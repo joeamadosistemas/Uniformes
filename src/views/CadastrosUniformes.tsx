@@ -1,0 +1,392 @@
+import React, { useState, useEffect } from 'react';
+import {
+    Shirt,
+    Plus,
+    Trash2,
+    Save,
+    Search,
+    Package,
+    DollarSign,
+    Loader2
+} from 'lucide-react';
+import { Uniforme } from '../types';
+import { SEGMENTOS_ENSINO, TAMANHOS_DISPONIVEIS, CATEGORIAS_UNIFORMES, UNIDADES_MEDIDA } from '../constants';
+import { supabase } from '../lib/supabaseClient';
+
+export const CadastrosUniformes: React.FC = () => {
+    const [uniformes, setUniformes] = useState<Uniforme[]>([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+
+    // Extrair chave da categoria a partir do segmento selecionado
+    const getCategoriaKey = (segmento: string) => {
+        return segmento.replace('CONJUNTO UNIFORMA ESCOLAR ', '').replace('CONJUNTO UNIFORME ESCOLAR ', '').trim();
+    };
+
+    // Form State
+    const [formData, setFormData] = useState<Omit<Uniforme, 'id' | 'precoTotal' | 'dataCadastro'>>({
+        segmento: '',
+        unidade: '',
+        modelo: '',
+        descricao: '',
+        tamanho: '',
+        quantidade: 0,
+        precoUnitario: 0
+    });
+
+    useEffect(() => {
+        fetchUniformes();
+    }, []);
+
+    const fetchUniformes = async () => {
+        try {
+            setLoading(true);
+            const { data, error } = await supabase
+                .from('uniformes_catalogo')
+                .select('*')
+                .order('data_cadastro', { ascending: false });
+
+            if (error) throw error;
+
+            if (data) {
+                // Map snake_case to camelCase
+                const mappedData: Uniforme[] = data.map((item: any) => ({
+                    id: item.id,
+                    segmento: item.segmento,
+                    unidade: item.unidade,
+                    modelo: item.modelo,
+                    descricao: item.descricao,
+                    tamanho: item.tamanho,
+                    quantidade: item.quantidade,
+                    precoUnitario: item.preco_unitario,
+                    precoTotal: item.preco_total,
+                    dataCadastro: item.data_cadastro
+                }));
+                setUniformes(mappedData);
+            }
+        } catch (error) {
+            console.error('Erro ao buscar uniformes:', error);
+            alert('Erro ao carregar os dados do catálogo.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: name === 'quantidade' || name === 'precoUnitario' ? Number(value) : value
+        }));
+    };
+
+    const handleSave = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!formData.segmento || !formData.descricao || !formData.quantidade) {
+            alert('Por favor, preencha os campos obrigatórios (Segmento, Descrição e Quantidade).');
+            return;
+        }
+
+        try {
+            setSaving(true);
+            const { error } = await supabase
+                .from('uniformes_catalogo')
+                .insert([{
+                    segmento: formData.segmento,
+                    unidade: formData.unidade,
+                    modelo: formData.modelo,
+                    descricao: formData.descricao,
+                    tamanho: formData.tamanho,
+                    quantidade: formData.quantidade,
+                    preco_unitario: formData.precoUnitario
+                }]);
+
+            if (error) throw error;
+
+            await fetchUniformes();
+
+            // Reset Form
+            setFormData({
+                segmento: '',
+                unidade: '',
+                modelo: '',
+                descricao: '',
+                tamanho: '',
+                quantidade: 0,
+                precoUnitario: 0
+            });
+        } catch (error) {
+            console.error('Erro ao salvar uniforme:', error);
+            alert('Erro ao salvar no banco de dados.');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleDelete = async (id: string) => {
+        if (window.confirm('Deseja excluir este cadastro?')) {
+            try {
+                const { error } = await supabase
+                    .from('uniformes_catalogo')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) throw error;
+
+                setUniformes(prev => prev.filter(u => u.id !== id));
+            } catch (error) {
+                console.error('Erro ao excluir uniforme:', error);
+                alert('Erro ao deletar o item.');
+            }
+        }
+    };
+
+    const filteredUniformes = uniformes.filter(u =>
+        u.modelo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        u.segmento.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        u.unidade.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        u.descricao.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    return (
+        <div className="space-y-8 pb-20">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h2 className="text-3xl font-bold text-gray-800">Cadastro de Uniformes</h2>
+                    <p className="text-gray-500">Gerencie o catálogo de uniformes e preços (Sincronizado via Supabase)</p>
+                </div>
+            </div>
+
+            {/* Form Card */}
+            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="bg-slate-50/50 px-8 py-4 border-b border-gray-100 flex items-center space-x-2">
+                    <Plus size={20} className="text-blue-600" />
+                    <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wider">Novo Cadastro</h3>
+                </div>
+
+                <form onSubmit={handleSave} className="p-8 space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="md:col-span-1">
+                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Segmento *</label>
+                            <select
+                                name="segmento"
+                                value={formData.segmento}
+                                onChange={(e) => {
+                                    handleInputChange(e);
+                                    setFormData(prev => ({ ...prev, descricao: '' }));
+                                }}
+                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-medium"
+                            >
+                                <option value="">Selecione...</option>
+                                {SEGMENTOS_ENSINO.map(s => (
+                                    <option key={s} value={s}>{s.replace('CONJUNTO UNIFORMA ESCOLAR ', '')}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Unid. *</label>
+                            <select
+                                name="unidade"
+                                value={formData.unidade}
+                                onChange={handleInputChange}
+                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-medium"
+                            >
+                                <option value="">Selecione...</option>
+                                {UNIDADES_MEDIDA.map(u => (
+                                    <option key={u} value={u}>{u}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Modelo (Número)</label>
+                            <input
+                                type="text"
+                                name="modelo"
+                                value={formData.modelo}
+                                onChange={handleInputChange}
+                                placeholder="Ex: 001"
+                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-bold"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div className="md:col-span-2">
+                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Descrição *</label>
+                            <select
+                                name="descricao"
+                                value={formData.descricao}
+                                onChange={handleInputChange}
+                                disabled={!formData.segmento}
+                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <option value="">Selecione o Segmento primeiro...</option>
+                                {formData.segmento && CATEGORIAS_UNIFORMES[getCategoriaKey(formData.segmento)]?.map(m => (
+                                    <option key={m} value={m}>{m}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Tamanho</label>
+                            <select
+                                name="tamanho"
+                                value={formData.tamanho}
+                                onChange={handleInputChange}
+                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-medium"
+                            >
+                                <option value="">Selecione...</option>
+                                {TAMANHOS_DISPONIVEIS.map(t => (
+                                    <option key={t} value={t}>{t}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Quantidade *</label>
+                            <input
+                                type="number"
+                                name="quantidade"
+                                value={formData.quantidade}
+                                onChange={handleInputChange}
+                                min="0"
+                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-bold"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+                        <div>
+                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Preço Unitário (R$)</label>
+                            <div className="relative">
+                                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                <input
+                                    type="number"
+                                    name="precoUnitario"
+                                    value={formData.precoUnitario}
+                                    onChange={handleInputChange}
+                                    step="0.01"
+                                    min="0"
+                                    className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-bold"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="bg-blue-50/50 p-3 rounded-2xl border border-blue-100/50">
+                            <label className="block text-[9px] font-black text-blue-400 uppercase tracking-widest mb-1">Preço Total Estimado</label>
+                            <p className="text-xl font-black text-blue-600">
+                                R$ {(formData.quantidade * formData.precoUnitario).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                            </p>
+                        </div>
+
+                        <div className="md:col-span-2 flex justify-end">
+                            <button
+                                type="submit"
+                                disabled={saving}
+                                className="flex items-center px-8 py-3.5 bg-blue-700 text-white rounded-2xl hover:bg-blue-800 transition-all font-bold shadow-lg shadow-blue-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {saving ? (
+                                    <Loader2 size={20} className="mr-2 animate-spin" />
+                                ) : (
+                                    <Save size={20} className="mr-2" />
+                                )}
+                                {saving ? 'Salvando...' : 'Cadastrar Uniforme'}
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            {/* List Card */}
+            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="px-8 py-6 border-b border-gray-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex items-center space-x-2">
+                        <Package size={20} className="text-gray-400" />
+                        <h3 className="text-sm font-bold text-gray-700 uppercase tracking-widest">Uniformes Cadastrados</h3>
+                    </div>
+
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                        <input
+                            type="text"
+                            placeholder="Buscar por modelo, segmento ou unidade..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none w-full md:w-80 transition-all"
+                        />
+                    </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                        <thead>
+                            <tr className="bg-slate-50/50">
+                                <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Segmento / Unid.</th>
+                                <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Modelo / Descrição</th>
+                                <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Tamanho</th>
+                                <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Qtd</th>
+                                <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Preço Un.</th>
+                                <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Total</th>
+                                <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-50 text-sm">
+                            {loading ? (
+                                <tr>
+                                    <td colSpan={7} className="px-8 py-20 text-center text-gray-400 font-medium">
+                                        <Loader2 size={48} className="mx-auto mb-4 animate-spin opacity-20" />
+                                        Carregando dados...
+                                    </td>
+                                </tr>
+                            ) : filteredUniformes.length === 0 ? (
+                                <tr>
+                                    <td colSpan={7} className="px-8 py-20 text-center text-gray-400 font-medium">
+                                        <Shirt size={48} className="mx-auto mb-4 opacity-20" />
+                                        Nenhum uniforme cadastrado ainda.
+                                    </td>
+                                </tr>
+                            ) : (
+                                filteredUniformes.map(u => (
+                                    <tr key={u.id} className="hover:bg-slate-50/50 transition-colors">
+                                        <td className="px-8 py-4">
+                                            <p className="font-bold text-gray-800">{u.segmento.replace('CONJUNTO UNIFORMA ESCOLAR ', '')}</p>
+                                            <p className="text-[10px] text-gray-400 font-black uppercase tracking-tighter">Unid: {u.unidade || '-'}</p>
+                                        </td>
+                                        <td className="px-8 py-4">
+                                            <p className="font-bold text-gray-700">Modelo: {u.modelo || '-'}</p>
+                                            <p className="text-[10px] text-gray-400 italic line-clamp-1">{u.descricao || '-'}</p>
+                                        </td>
+                                        <td className="px-8 py-4 text-center">
+                                            <span className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-[10px] font-black uppercase">{u.tamanho || '-'}</span>
+                                        </td>
+                                        <td className="px-8 py-4 text-center font-bold text-gray-600">
+                                            {u.quantidade}
+                                        </td>
+                                        <td className="px-8 py-4 text-right font-medium text-gray-500">
+                                            R$ {u.precoUnitario.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                        </td>
+                                        <td className="px-8 py-4 text-right">
+                                            <p className="font-black text-blue-600">R$ {u.precoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                        </td>
+                                        <td className="px-8 py-4 text-center">
+                                            <button
+                                                onClick={() => handleDelete(u.id)}
+                                                className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                                                title="Excluir"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    );
+};

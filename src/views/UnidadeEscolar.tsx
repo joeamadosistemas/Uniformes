@@ -1,61 +1,223 @@
 import React, { useState, useEffect } from 'react';
 import { EscolaCadastro } from '../types';
-import { Save, Trash2, School, Check } from 'lucide-react';
+import { Save, Trash2, School, Check, Loader2, Pencil, Power, X } from 'lucide-react';
 import { SEGMENTOS_ENSINO } from '../constants';
+import { supabase } from '../lib/supabaseClient';
 
 export const UnidadeEscolar: React.FC = () => {
   const [escolas, setEscolas] = useState<EscolaCadastro[]>([]);
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [segmentosSelecionados, setSegmentosSelecionados] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  // Edit modal state
+  const [editando, setEditando] = useState<EscolaCadastro | null>(null);
+  const [editNome, setEditNome] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [editSegmentos, setEditSegmentos] = useState<string[]>([]);
 
   useEffect(() => {
-    const dadosSalvos = localStorage.getItem('@Uniformes:escolas');
-    if (dadosSalvos) {
-      setEscolas(JSON.parse(dadosSalvos));
-    }
+    fetchEscolas();
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem('@Uniformes:escolas', JSON.stringify(escolas));
-  }, [escolas]);
+  const fetchEscolas = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('escolas')
+        .select('*')
+        .order('nome', { ascending: true });
+
+      if (error) throw error;
+      if (data) setEscolas(data as EscolaCadastro[]);
+    } catch (error) {
+      console.error('Erro ao buscar escolas:', error);
+      alert('Erro ao carregar as escolas.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const toggleSegmento = (segmento: string) => {
     setSegmentosSelecionados(prev =>
-      prev.includes(segmento)
-        ? prev.filter(s => s !== segmento)
-        : [...prev, segmento]
+      prev.includes(segmento) ? prev.filter(s => s !== segmento) : [...prev, segmento]
     );
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const toggleEditSegmento = (segmento: string) => {
+    setEditSegmentos(prev =>
+      prev.includes(segmento) ? prev.filter(s => s !== segmento) : [...prev, segmento]
+    );
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nome || !email || segmentosSelecionados.length === 0) {
-      alert('Por favor, preencha todos os campos e selecione ao menos um segmento.');
+    if (!nome || segmentosSelecionados.length === 0) {
+      alert('Por favor, preencha o nome e selecione ao menos um segmento.');
       return;
     }
 
-    const novaEscola: EscolaCadastro = {
-      id: crypto.randomUUID(),
-      nome,
-      email,
-      segmentos: segmentosSelecionados
-    };
+    try {
+      setSaving(true);
+      const { error } = await supabase
+        .from('escolas')
+        .insert([{ nome, email, segmentos: segmentosSelecionados, ativo: true }]);
 
-    setEscolas([...escolas, novaEscola]);
-    setNome('');
-    setEmail('');
-    setSegmentosSelecionados([]);
+      if (error) throw error;
+
+      await fetchEscolas();
+      setNome('');
+      setEmail('');
+      setSegmentosSelecionados([]);
+    } catch (error) {
+      console.error('Erro ao salvar escola:', error);
+      alert('Erro ao salvar a escola no banco de dados.');
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleDelete = (id: string) => {
+  const handleEdit = (escola: EscolaCadastro) => {
+    setEditando(escola);
+    setEditNome(escola.nome);
+    setEditEmail(escola.email);
+    setEditSegmentos(escola.segmentos || []);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editando) return;
+    try {
+      setSaving(true);
+      const { error } = await supabase
+        .from('escolas')
+        .update({ nome: editNome, email: editEmail, segmentos: editSegmentos })
+        .eq('id', editando.id);
+
+      if (error) throw error;
+      await fetchEscolas();
+      setEditando(null);
+    } catch (error) {
+      console.error('Erro ao editar escola:', error);
+      alert('Erro ao salvar as alterações.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleToggleAtivo = async (escola: EscolaCadastro) => {
+    const novoStatus = !escola.ativo;
+    const acao = novoStatus ? 'reativar' : 'desativar';
+    if (!window.confirm(`Deseja ${acao} a escola "${escola.nome}"?`)) return;
+
+    try {
+      const { error } = await supabase
+        .from('escolas')
+        .update({ ativo: novoStatus })
+        .eq('id', escola.id);
+
+      if (error) throw error;
+      setEscolas(prev => prev.map(e => e.id === escola.id ? { ...e, ativo: novoStatus } : e));
+    } catch (error) {
+      console.error('Erro ao alterar status:', error);
+      alert('Erro ao atualizar o status da escola.');
+    }
+  };
+
+  const handleDelete = async (id: string) => {
     if (window.confirm('Deseja realmente excluir esta unidade escolar?')) {
-      setEscolas(escolas.filter(e => e.id !== id));
+      try {
+        const { error } = await supabase.from('escolas').delete().eq('id', id);
+        if (error) throw error;
+        setEscolas(prev => prev.filter(e => e.id !== id));
+      } catch (error) {
+        console.error('Erro ao excluir escola:', error);
+        alert('Erro ao deletar a escola.');
+      }
     }
   };
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
+      {/* Edit Modal */}
+      {editando && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-4 p-6 space-y-5">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-gray-800 flex items-center">
+                <Pencil size={18} className="mr-2 text-blue-600" />
+                Editar Escola
+              </h3>
+              <button onClick={() => setEditando(null)} className="p-1.5 hover:bg-gray-100 rounded-lg">
+                <X size={18} className="text-gray-500" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nome da Escola *</label>
+                <input
+                  type="text"
+                  value={editNome}
+                  onChange={(e) => setEditNome(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+                <input
+                  type="email"
+                  value={editEmail}
+                  onChange={(e) => setEditEmail(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Segmentos de Ensino</label>
+              <div className="flex flex-wrap gap-2">
+                {SEGMENTOS_ENSINO.map((seg) => {
+                  const isSelected = editSegmentos.includes(seg);
+                  return (
+                    <button
+                      key={seg}
+                      type="button"
+                      onClick={() => toggleEditSegmento(seg)}
+                      className={`px-3 py-1.5 rounded-lg border text-xs transition-all flex items-center ${isSelected
+                        ? 'bg-blue-600 border-blue-600 text-white'
+                        : 'bg-white border-gray-200 text-gray-600 hover:border-blue-300'
+                        }`}
+                    >
+                      {isSelected && <Check size={12} className="mr-1.5" />}
+                      {seg.replace('CONJUNTO UNIFORMA ESCOLAR ', '')}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+              <button
+                onClick={() => setEditando(null)}
+                className="px-5 py-2 text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleSaveEdit}
+                disabled={saving}
+                className="flex items-center px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm disabled:opacity-50"
+              >
+                {saving ? <Loader2 size={16} className="mr-2 animate-spin" /> : <Save size={16} className="mr-2" />}
+                Salvar Alterações
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div>
         <h2 className="text-2xl font-bold text-gray-800 mb-2 flex items-center">
           <School className="mr-3 text-blue-600" />
@@ -79,14 +241,13 @@ export const UnidadeEscolar: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">E-mail da Escola *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">E-mail da Escola</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                 placeholder="escola@educacao.gov.br"
-                required
               />
             </div>
           </div>
@@ -102,8 +263,8 @@ export const UnidadeEscolar: React.FC = () => {
                     type="button"
                     onClick={() => toggleSegmento(seg)}
                     className={`px-4 py-2 rounded-lg border text-sm transition-all flex items-center ${isSelected
-                        ? 'bg-blue-600 border-blue-600 text-white shadow-sm'
-                        : 'bg-white border-gray-200 text-gray-600 hover:border-blue-300 hover:bg-blue-50'
+                      ? 'bg-blue-600 border-blue-600 text-white shadow-sm'
+                      : 'bg-white border-gray-200 text-gray-600 hover:border-blue-300 hover:bg-blue-50'
                       }`}
                   >
                     {isSelected && <Check size={14} className="mr-2" />}
@@ -126,18 +287,20 @@ export const UnidadeEscolar: React.FC = () => {
           <div className="flex justify-end pt-4 border-t border-gray-100">
             <button
               type="submit"
-              className="flex items-center px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              disabled={saving}
+              className="flex items-center px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50"
             >
-              <Save size={18} className="mr-2" />
-              Salvar Escola
+              {saving ? <Loader2 size={18} className="mr-2 animate-spin" /> : <Save size={18} className="mr-2" />}
+              {saving ? 'Salvando...' : 'Salvar Escola'}
             </button>
           </div>
         </form>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100 bg-slate-50">
+        <div className="px-6 py-4 border-b border-gray-100 bg-slate-50 flex items-center justify-between">
           <h3 className="font-semibold text-gray-800">Escolas Cadastradas</h3>
+          <span className="text-xs text-gray-500">{escolas.length} escola(s)</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -145,40 +308,82 @@ export const UnidadeEscolar: React.FC = () => {
               <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-100">
                 <th className="px-6 py-3 font-medium">Escola / E-mail</th>
                 <th className="px-6 py-3 font-medium">Segmentos Atendidos</th>
+                <th className="px-6 py-3 font-medium text-center">Status</th>
                 <th className="px-6 py-3 font-medium text-right">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 text-sm">
-              {escolas.length === 0 ? (
+              {loading ? (
                 <tr>
-                  <td colSpan={3} className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
+                    <Loader2 size={24} className="mx-auto animate-spin opacity-30 mb-2" />
+                    Carregando...
+                  </td>
+                </tr>
+              ) : escolas.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
                     Nenhuma escola cadastrada ainda.
                   </td>
                 </tr>
               ) : (
                 escolas.map((escola) => (
-                  <tr key={escola.id} className="hover:bg-slate-50">
+                  <tr key={escola.id} className={`hover:bg-slate-50 transition-colors ${escola.ativo === false ? 'opacity-50' : ''}`}>
                     <td className="px-6 py-4">
                       <div className="font-medium text-gray-800">{escola.nome}</div>
-                      <div className="text-xs text-gray-500">{escola.email}</div>
+                      <div className="text-xs text-gray-500">{escola.email || '-'}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex flex-wrap gap-1">
-                        {(escola.segmentos || []).map(seg => (
-                          <span key={seg} className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px] uppercase font-semibold">
-                            {seg.replace('CONJUNTO UNIFORMA ESCOLAR ', '')}
-                          </span>
-                        ))}
-                      </div>
+                      {(escola.segmentos || []).length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {escola.segmentos.map(seg => (
+                            <span key={seg} className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px] uppercase font-semibold">
+                              {seg.replace('CONJUNTO UNIFORMA ESCOLAR ', '')}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-gray-400 italic">Nenhum segmento</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${escola.ativo === false
+                        ? 'bg-red-100 text-red-600'
+                        : 'bg-green-100 text-green-600'
+                        }`}>
+                        {escola.ativo === false ? 'Inativa' : 'Ativa'}
+                      </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button
-                        onClick={() => handleDelete(escola.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors inline-flex"
-                        title="Excluir"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      <div className="flex items-center justify-end gap-1">
+                        {/* Edit */}
+                        <button
+                          onClick={() => handleEdit(escola)}
+                          className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                          title="Editar"
+                        >
+                          <Pencil size={15} />
+                        </button>
+                        {/* Deactivate / Reactivate */}
+                        <button
+                          onClick={() => handleToggleAtivo(escola)}
+                          className={`p-2 rounded-lg transition-colors ${escola.ativo === false
+                            ? 'text-green-500 hover:bg-green-50'
+                            : 'text-amber-500 hover:bg-amber-50'
+                            }`}
+                          title={escola.ativo === false ? 'Reativar' : 'Desativar'}
+                        >
+                          <Power size={15} />
+                        </button>
+                        {/* Delete */}
+                        <button
+                          onClick={() => handleDelete(escola.id)}
+                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Excluir"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))

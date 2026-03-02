@@ -56,6 +56,10 @@ export const TAMANHOS_DISPONIVEIS = [
   'P', 'M', 'G', 'XG', 'Outros'
 ];
 
+export const UNIDADES_MEDIDA = [
+  'CONJ.', 'PAR', 'UNIT.', 'PEÇ.', 'PCT', 'OUTROS'
+];
+
 export const SEGMENTOS_ENSINO = [
   'CONJUNTO UNIFORMA ESCOLAR CRECHE',
   'CONJUNTO UNIFORMA ESCOLAR PRÉ ESCOLA',

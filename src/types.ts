@@ -28,6 +28,7 @@ export interface EscolaCadastro {
   nome: string;
   email: string;
   segmentos: string[];
+  ativo?: boolean;
 }
 
 export interface ItemTransferencia {
@@ -51,4 +52,17 @@ export interface UsuarioCadastro {
   id: string;
   nome: string;
   email_escola: string;
+}
+
+export interface Uniforme {
+  id: string;
+  segmento: string;
+  unidade: string;
+  modelo: string;
+  descricao: string;
+  tamanho: string;
+  quantidade: number;
+  precoUnitario: number;
+  precoTotal: number;
+  dataCadastro: string;
 }

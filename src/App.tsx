@@ -5,6 +5,7 @@ import { UnidadeEscolar } from './views/UnidadeEscolar';
 import { Usuarios } from './views/Usuarios';
 import { Transferencias } from './views/Transferencias';
 import { DashboardAdmin } from './views/DashboardAdmin';
+import { CadastrosUniformes } from './views/CadastrosUniformes';
 import { PlaceholderView } from './views/PlaceholderView';
 import { UserCircle } from 'lucide-react';
 
@@ -24,7 +25,7 @@ function App() {
       case 'config-usuarios':
         return <Usuarios />;
       case 'config-uniformes':
-        return <PlaceholderView title="Cadastros Uniformes" />;
+        return <CadastrosUniformes />;
       case 'config-backup':
         return <PlaceholderView title="Backup e Restauração" />;
       case 'config-sobre':
