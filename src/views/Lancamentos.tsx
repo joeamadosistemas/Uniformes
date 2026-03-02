@@ -1,26 +1,49 @@
 import React, { useState, useEffect } from 'react';
-import { RegistroUniforme, Filtros, Usuario } from '../types';
+import { RegistroUniforme, Filtros } from '../types';
 import { UniformForm } from '../components/UniformForm';
 import { UniformTable } from '../components/UniformTable';
 import { DashboardStats } from '../components/DashboardStats';
 import { exportarParaPDF, exportarParaExcel } from '../utils/exportUtils';
+import { supabase } from '../lib/supabaseClient';
 
-const USUARIO_LOGADO: Usuario = {
-  escola: 'EMEF Professora Maria Silva',
-  diretor: 'Ana Paula Rodrigues'
-};
+/**
+ * Mapeia o prefixo do e-mail da escola para a categoria padrão de uniforme.
+ *   cm.*       → CRECHE
+ *   emei.*     → PRÉ ESCOLA
+ *   em.*       → FUNDAMENTAL 1-3 ANOS
+ *   eem.*      → FUNDAMENTAL II 6 AO 9 ANOS
+ *   ciep*      → FUNDAMENTAL II 6 AO 9 ANOS
+ */
+function getCategoriaDefault(email: string): string {
+  const prefixo = email.split('@')[0].toLowerCase();
+  if (prefixo.startsWith('cm.')) return 'CRECHE';
+  if (prefixo.startsWith('emei.')) return 'PRÉ ESCOLA';
+  if (prefixo.startsWith('em.')) return 'FUNDAMENTAL 1-3 ANOS';
+  if (prefixo.startsWith('eem.')) return 'FUNDAMENTAL II 6 AO 9 ANOS';
+  if (prefixo.startsWith('ciep')) return 'FUNDAMENTAL II 6 AO 9 ANOS';
+  return '';
+}
 
 export const Lancamentos: React.FC = () => {
   const [registros, setRegistros] = useState<RegistroUniforme[]>([]);
   const [registroEmEdicao, setRegistroEmEdicao] = useState<RegistroUniforme | null>(null);
   const [filtros, setFiltros] = useState<Filtros>({ categoria: '', tipo_uniforme: '', data: '' });
   const [mensagem, setMensagem] = useState<{ texto: string; tipo: 'sucesso' | 'erro' } | null>(null);
+  const [escola, setEscola] = useState('');
+  const [categoriaDefault, setCategoriaDefault] = useState('');
+
+  // Lê sessão do Supabase para obter e-mail e derivar categoria padrão
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      const email = data.session?.user?.email ?? '';
+      setEscola(email);
+      setCategoriaDefault(getCategoriaDefault(email));
+    });
+  }, []);
 
   useEffect(() => {
     const dadosSalvos = localStorage.getItem('@Uniformes:registros');
-    if (dadosSalvos) {
-      setRegistros(JSON.parse(dadosSalvos));
-    }
+    if (dadosSalvos) setRegistros(JSON.parse(dadosSalvos));
   }, []);
 
   useEffect(() => {
@@ -34,31 +57,22 @@ export const Lancamentos: React.FC = () => {
 
   const handleSave = (novosDados: Omit<RegistroUniforme, 'id' | 'data_registro' | 'escola' | 'diretor'>[]) => {
     if (registroEmEdicao) {
-      // No caso de edição, novosDados terá apenas um item (o editado)
       const dados = novosDados[0];
-      const dadosCompletos = {
-        ...dados,
-        escola: USUARIO_LOGADO.escola,
-        diretor: USUARIO_LOGADO.diretor
-      };
-
       setRegistros(prev => prev.map(r =>
         r.id === registroEmEdicao.id
-          ? { ...dadosCompletos, id: r.id, data_registro: r.data_registro }
+          ? { ...dados, id: r.id, data_registro: r.data_registro, escola, diretor: '' }
           : r
       ));
       setRegistroEmEdicao(null);
       mostrarMensagem('Registro atualizado com sucesso!');
     } else {
-      // No caso de novo registro, pode haver múltiplos itens
       const novosRegistros: RegistroUniforme[] = novosDados.map(dados => ({
         ...dados,
         id: crypto.randomUUID(),
         data_registro: new Date().toISOString(),
-        escola: USUARIO_LOGADO.escola,
-        diretor: USUARIO_LOGADO.diretor
+        escola,
+        diretor: '',
       }));
-
       setRegistros(prev => [...novosRegistros, ...prev]);
       mostrarMensagem(`${novosRegistros.length} registro(s) salvo(s) com sucesso!`);
     }
@@ -70,11 +84,10 @@ export const Lancamentos: React.FC = () => {
   };
 
   const registrosFiltrados = registros.filter(r => {
-    const matchEscola = r.escola === USUARIO_LOGADO.escola;
     const matchCategoria = filtros.categoria ? r.categoria === filtros.categoria : true;
     const matchTipo = filtros.tipo_uniforme ? r.tipo_uniforme === filtros.tipo_uniforme : true;
     const matchData = filtros.data ? r.data_registro.startsWith(filtros.data) : true;
-    return matchEscola && matchCategoria && matchTipo && matchData;
+    return matchCategoria && matchTipo && matchData;
   });
 
   return (
@@ -97,7 +110,10 @@ export const Lancamentos: React.FC = () => {
         onSave={handleSave}
         registroEmEdicao={registroEmEdicao}
         onCancelEdit={() => setRegistroEmEdicao(null)}
+        categoriaDefault={categoriaDefault}
+        categoriaLocked={categoriaDefault !== ''}
       />
+
 
       <UniformTable
         registros={registrosFiltrados}
@@ -105,7 +121,7 @@ export const Lancamentos: React.FC = () => {
         setFiltros={setFiltros}
         onEdit={setRegistroEmEdicao}
         onDelete={handleDelete}
-        onExportPDF={() => exportarParaPDF(registrosFiltrados, USUARIO_LOGADO.escola)}
+        onExportPDF={() => exportarParaPDF(registrosFiltrados, escola)}
         onExportExcel={() => exportarParaExcel(registrosFiltrados)}
       />
     </div>

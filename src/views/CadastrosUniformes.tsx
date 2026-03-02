@@ -143,10 +143,10 @@ export const CadastrosUniformes: React.FC = () => {
     };
 
     const filteredUniformes = uniformes.filter(u =>
-        u.modelo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        u.segmento.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        u.unidade.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        u.descricao.toLowerCase().includes(searchTerm.toLowerCase())
+        (u.modelo ?? '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (u.segmento ?? '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (u.unidade ?? '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (u.descricao ?? '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
@@ -366,10 +366,10 @@ export const CadastrosUniformes: React.FC = () => {
                                             {u.quantidade}
                                         </td>
                                         <td className="px-8 py-4 text-right font-medium text-gray-500">
-                                            R$ {u.precoUnitario.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                            R$ {(u.precoUnitario ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                                         </td>
                                         <td className="px-8 py-4 text-right">
-                                            <p className="font-black text-blue-600">R$ {u.precoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                            <p className="font-black text-blue-600">R$ {(u.precoTotal ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                                         </td>
                                         <td className="px-8 py-4 text-center">
                                             <button

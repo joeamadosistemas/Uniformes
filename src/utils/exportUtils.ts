@@ -4,6 +4,12 @@ import * as XLSX from 'xlsx';
 import { RegistroUniforme } from '../types';
 import { format } from 'date-fns';
 
+/** Converte string ou Date em Date sem lançar exceção */
+const safeDate = (value: string | Date): Date => {
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? new Date() : d;
+};
+
 export const exportarParaPDF = (registros: RegistroUniforme[], escolaNome: string = 'Todas as Escolas') => {
   const doc = new jsPDF('landscape');
 
@@ -24,12 +30,12 @@ export const exportarParaPDF = (registros: RegistroUniforme[], escolaNome: strin
   // Tabela
   const tableColumn = ["Data", "Categoria", "Tipo", "Alunos", "Sobrando (Qtd/Tam)", "Faltando (Qtd/Tam)"];
   const tableRows = registros.map(r => [
-    format(new Date(r.data_registro), 'dd/MM/yyyy'),
+    format(safeDate(r.data_registro), 'dd/MM/yyyy'),
     r.categoria || '-',
     r.tipo_uniforme,
-    r.qtd_alunos.toString(),
-    `${r.qtd_sobrando} (${r.tamanho_sobrando || '-'})`,
-    `${r.qtd_faltando} (${r.tamanho_faltando || '-'})`
+    (r.qtd_alunos ?? 0).toString(),
+    `${r.qtd_sobrando ?? 0} (${r.tamanho_sobrando || '-'})`,
+    `${r.qtd_faltando ?? 0} (${r.tamanho_faltando || '-'})`
   ]);
 
   autoTable(doc, {
@@ -39,7 +45,7 @@ export const exportarParaPDF = (registros: RegistroUniforme[], escolaNome: strin
     styles: { fontSize: 9 },
     headStyles: { fillColor: [41, 128, 185] },
     columnStyles: {
-      2: { cellWidth: 60 } // Dá mais espaço para o nome do uniforme
+      2: { cellWidth: 60 }
     }
   });
 
@@ -48,16 +54,16 @@ export const exportarParaPDF = (registros: RegistroUniforme[], escolaNome: strin
 
 export const exportarParaExcel = (registros: RegistroUniforme[]) => {
   const worksheetData = registros.map(r => ({
-    'Data de Registro': format(new Date(r.data_registro), 'dd/MM/yyyy HH:mm'),
+    'Data de Registro': format(safeDate(r.data_registro), 'dd/MM/yyyy HH:mm'),
     'Escola': r.escola,
     'Diretor(a)': r.diretor,
-    'Qtd. Alunos': r.qtd_alunos,
+    'Qtd. Alunos': r.qtd_alunos ?? 0,
     'Categoria': r.categoria || '-',
     'Tipo de Uniforme': r.tipo_uniforme,
-    'Qtd. Sobrando': r.qtd_sobrando,
-    'Tamanho Sobrando': r.tamanho_sobrando,
-    'Qtd. Faltando': r.qtd_faltando,
-    'Tamanho Faltando': r.tamanho_faltando
+    'Qtd. Sobrando': r.qtd_sobrando ?? 0,
+    'Tamanho Sobrando': r.tamanho_sobrando || '-',
+    'Qtd. Faltando': r.qtd_faltando ?? 0,
+    'Tamanho Faltando': r.tamanho_faltando || '-'
   }));
 
   const worksheet = XLSX.utils.json_to_sheet(worksheetData);
@@ -66,7 +72,7 @@ export const exportarParaExcel = (registros: RegistroUniforme[]) => {
 
   // Ajustar largura das colunas
   const wscols = [
-    { wch: 18 }, { wch: 25 }, { wch: 20 }, { wch: 12 }, { wch: 20 }, { wch: 40 },
+    { wch: 18 }, { wch: 30 }, { wch: 20 }, { wch: 12 }, { wch: 22 }, { wch: 42 },
     { wch: 15 }, { wch: 18 }, { wch: 15 }, { wch: 18 }
   ];
   worksheet['!cols'] = wscols;
