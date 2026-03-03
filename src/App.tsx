@@ -20,6 +20,7 @@ function App() {
   const [activeView, setActiveView] = useState('lancamentos');
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [userRole, setUserRole] = useState<string>('Operador');
 
   useEffect(() => {
     if (isDarkMode) {
@@ -33,19 +34,34 @@ function App() {
     // Carrega sessão existente ao iniciar
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
-      setLoadingSession(false);
+      if (data.session?.user) loadUserRole(data.session.user.id);
+      else setLoadingSession(false);
     });
 
     // Escuta mudanças de autenticação em tempo real
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);
+      if (newSession?.user) loadUserRole(newSession.user.id);
+      else { setUserRole('Operador'); setLoadingSession(false); }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
+  const loadUserRole = async (userId: string) => {
+    setLoadingSession(true);
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', userId)
+      .single();
+    if (!error && data?.role) setUserRole(data.role);
+    setLoadingSession(false);
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    setUserRole('Operador');
   };
 
   // Tela de carregamento enquanto verifica sessão
@@ -68,7 +84,7 @@ function App() {
   }
 
   const userEmail = session.user?.email ?? '';
-  const isAdmin = userEmail === 'cpdinfra@edu.itaguai.rj.gov.br';
+  const isAdmin = userRole === 'Super Administrador' || userRole === 'admin';
 
   const renderView = () => {
     const adminViews = ['admin-dashboard', 'config-escola', 'config-usuarios', 'config-uniformes', 'config-backup', 'config-sobre'];
