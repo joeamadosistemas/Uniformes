@@ -24,26 +24,29 @@ export const UniformTable: React.FC<Props> = ({
   onExportExcel
 }) => {
 
-  const tiposDisponiveisFiltro = filtros.categoria 
-    ? CATEGORIAS_UNIFORMES[filtros.categoria] 
+  const tiposDisponiveisFiltro = filtros.categoria
+    ? CATEGORIAS_UNIFORMES[filtros.categoria]
     : Object.values(CATEGORIAS_UNIFORMES).flat();
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mt-8">
-      <div className="p-6 border-b border-gray-100 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-        <h2 className="text-lg font-semibold text-gray-800">Registros de Uniformes</h2>
-        
-        <div className="flex flex-wrap gap-2">
+    <div className="glass rounded-3xl shadow-xl border border-gray-100 dark:border-zinc-800 overflow-hidden mt-12 transition-all duration-300">
+      <div className="p-8 border-b border-gray-100 dark:border-zinc-800 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+        <div>
+          <h2 className="text-xl font-black text-zinc-900 dark:text-white tracking-tight">Registros de Uniformes</h2>
+          <p className="text-xs font-medium text-gray-400 dark:text-zinc-500 mt-1 uppercase tracking-widest">Histórico completo de movimentações</p>
+        </div>
+
+        <div className="flex flex-wrap gap-3">
           <button
             onClick={onExportPDF}
-            className="flex items-center px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium"
+            className="flex items-center px-5 py-2.5 bg-red-500/10 text-red-600 dark:text-red-400 rounded-xl hover:bg-red-500/20 transition-all text-xs font-bold uppercase tracking-widest"
           >
             <FileText size={16} className="mr-2" />
             Gerar PDF
           </button>
           <button
             onClick={onExportExcel}
-            className="flex items-center px-4 py-2 bg-green-50 text-green-600 border border-green-200 rounded-lg hover:bg-green-100 transition-colors text-sm font-medium"
+            className="flex items-center px-5 py-2.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl hover:bg-emerald-500/20 transition-all text-xs font-bold uppercase tracking-widest"
           >
             <FileSpreadsheet size={16} className="mr-2" />
             Exportar Excel
@@ -52,12 +55,13 @@ export const UniformTable: React.FC<Props> = ({
       </div>
 
       {/* Filtros */}
-      <div className="bg-slate-50 p-4 border-b border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
+      <div className="bg-gray-50/50 dark:bg-zinc-900/30 p-6 border-b border-gray-100 dark:border-zinc-800 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="space-y-1.5">
+          <label className="text-[10px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest ml-1">Categoria</label>
           <select
             value={filtros.categoria}
             onChange={(e) => setFiltros({ ...filtros, categoria: e.target.value, tipo_uniforme: '' })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+            className="w-full px-4 py-2.5 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl text-sm font-semibold text-zinc-900 dark:text-white focus:ring-2 focus:ring-[#005A9C] outline-none transition-all"
           >
             <option value="">Todas as Categorias</option>
             {Object.keys(CATEGORIAS_UNIFORMES).map(cat => (
@@ -65,11 +69,12 @@ export const UniformTable: React.FC<Props> = ({
             ))}
           </select>
         </div>
-        <div>
+        <div className="space-y-1.5">
+          <label className="text-[10px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest ml-1">Tipo de Uniforme</label>
           <select
             value={filtros.tipo_uniforme}
             onChange={(e) => setFiltros({ ...filtros, tipo_uniforme: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+            className="w-full px-4 py-2.5 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl text-sm font-semibold text-zinc-900 dark:text-white focus:ring-2 focus:ring-[#005A9C] outline-none transition-all"
           >
             <option value="">Todos os Tipos</option>
             {Array.from(new Set(tiposDisponiveisFiltro)).map(t => (
@@ -77,12 +82,13 @@ export const UniformTable: React.FC<Props> = ({
             ))}
           </select>
         </div>
-        <div>
+        <div className="space-y-1.5">
+          <label className="text-[10px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest ml-1">Data do Registro</label>
           <input
             type="date"
             value={filtros.data}
             onChange={(e) => setFiltros({ ...filtros, data: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+            className="w-full px-4 py-2.5 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl text-sm font-semibold text-zinc-900 dark:text-white focus:ring-2 focus:ring-[#005A9C] outline-none transition-all"
           />
         </div>
       </div>
@@ -91,13 +97,13 @@ export const UniformTable: React.FC<Props> = ({
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
-              <th className="px-6 py-4 font-medium">Data</th>
-              <th className="px-6 py-4 font-medium">Categoria / Item</th>
-              <th className="px-6 py-4 font-medium text-center">Alunos</th>
-              <th className="px-6 py-4 font-medium text-center">Sobrando</th>
-              <th className="px-6 py-4 font-medium text-center">Faltando</th>
-              <th className="px-6 py-4 font-medium text-right">Ações</th>
+            <tr className="bg-gray-50/50 dark:bg-zinc-900/50 text-gray-400 dark:text-zinc-500 text-[10px] font-bold uppercase tracking-widest border-b border-gray-100 dark:border-zinc-800">
+              <th className="px-8 py-4">Data</th>
+              <th className="px-8 py-4">Categoria / Item</th>
+              <th className="px-8 py-4 text-center">Alunos</th>
+              <th className="px-8 py-4 text-center">Sobrando</th>
+              <th className="px-8 py-4 text-center">Faltando</th>
+              <th className="px-8 py-4 text-right">Ações</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 text-sm">
@@ -110,55 +116,57 @@ export const UniformTable: React.FC<Props> = ({
             ) : (
               registros.map((registro) => (
                 <tr key={registro.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                  <td className="px-8 py-5 whitespace-nowrap text-xs font-bold text-gray-400 dark:text-zinc-500 tracking-wider">
                     {format(new Date(registro.data_registro), 'dd/MM/yyyy')}
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="text-xs font-semibold text-blue-600 mb-1">{registro.categoria || 'Não definida'}</div>
-                    <div className="font-medium text-gray-900 leading-tight">{registro.tipo_uniforme}</div>
+                  <td className="px-8 py-5">
+                    <div className="text-[10px] font-black text-[#005A9C] dark:text-[#66b3ff] mb-1 uppercase tracking-widest">{registro.categoria || 'Não definida'}</div>
+                    <div className="text-sm font-bold text-zinc-900 dark:text-zinc-100 leading-tight">{registro.tipo_uniforme}</div>
                   </td>
-                  <td className="px-6 py-4 text-center font-medium text-gray-700">
+                  <td className="px-8 py-5 text-center font-black text-zinc-900 dark:text-white">
                     {registro.qtd_alunos}
                   </td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-8 py-5 text-center">
                     {registro.qtd_sobrando > 0 ? (
                       <div className="inline-flex flex-col items-center">
-                        <span className="font-bold text-green-600">{registro.qtd_sobrando} un.</span>
-                        <span className="text-xs text-gray-500">Tam: {registro.tamanho_sobrando || '-'}</span>
+                        <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">{registro.qtd_sobrando} un.</span>
+                        <span className="text-[10px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest mt-1">Tam: {registro.tamanho_sobrando || '-'}</span>
                       </div>
                     ) : (
-                      <span className="text-gray-400">-</span>
+                      <span className="text-gray-300 dark:text-zinc-800">-</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-8 py-5 text-center">
                     {registro.qtd_faltando > 0 ? (
                       <div className="inline-flex flex-col items-center">
-                        <span className="font-bold text-red-600">{registro.qtd_faltando} un.</span>
-                        <span className="text-xs text-gray-500">Tam: {registro.tamanho_faltando || '-'}</span>
+                        <span className="text-sm font-black text-red-600 dark:text-red-400">{registro.qtd_faltando} un.</span>
+                        <span className="text-[10px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest mt-1">Tam: {registro.tamanho_faltando || '-'}</span>
                       </div>
                     ) : (
-                      <span className="text-gray-400">-</span>
+                      <span className="text-gray-300 dark:text-zinc-800">-</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right">
-                    <button
-                      onClick={() => onEdit(registro)}
-                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors inline-flex mr-2"
-                      title="Editar"
-                    >
-                      <Edit2 size={16} />
-                    </button>
-                    <button
-                      onClick={() => {
-                        if(window.confirm('Tem certeza que deseja excluir este registro?')) {
-                          onDelete(registro.id);
-                        }
-                      }}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors inline-flex"
-                      title="Excluir"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                  <td className="px-8 py-5 whitespace-nowrap text-right">
+                    <div className="flex justify-end gap-1">
+                      <button
+                        onClick={() => onEdit(registro)}
+                        className="w-9 h-9 flex items-center justify-center text-blue-600 hover:bg-blue-500/10 dark:hover:bg-blue-500/20 rounded-xl transition-all"
+                        title="Editar"
+                      >
+                        <Edit2 size={16} />
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (window.confirm('Tem certeza que deseja excluir este registro?')) {
+                            onDelete(registro.id);
+                          }
+                        }}
+                        className="w-9 h-9 flex items-center justify-center text-red-600 hover:bg-red-500/10 dark:hover:bg-red-500/20 rounded-xl transition-all"
+                        title="Excluir"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -166,7 +174,7 @@ export const UniformTable: React.FC<Props> = ({
           </tbody>
         </table>
       </div>
-      
+
       <div className="p-4 border-t border-gray-100 bg-gray-50 text-xs text-gray-500 flex justify-between items-center">
         <span>Mostrando {registros.length} registros</span>
       </div>

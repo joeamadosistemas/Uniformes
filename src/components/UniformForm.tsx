@@ -148,23 +148,23 @@ export const UniformForm: React.FC<Props> = ({ onSave, registroEmEdicao, onCance
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div className="glass rounded-3xl overflow-hidden shadow-xl border border-gray-100 dark:border-zinc-800 transition-all duration-300">
       {/* Cabeçalho */}
-      <div className="bg-slate-50 border-b border-gray-100 px-6 py-4 flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-gray-800">
+      <div className="bg-white/50 dark:bg-zinc-900/50 border-b border-gray-100 dark:border-zinc-800 px-6 py-5 flex justify-between items-center transition-colors">
+        <h2 className="text-xl font-black text-zinc-900 dark:text-white tracking-tight">
           {registroEmEdicao ? 'Editar Registro' : 'Registrar Uniformes'}
         </h2>
         {registroEmEdicao && (
-          <button onClick={onCancelEdit} className="text-gray-400 hover:text-gray-600 transition-colors">
-            <X size={20} />
+          <button onClick={onCancelEdit} className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 dark:bg-zinc-800 text-gray-400 hover:text-red-500 transition-all">
+            <X size={18} />
           </button>
         )}
       </div>
 
-      <form onSubmit={handleSubmit} className="p-6 space-y-6">
+      <form onSubmit={handleSubmit} className="p-8 space-y-8">
         {/* Quantidade de Alunos */}
-        <div className="max-w-xs">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+        <div className="max-w-xs space-y-2">
+          <label className="block text-xs font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest ml-1">
             Quantidade de Alunos na unidade *
           </label>
           <input
@@ -172,7 +172,7 @@ export const UniformForm: React.FC<Props> = ({ onSave, registroEmEdicao, onCance
             min="0"
             value={qtdAlunos}
             onChange={(e) => setQtdAlunos(Number(e.target.value))}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+            className="w-full px-5 py-3 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-[#005A9C] dark:focus:ring-[#66b3ff] outline-none transition-all text-zinc-900 dark:text-white font-semibold"
             required
           />
         </div>
@@ -185,26 +185,28 @@ export const UniformForm: React.FC<Props> = ({ onSave, registroEmEdicao, onCance
             return (
               <div
                 key={bloco.id}
-                className="border border-blue-100 rounded-xl overflow-hidden"
+                className="bg-gray-50/30 dark:bg-zinc-900/10 border border-gray-100 dark:border-zinc-800 rounded-2xl overflow-hidden transition-all duration-300"
               >
                 {/* Cabeçalho do bloco */}
-                <div className="bg-blue-50/60 px-5 py-3 flex items-center justify-between gap-4 border-b border-blue-100">
-                  <div className="flex items-center gap-3 flex-1">
-                    <ChevronDown size={16} className="text-blue-400 shrink-0" />
+                <div className="bg-[#005A9C]/5 dark:bg-[#66b3ff]/5 px-6 py-4 flex items-center justify-between gap-4 border-b border-gray-100 dark:border-zinc-800">
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#005A9C]/10 dark:bg-[#66b3ff]/10 text-[#005A9C] dark:text-[#66b3ff]">
+                      <ChevronDown size={18} className={!bloco.categoria ? "animate-pulse" : ""} />
+                    </div>
                     <div className="flex-1">
-                      <label className="block text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1">
+                      <label className="block text-[10px] font-bold text-[#005A9C] dark:text-[#66b3ff] uppercase tracking-widest mb-1.5 ml-1">
                         Categoria / Nível Escolar {blocoIdx + 1} *
                         {blocoIdx === 0 && categoriaLocked && (
-                          <span className="ml-2 text-blue-400 font-normal normal-case tracking-normal">(definida pela unidade)</span>
+                          <span className="ml-2 text-zinc-400 font-normal normal-case tracking-normal">(padrão da unidade)</span>
                         )}
                       </label>
                       <select
                         value={bloco.categoria}
                         onChange={(e) => handleCategoriaChange(bloco.id, e.target.value)}
-                        disabled={blocoIdx === 0 && categoriaLocked}
-                        className={`w-full px-3 py-1.5 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors text-sm font-medium ${blocoIdx === 0 && categoriaLocked
-                          ? 'bg-blue-50 cursor-not-allowed opacity-80'
-                          : 'bg-white'
+                        disabled={(blocoIdx === 0 && categoriaLocked) || qtdAlunos === 0}
+                        className={`w-full px-4 py-2.5 border border-gray-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-[#005A9C] outline-none transition-all text-sm font-bold ${((blocoIdx === 0 && categoriaLocked) || qtdAlunos === 0)
+                          ? 'bg-gray-100 dark:bg-zinc-800 cursor-not-allowed text-zinc-400 dark:text-zinc-600'
+                          : 'bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white'
                           }`}
                         required
                       >
@@ -249,8 +251,8 @@ export const UniformForm: React.FC<Props> = ({ onSave, registroEmEdicao, onCance
                             <select
                               value={item.tipo_uniforme}
                               onChange={(e) => handleItemChange(bloco.id, item.id, 'tipo_uniforme', e.target.value)}
-                              disabled={!bloco.categoria}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 outline-none text-sm bg-white disabled:bg-gray-50 disabled:cursor-not-allowed"
+                              disabled={!bloco.categoria || qtdAlunos === 0}
+                              className="w-full px-3 py-2 border border-gray-300 dark:border-zinc-800 rounded-lg focus:ring-1 focus:ring-blue-500 outline-none text-sm bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white disabled:bg-gray-50 dark:disabled:bg-zinc-900 disabled:cursor-not-allowed disabled:text-zinc-400"
                               required
                             >
                               <option value="">Selecione...</option>
@@ -340,21 +342,21 @@ export const UniformForm: React.FC<Props> = ({ onSave, registroEmEdicao, onCance
 
 
         {/* Rodapé com botões */}
-        <div className="flex justify-end items-center pt-4 border-t border-gray-100 gap-3">
+        <div className="flex justify-end items-center pt-8 border-t border-gray-100 dark:border-zinc-800 gap-4">
           {registroEmEdicao && (
             <button
               type="button"
               onClick={onCancelEdit}
-              className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              className="px-8 py-3 bg-gray-100 dark:bg-zinc-900 text-gray-600 dark:text-zinc-400 rounded-xl hover:bg-gray-200 dark:hover:bg-zinc-800 transition-all font-bold text-sm tracking-wide"
             >
               Cancelar
             </button>
           )}
           <button
             type="submit"
-            className="flex items-center px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
+            className="flex items-center px-10 py-3.5 bg-gradient-to-r from-[#005A9C] to-[#004a80] text-white rounded-xl hover:scale-[1.02] active:scale-95 transition-all font-black text-sm uppercase tracking-widest shadow-lg shadow-blue-500/20"
           >
-            {registroEmEdicao ? <RefreshCw size={18} className="mr-2" /> : <Save size={18} className="mr-2" />}
+            {registroEmEdicao ? <RefreshCw size={18} className="mr-2" /> : <Save size={18} className="mr-3" />}
             {registroEmEdicao ? 'Atualizar Registro' : 'Salvar no Banco de Dados'}
           </button>
         </div>

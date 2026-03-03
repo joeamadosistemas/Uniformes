@@ -39,10 +39,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, isA
   ];
 
   return (
-    <aside className="w-72 bg-white dark:bg-[#1e1e1e] text-gray-800 dark:text-gray-200 flex flex-col h-full shadow-2xl border-r border-gray-100 dark:border-[#333] transition-all duration-300">
-      {/* Header com Botão Fechar */}
-      <div className="p-4 flex items-center justify-between bg-[#005A9C] text-white">
-        <h1 className="text-lg font-bold">Uniforme Escolar</h1>
+    <aside className="w-72 bg-white dark:bg-zinc-950 text-gray-800 dark:text-zinc-200 flex flex-col h-full shadow-2xl border-r border-gray-100 dark:border-zinc-900 transition-all duration-300">
+      {/* Header */}
+      <div className="p-6 flex items-center justify-between bg-gradient-to-br from-[#005A9C] to-[#004a80] text-white shadow-lg">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
+            <Shirt size={20} className="text-white" />
+          </div>
+          <h1 className="text-lg font-extrabold tracking-tight">Uniforme Escolar</h1>
+        </div>
         {onClose && (
           <button onClick={onClose} className="hover:bg-white/10 p-1 rounded transition-colors">
             <X size={24} />
@@ -50,41 +55,43 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, isA
         )}
       </div>
 
-      <nav className="flex-1 overflow-y-auto bg-white dark:bg-[#1e1e1e]">
+      <nav className="flex-1 overflow-y-auto py-4 bg-white dark:bg-zinc-950">
         <ul>
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeView === item.id;
             return (
-              <li key={item.id} className="border-b border-gray-100 dark:border-[#2a2a2a]">
+              <li key={item.id} className="px-3 mb-1">
                 <button
                   onClick={() => setActiveView(item.id)}
-                  className={`w-full flex items-center group px-5 py-4 transition-all ${isActive ? 'bg-gray-50/50' : 'hover:bg-gray-50'
+                  className={`w-full flex items-center group px-4 py-3 rounded-xl transition-all duration-200 ${isActive
+                    ? 'bg-[#005A9C]/10 text-[#005A9C] dark:bg-[#66b3ff]/10 dark:text-[#66b3ff]'
+                    : 'text-gray-500 dark:text-zinc-400 hover:bg-gray-50 dark:hover:bg-zinc-900 hover:text-gray-900 dark:hover:text-white'
                     }`}
                 >
                   <div className="flex items-center space-x-4 flex-1">
-                    <Icon size={20} className={isActive ? 'text-[#005A9C] dark:text-[#66b3ff]' : 'text-[#005A9C]/70'} />
-                    <span className={`text-sm ${isActive ? 'text-[#005A9C] dark:text-[#66b3ff] font-bold' : 'text-gray-600'}`}>
+                    <Icon size={20} className={isActive ? 'text-[#005A9C] dark:text-[#66b3ff]' : 'text-gray-400 group-hover:text-[#005A9C] dark:group-hover:text-[#66b3ff]'} />
+                    <span className={`text-sm font-medium ${isActive ? 'font-bold' : ''}`}>
                       {item.label}
                     </span>
                   </div>
-                  <ChevronRight size={16} className={`${isActive ? 'text-[#005A9C]' : 'text-gray-300'} group-hover:translate-x-0.5 transition-transform`} />
+                  <ChevronRight size={14} className={`${isActive ? 'opacity-100' : 'opacity-0'} group-hover:opacity-100 group-hover:translate-x-1 transition-all`} />
                 </button>
               </li>
             );
           })}
 
           {/* Configurações Importantes Dropdown */}
-          <li className="mt-2">
+          <li className="mt-4 px-3 border-t border-gray-100 dark:border-zinc-900 pt-4">
             <button
               onClick={() => setIsConfigOpen(!isConfigOpen)}
-              className="w-full flex items-center justify-between px-5 py-4 transition-colors hover:bg-gray-50 group border-b border-gray-100 dark:border-[#2a2a2a]"
+              className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all hover:bg-gray-50 dark:hover:bg-zinc-900 group"
             >
               <div className="flex items-center space-x-4">
-                <Settings size={22} className="text-[#d94e4e]" />
-                <span className="font-bold text-[#005A9C] dark:text-[#66b3ff]">Configurações</span>
+                <Settings size={20} className="text-gray-400 group-hover:text-[#d94e4e] transition-colors" />
+                <span className="text-sm font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-widest">Configurações</span>
               </div>
-              <ChevronDown size={18} className={`text-gray-400 transition-transform ${isConfigOpen ? '' : '-rotate-90'}`} />
+              <ChevronDown size={16} className={`text-gray-300 transition-transform duration-300 ${isConfigOpen ? '' : '-rotate-90'}`} />
             </button>
 
             {isConfigOpen && (
@@ -113,7 +120,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, isA
         </ul>
       </nav>
 
-      <div className="p-4 border-t border-gray-100 dark:border-[#333] text-[10px] text-gray-400 text-center bg-gray-50/30">
+      <div className="p-6 border-t border-gray-100 dark:border-zinc-900 text-[10px] font-medium text-gray-400 dark:text-zinc-600 tracking-widest uppercase">
         Versão 1.0.0
       </div>
     </aside>

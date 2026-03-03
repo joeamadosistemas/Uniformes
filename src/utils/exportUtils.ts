@@ -159,58 +159,231 @@ export const exportarResumoEstoque = (
 export const exportarCatalogoPDF = (uniformes: Uniforme[]) => {
   const doc = new jsPDF('landscape');
 
-  const valorTotalGeral = uniformes.reduce((acc, curr) => acc + (curr.quantidade * curr.precoUnitario), 0);
-
   const startY = drawGovHeader(doc, 'Catálogo de Uniformes e Preços', [
-    `Total de Itens: ${uniformes.length}`,
-    `Valor Total Estimado do Catálogo: R$ ${valorTotalGeral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+    `Emitido em: ${format(new Date(), 'dd/MM/yyyy HH:mm')}`
   ]);
 
-  // Tabela
-  const tableColumn = ["Segmento", "Unidade", "Modelo", "Descrição", "Tamanho", "Qtd", "Preço Un.", "Total"];
-  const tableRows = uniformes.map(u => [
-    u.segmento.replace('CONJUNTO UNIFORMA ESCOLAR ', '').replace('CONJUNTO UNIFORME ESCOLAR ', ''),
-    u.unidade || '-',
-    u.modelo || '-',
-    u.descricao || '-',
-    u.tamanho || '-',
-    u.quantidade.toString(),
-    `R$ ${u.precoUnitario.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
-    `R$ ${(u.quantidade * u.precoUnitario).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
-  ]);
-
-  autoTable(doc, {
-    head: [tableColumn],
-    body: tableRows,
-    startY: startY,
-    styles: { fontSize: 8 },
-    headStyles: { fillColor: [0, 51, 102], textColor: [255, 255, 255] },
-    alternateRowStyles: { fillColor: [245, 245, 245] }
+  // 1. IMPORTANTE: Garantir que a lista geral já venha ordenada pela data de cadastro (sequência de lançamento)
+  // No CadastrosUniformes.tsx o fetch já traz order('data_cadastro', { ascending: false })
+  // Mas para o PDF, o usuário quer na "sequência do lançamento" (provavelmente os mais antigos primeiro ou a ordem natural)
+  // Vamos re-ordenar aqui para garantir cronologia ascendente (do primeiro ao último lançado)
+  const itensOrdenados = [...uniformes].sort((a, b) => {
+    const dateA = a.dataCadastro ? new Date(a.dataCadastro).getTime() : 0;
+    const dateB = b.dataCadastro ? new Date(b.dataCadastro).getTime() : 0;
+    return dateA - dateB;
   });
 
-  doc.save(`catalogo_uniformes_${format(new Date(), 'yyyyMMdd')}.pdf`);
+  // Agrupar por segmento mantendo a ordem de descoberta (que agora é cronológica)
+  const gruposMap = new Map<string, Uniforme[]>();
+  itensOrdenados.forEach(u => {
+    if (!gruposMap.has(u.segmento)) {
+      gruposMap.set(u.segmento, []);
+    }
+    gruposMap.get(u.segmento)!.push(u);
+  });
+
+  let currentY = startY;
+
+  Array.from(gruposMap.entries()).forEach(([segmento, itens], index) => {
+    // Se não for o primeiro grupo e não couber na página, adiciona nova página
+    if (index > 0 && currentY > doc.internal.pageSize.getHeight() - 60) {
+      doc.addPage();
+      currentY = 20;
+    }
+
+    // Regra da Quantidade Estimada: Sempre o valor do PRIMEIRO item do segmento
+    const qtdEstimada = itens[0]?.quantidade || 0;
+    const nomeLimpo = segmento.replace('CONJUNTO UNIFORMA ESCOLAR ', '').replace('CONJUNTO UNIFORME ESCOLAR ', '');
+
+    doc.setFillColor(230, 230, 230);
+    doc.rect(14, currentY, doc.internal.pageSize.getWidth() - 28, 8, 'F');
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(0);
+
+    const headerText = `CONJUNTO UNIFORME ESCOLAR ${nomeLimpo.toUpperCase()} – Quantidade Estimada: ${qtdEstimada.toLocaleString('pt-BR')} ALUNOS`;
+    doc.text(headerText, doc.internal.pageSize.getWidth() / 2, currentY + 6, { align: 'center' });
+
+    currentY += 8;
+
+    // Itens do grupo (já estão na sequência de lançamento)
+    const tableColumn = ["ITEM", "Modelo", "Unid.", "Descrição", "Qtd/Aluno", "Quantidade", "Preço Unitário", "Preço Total"];
+    const tableRows = itens.map((u, i) => [
+      (i + 1).toString().padStart(2, '0'),
+      u.modelo || '-',
+      u.unidade || '-',
+      u.descricao || '-',
+      "01",
+      u.quantidade.toLocaleString('pt-BR'),
+      `R$ ${u.precoUnitario.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      `R$ ${(u.quantidade * u.precoUnitario).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+    ]);
+
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: currentY,
+      margin: { left: 14, right: 14 },
+      styles: {
+        fontSize: 8,
+        cellPadding: 2,
+        lineColor: [180, 180, 180],
+        lineWidth: 0.1,
+      },
+      headStyles: {
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0],
+        fontStyle: 'bold',
+        halign: 'center'
+      },
+      bodyStyles: {
+        textColor: [0, 0, 0],
+      },
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 12 },
+        1: { halign: 'center', cellWidth: 15 },
+        2: { halign: 'center', cellWidth: 15 },
+        4: { halign: 'center', cellWidth: 20 },
+        5: { halign: 'center', cellWidth: 20 },
+        6: { halign: 'right', cellWidth: 25 },
+        7: { halign: 'right', cellWidth: 25 },
+      },
+      didDrawPage: (data) => {
+        currentY = data.cursor?.y || currentY;
+      }
+    });
+
+    currentY = (doc as any).lastAutoTable.finalY + 8;
+  });
+
+  // Valor Total Geral no final
+  const valorTotalGeral = uniformes.reduce((acc, curr) => acc + (curr.quantidade * curr.precoUnitario), 0);
+  if (currentY > doc.internal.pageSize.getHeight() - 20) {
+    doc.addPage();
+    currentY = 20;
+  }
+
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "bold");
+  doc.text(`VALOR TOTAL ESTIMADO DO CATÁLOGO: R$ ${valorTotalGeral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 14, currentY + 5);
+
+  doc.save(`catalogo_precos_uniformes_${format(new Date(), 'yyyyMMdd')}.pdf`);
 };
 
 export const exportarCatalogoExcel = (uniformes: Uniforme[]) => {
-  const worksheetData = uniformes.map(u => ({
-    'Segmento': u.segmento,
-    'Unidade': u.unidade || '-',
-    'Modelo': u.modelo || '-',
-    'Descrição': u.descricao || '-',
-    'Tamanho': u.tamanho || '-',
-    'Quantidade': u.quantidade,
-    'Preço Unitário (R$)': u.precoUnitario,
-    'Preço Total (R$)': u.quantidade * u.precoUnitario
-  }));
+  // 1. Ordenação Cronológica (Sequência de Lançamento)
+  const itensOrdenados = [...uniformes].sort((a, b) => {
+    const dateA = a.dataCadastro ? new Date(a.dataCadastro).getTime() : 0;
+    const dateB = b.dataCadastro ? new Date(b.dataCadastro).getTime() : 0;
+    return dateA - dateB;
+  });
 
-  const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+  // 2. Agrupamento por Segmento
+  const gruposMap = new Map<string, Uniforme[]>();
+  itensOrdenados.forEach(u => {
+    if (!gruposMap.has(u.segmento)) {
+      gruposMap.set(u.segmento, []);
+    }
+    gruposMap.get(u.segmento)!.push(u);
+  });
+
+  // 3. Construção do AOA (Array of Arrays) e controle de Merges
+  const aoa: any[][] = [];
+  const merges: { s: { r: number, c: number }, e: { r: number, c: number } }[] = [];
+
+  // Função auxiliar para adicionar linha mesclada
+  const pushMergedRow = (content: string, rowIndex: number) => {
+    aoa.push([content]);
+    merges.push({ s: { r: rowIndex, c: 0 }, e: { r: rowIndex, c: 7 } }); // Mescla de A até H
+  };
+
+  // Cabeçalho Institucional
+  pushMergedRow('ESTADO DO RIO DE JANEIRO', 0);
+  pushMergedRow('PREFEITURA MUNICIPAL DE ITAGUAÍ', 1);
+  pushMergedRow('SECRETARIA MUNICIPAL DE EDUCAÇÃO', 2);
+  aoa.push(['']); // Linha 3 vaga
+  pushMergedRow('CATÁLOGO DE UNIFORMES E PREÇOS', 4);
+  pushMergedRow(`Data de Emissão: ${format(new Date(), 'dd/MM/yyyy HH:mm')}`, 5);
+  aoa.push(['']); // Linha 6 vaga
+
+  let currentRow = 7;
+
+  Array.from(gruposMap.entries()).forEach(([segmento, itens]) => {
+    const qtdEstimada = itens[0]?.quantidade || 0;
+    const nomeLimpo = segmento.replace('CONJUNTO UNIFORMA ESCOLAR ', '').replace('CONJUNTO UNIFORME ESCOLAR ', '');
+
+    // Linha de Cabeçalho do Grupo (Lote) - Mesclada
+    pushMergedRow(`CONJUNTO UNIFORME ESCOLAR ${nomeLimpo.toUpperCase()} – Quantidade Estimada: ${qtdEstimada.toLocaleString('pt-BR')} ALUNOS`, currentRow);
+    currentRow++;
+
+    // Cabeçalho da Tabela
+    aoa.push(["ITEM", "Modelo", "Unid.", "Descrição", "Qtd/Aluno", "Quantidade", "Preço Unitário", "Preço Total"]);
+    currentRow++;
+
+    // Itens do Grupo
+    itens.forEach((u, i) => {
+      aoa.push([
+        (i + 1).toString().padStart(2, '0'),
+        u.modelo || '-',
+        u.unidade || '-',
+        u.descricao || '-',
+        "01",
+        u.quantidade,
+        u.precoUnitario,
+        u.quantidade * u.precoUnitario
+      ]);
+      currentRow++;
+    });
+
+    // Linhas em branco para separar blocos
+    aoa.push(['']);
+    aoa.push(['']);
+    currentRow += 2;
+  });
+
+  // Valor Total Geral
+  const valorTotalGeral = uniformes.reduce((acc, curr) => acc + (curr.quantidade * curr.precoUnitario), 0);
+  aoa.push(['VALOR TOTAL ESTIMADO DO CATÁLOGO:', '', '', '', '', '', '', valorTotalGeral]);
+  // Mescla o rótulo do total (opcional, vamos mesclar A-G e deixar o valor no H)
+  merges.push({ s: { r: currentRow, c: 0 }, e: { r: currentRow, c: 6 } });
+
+  // Criar Worksheet e Workbook
+  const worksheet = XLSX.utils.aoa_to_sheet(aoa);
+
+  // Aplicar as Mesclagens
+  worksheet['!merges'] = merges;
+
+  // Aplicar Formatação de Moeda nas colunas G e H (Preço Unitário e Preço Total)
+  // Nota: Itera as células para aplicar o formato 'z' (formato de moeda local)
+  // Mas no SheetJS básico (xlsx), o formato de número é 'z' ou 'numFmt'
+  const range = XLSX.utils.decode_range(worksheet['!ref']!);
+  for (let r = range.s.r; r <= range.e.r; ++r) {
+    // Coluna G (índice 6) e H (índice 7)
+    [6, 7].forEach(c => {
+      const cellRef = XLSX.utils.encode_cell({ r, c });
+      if (worksheet[cellRef] && typeof worksheet[cellRef].v === 'number') {
+        worksheet[cellRef].t = 'n';
+        worksheet[cellRef].z = '"R$ "#,##0.00';
+      }
+    });
+  }
+
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, "Catálogo");
 
+  // Ajuste de largura das colunas
   const wscols = [
-    { wch: 30 }, { wch: 10 }, { wch: 10 }, { wch: 40 }, { wch: 12 }, { wch: 10 }, { wch: 15 }, { wch: 15 }
+    { wch: 8 },  // ITEM
+    { wch: 10 }, // Modelo
+    { wch: 10 }, // Unid.
+    { wch: 60 }, // Descrição (Maior para caber textos longos)
+    { wch: 12 }, // Qtd/Aluno
+    { wch: 15 }, // Quantidade
+    { wch: 18 }, // Preço Unitário
+    { wch: 18 }  // Preço Total
   ];
   worksheet['!cols'] = wscols;
 
-  XLSX.writeFile(workbook, `catalogo_uniformes_${format(new Date(), 'yyyyMMdd')}.xlsx`);
+  // Salvar
+  XLSX.writeFile(workbook, `catalogo_precos_uniformes_${format(new Date(), 'yyyyMMdd')}.xlsx`);
 };

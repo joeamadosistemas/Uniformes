@@ -8,8 +8,10 @@ export const BackupRestauracao: React.FC = () => {
     const [file, setFile] = useState<File | null>(null);
 
     const tables = [
+        'profiles',
         'escolas',
         'uniformes',
+        'uniformes_catalogo',
         'estoque',
         'transferencias',
         'movimentacoes'
@@ -18,13 +20,38 @@ export const BackupRestauracao: React.FC = () => {
     const handleBackupJSON = async () => {
         setLoading(true);
         try {
-            const backupData: Record<string, any> = {};
+            const backupData: Record<string, any> = {
+                timestamp: new Date().toISOString(),
+                database: {},
+                localStorage: {}
+            };
 
+            // 1. Coleta de dados do Supabase (Tentar todas as tabelas, mas não travar se alguma falhar)
             for (const table of tables) {
-                const { data, error } = await supabase.from(table).select('*');
-                if (error) throw error;
-                backupData[table] = data;
+                try {
+                    const { data, error } = await supabase.from(table).select('*');
+                    if (error) {
+                        console.warn(`Aviso: Falha ao ler tabela ${table}:`, error.message);
+                        backupData.database[table] = [];
+                    } else {
+                        backupData.database[table] = data;
+                    }
+                } catch (e) {
+                    console.warn(`Erro na tabela ${table}:`, e);
+                }
             }
+
+            // 2. Coleta de dados do LocalStorage
+            const lsKeys = [
+                '@Uniformes:registros',
+                '@Uniformes:transferencias',
+                '@Uniformes:escolas',
+                '@Uniformes:tema'
+            ];
+            lsKeys.forEach(key => {
+                const val = localStorage.getItem(key);
+                if (val) backupData.localStorage[key] = JSON.parse(val);
+            });
 
             const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
@@ -42,20 +69,48 @@ export const BackupRestauracao: React.FC = () => {
     };
 
     const handleBackupCSV = async () => {
-        // Implementação simplificada para exportar estoque consolidado
         setLoading(true);
         try {
-            const { data, error } = await supabase.from('estoque').select('*, uniformes(nome), escolas(nome)');
-            if (error) throw error;
+            // Tenta buscar do estoque do Supabase, mas com os nomes de colunas corretos (descricao em vez de nome)
+            // Caso a tabela de estoque do banco esteja vazia ou incompleta, buscamos dos Lançamentos (localStorage)
+            const { data, error } = await supabase.from('estoque').select('*, uniformes(descricao), escolas(nome)');
 
-            const headers = ['Escola', 'Uniforme', 'Quantidade', 'Data Atualização'];
+            let reportData = [];
+
+            if (!error && data && data.length > 0) {
+                reportData = (data as any[]).map((row: any) => ({
+                    escola: row.escolas?.nome || 'N/A',
+                    uniforme: row.uniformes?.descricao || 'N/A',
+                    quantidade: row.quantidade,
+                    data: new Date(row.updated_at).toLocaleDateString()
+                }));
+            } else {
+                // FALLBACK: Usar dados do localStorage (Lançamentos)
+                const localRegistros = localStorage.getItem('@Uniformes:registros');
+                if (localRegistros) {
+                    const registros = JSON.parse(localRegistros);
+                    reportData = registros.map((r: any) => ({
+                        escola: r.escola || 'N/A',
+                        uniforme: r.tipo_uniforme || r.descricao || 'N/A',
+                        quantidade: r.quantidade_alunos || 0,
+                        data: new Date(r.data_registro).toLocaleDateString()
+                    }));
+                }
+            }
+
+            if (reportData.length === 0) {
+                alert('Não há dados de estoque para gerar o relatório.');
+                return;
+            }
+
+            const headers = ['Escola', 'Uniforme/Item', 'Quantidade', 'Data Registro'];
             const csvContent = [
                 headers.join(','),
-                ...data.map(row => [
-                    `"${row.escolas?.nome || 'N/A'}"`,
-                    `"${row.uniformes?.nome || 'N/A'}"`,
+                ...reportData.map(row => [
+                    `"${row.escola}"`,
+                    `"${row.uniforme}"`,
                     row.quantidade,
-                    new Date(row.updated_at).toLocaleDateString()
+                    row.data
                 ].join(','))
             ].join('\n');
 
@@ -83,7 +138,7 @@ export const BackupRestauracao: React.FC = () => {
     const handleRestore = async () => {
         if (!file) return;
 
-        const confirm = window.confirm('ATENÇÃO: Restaurar o backup substituirá todos os dados atuais. Deseja continuar?');
+        const confirm = window.confirm('ATENÇÃO: Restaurar o backup substituirá todos os dados atuais (Banco e LocalStorage). Deseja continuar?');
         if (!confirm) return;
 
         setLoading(true);
@@ -92,17 +147,25 @@ export const BackupRestauracao: React.FC = () => {
             reader.onload = async (e) => {
                 try {
                     const content = JSON.parse(e.target?.result as string);
+                    const dbData = content.database || content; // Suporte ao formato antigo
 
+                    // 1. Restaurar Supabase
                     for (const table of tables) {
-                        if (content[table]) {
-                            // Limpar tabela (opcional - dependendo da RLS e política de deleção)
-                            // Note: Supabase deletions often require filters or are restricted via RLS
-                            // Para este MVP, vamos apenas tentar o Upsert
-                            const { error } = await supabase.from(table).upsert(content[table]);
-                            if (error) throw error;
+                        if (dbData[table] && dbData[table].length > 0) {
+                            const { error } = await supabase.from(table).upsert(dbData[table]);
+                            if (error) console.warn(`Erro ao restaurar tabela ${table}:`, error.message);
                         }
                     }
+
+                    // 2. Restaurar LocalStorage
+                    if (content.localStorage) {
+                        Object.entries(content.localStorage).forEach(([key, val]) => {
+                            localStorage.setItem(key, JSON.stringify(val));
+                        });
+                    }
+
                     alert('Restauração concluída com sucesso!');
+                    window.location.reload(); // Recarregar para aplicar mudanças do localStorage
                 } catch (err) {
                     console.error(err);
                     alert('Erro ao processar arquivo JSON.');

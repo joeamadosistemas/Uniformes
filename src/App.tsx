@@ -18,15 +18,21 @@ function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [loadingSession, setLoadingSession] = useState(true);
   const [activeView, setActiveView] = useState('lancamentos');
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem('theme');
+    return saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  });
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [userRole, setUserRole] = useState<string>('Operador');
+  const [userName, setUserName] = useState<string>('');
 
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
     } else {
       document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
     }
   }, [isDarkMode]);
 
@@ -52,16 +58,20 @@ function App() {
     setLoadingSession(true);
     const { data, error } = await supabase
       .from('profiles')
-      .select('role')
+      .select('role, nome')
       .eq('id', userId)
       .single();
-    if (!error && data?.role) setUserRole(data.role);
+    if (!error && data) {
+      if (data.role) setUserRole(data.role);
+      if (data.nome) setUserName(data.nome);
+    }
     setLoadingSession(false);
   };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setUserRole('Operador');
+    setUserName('');
   };
 
   // Tela de carregamento enquanto verifica sessão
@@ -136,6 +146,7 @@ function App() {
       <div className={`flex flex-col flex-1 min-h-screen transition-all duration-300 ${isSidebarOpen ? 'lg:pl-72' : 'pl-0'}`}>
         <GovHeader
           userEmail={userEmail}
+          userName={userName}
           isAdmin={isAdmin}
           onLogout={handleLogout}
           isDarkMode={isDarkMode}
