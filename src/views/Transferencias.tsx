@@ -8,8 +8,7 @@ import {
     Send,
     ChevronDown,
     ChevronUp,
-    Package,
-    Check
+    Package
 } from 'lucide-react';
 import { EscolaCadastro, Transferencia, ItemTransferencia } from '../types';
 import { SEGMENTOS_ENSINO, CATEGORIAS_UNIFORMES } from '../constants';
@@ -38,32 +37,8 @@ export const Transferencias: React.FC = () => {
         if (transSalvas) {
             setTransferencias(JSON.parse(transSalvas));
         } else {
-            const mockData: Transferencia[] = [
-                {
-                    id: '053d3803',
-                    tipo: 'recebida',
-                    status: 'concluida',
-                    unidade_origem_destino: 'CESMI-Centro Municipal de Estudos Supletivos de Itaguaí',
-                    data: '06/02/2026',
-                    segmentos: ['CONJUNTO UNIFORMA ESCOLAR EJA'],
-                    itens: [
-                        { id: '1', produto: 'CAMISETA COM MANGA', quantidade: 50, motivo: 'Reforço de estoque' }
-                    ]
-                },
-                {
-                    id: '0ef1903d',
-                    tipo: 'enviada',
-                    status: 'concluida',
-                    unidade_origem_destino: 'SECRETARIA DE EDUCAÇÃO',
-                    data: '06/02/2026',
-                    segmentos: ['CONJUNTO UNIFORMA ESCOLAR FUNDAMENTAL 1-3 ANOS'],
-                    itens: [
-                        { id: '2', produto: 'BERMUDA HELANCA', quantidade: 30 }
-                    ]
-                }
-            ];
-            setTransferencias(mockData);
-            localStorage.setItem('@Uniformes:transferencias', JSON.stringify(mockData));
+            setTransferencias([]);
+            localStorage.setItem('@Uniformes:transferencias', JSON.stringify([]));
         }
     }, []);
 
@@ -88,7 +63,7 @@ export const Transferencias: React.FC = () => {
     };
 
     const handleEnviar = () => {
-        if (!destino || segmentosSelecionados.length === 0 || itens.some(i => !i.produto || i.quantidade <= 0)) {
+        if (!destino || segmentosSelecionados.length === 0 || itens.some(i => !i.produto || (i.quantidade ?? 0) <= 0)) {
             alert('Por favor, preencha todos os campos obrigatórios.');
             return;
         }
@@ -203,8 +178,8 @@ export const Transferencias: React.FC = () => {
                                                 onClick={() => toggleSegmento(seg)}
                                                 title={seg}
                                                 className={`px-3 py-1.5 rounded-lg border text-[11px] font-bold transition-all ${isSelected
-                                                        ? 'bg-blue-600 border-blue-600 text-white'
-                                                        : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
+                                                    ? 'bg-blue-600 border-blue-600 text-white'
+                                                    : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
                                                     }`}
                                             >
                                                 {seg.replace('CONJUNTO UNIFORMA ESCOLAR ', '')}
@@ -218,7 +193,7 @@ export const Transferencias: React.FC = () => {
                         <div className="space-y-4">
                             <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Itens da Transferência</label>
                             <div className="bg-slate-50/50 rounded-2xl border border-slate-100 p-6 space-y-4">
-                                {itens.map((item, index) => (
+                                {itens.map((item) => (
                                     <div key={item.id} className="grid grid-cols-12 gap-4 items-start pb-4 border-b border-slate-100 last:border-0 last:pb-0">
                                         <div className="col-span-12 md:col-span-5">
                                             <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Produto</label>
