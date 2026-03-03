@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { LOGO_ITAGUAI_BASE64 } from '../utils/logoBase64';
 
 interface LoginProps {
     onLoginSuccess: () => void;
@@ -55,19 +56,14 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                 >
                     {/* Brasão */}
                     <div
-                        className="mb-4 rounded-full border-4 border-white overflow-hidden flex items-center justify-center"
-                        style={{ width: 72, height: 72, background: '#fff' }}
+                        className="mb-4 rounded-full border-4 border-white overflow-hidden flex items-center justify-center shadow-md bg-white"
+                        style={{ width: 80, height: 80 }}
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="58" height="58">
-                            <circle cx="32" cy="32" r="30" fill="#fff" stroke="#1a4fba" strokeWidth="2" />
-                            <path d="M32 8 L52 20 L52 44 Q32 58 12 44 L12 20 Z" fill="#1a4fba" opacity="0.12" />
-                            <path d="M32 12 L49 22 L49 41 Q32 53 15 41 L15 22 Z" fill="none" stroke="#1a4fba" strokeWidth="1.5" />
-                            <path d="M32 14 L49 24 L49 30 L15 30 L15 24 Z" fill="#22c55e" opacity="0.75" />
-                            <rect x="15" y="30" width="34" height="8" fill="#fff" />
-                            <path d="M15 38 L15 41 Q32 53 49 41 L49 38 Z" fill="#1a4fba" opacity="0.85" />
-                            <text x="32" y="28" textAnchor="middle" fontSize="8" fill="#1a4fba" fontWeight="bold">✦</text>
-                            <text x="32" y="48" textAnchor="middle" fontSize="4.5" fill="#fff" fontWeight="600" letterSpacing="0.5">ITAGUAÍ</text>
-                        </svg>
+                        <img
+                            src={LOGO_ITAGUAI_BASE64}
+                            alt="Brasão de Itaguaí"
+                            className="w-full h-full object-contain p-1"
+                        />
                     </div>
 
                     <h1
