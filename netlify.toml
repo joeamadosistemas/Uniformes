@@ -1,17 +1,22 @@
 [build]
-    command = "npm install && npm run build"
+  command = "npm install && npm run build"
   publish = "dist"
   base = "/"
-  ignore = "false"  # Never skip build
-  force = "true"    # Force build even if no changes detected
+  ignore = "false"
+  force = "true"
 
 [build.environment]
   NODE_VERSION = "18"
-  CI = "true"       # Ensure we're in CI mode
-  NETLIFY_BUILD_SKIP = "false"  # Never skip build
+  CI = "true"
+  NETLIFY_BUILD_SKIP = "false"
 
 [build.processing]
-  skip_processing = false  # Ensure processing is not skipped
+  skip_processing = false
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
 
 [dev]
   command = "vite"
