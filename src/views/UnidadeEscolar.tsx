@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { EscolaCadastro } from '../types';
-import { Save, Trash2, School, Check, Loader2, Pencil, Power, X } from 'lucide-react';
+import { Save, Trash2, School, Check, Loader2, Pencil, Power, X, Search, Filter } from 'lucide-react';
 import { SEGMENTOS_ENSINO } from '../constants';
 import { supabase } from '../lib/supabaseClient';
 
 export const UnidadeEscolar: React.FC = () => {
   const [escolas, setEscolas] = useState<EscolaCadastro[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterSegmento, setFilterSegmento] = useState('');
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [segmentosSelecionados, setSegmentosSelecionados] = useState<string[]>([]);
@@ -137,6 +139,17 @@ export const UnidadeEscolar: React.FC = () => {
       }
     }
   };
+
+  const filteredEscolas = escolas.filter(escola => {
+    const matchesSearch = escola.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (escola.email && escola.email.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    const matchesSegmento = filterSegmento
+      ? (escola.segmentos || []).includes(filterSegmento)
+      : true;
+
+    return matchesSearch && matchesSegmento;
+  });
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
@@ -298,9 +311,50 @@ export const UnidadeEscolar: React.FC = () => {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100 bg-slate-50 flex items-center justify-between">
-          <h3 className="font-semibold text-gray-800">Escolas Cadastradas</h3>
-          <span className="text-xs text-gray-500">{escolas.length} escola(s)</span>
+        <div className="px-6 py-4 border-b border-gray-100 bg-slate-50 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-gray-800">Escolas Cadastradas</h3>
+            <span className="text-xs text-gray-500">{filteredEscolas.length} de {escolas.length} escola(s)</span>
+          </div>
+
+          <div className="flex flex-col md:flex-row gap-3">
+            <div className="relative flex-1">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search size={18} className="text-gray-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Buscar por nome ou e-mail da escola..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all shadow-sm"
+              />
+            </div>
+            <div className="relative w-full md:w-72">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Filter size={16} className="text-gray-400" />
+              </div>
+              <select
+                value={filterSegmento}
+                onChange={(e) => setFilterSegmento(e.target.value)}
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all shadow-sm appearance-none"
+              >
+                <option value="">Todos os Segmentos</option>
+                {SEGMENTOS_ENSINO.map(seg => (
+                  <option key={seg} value={seg}>
+                    {seg.replace('CONJUNTO UNIFORMA ESCOLAR ', '').replace('EJA', 'SEJA')}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <X
+                  size={14}
+                  className={`text-gray-400 cursor-pointer hover:text-red-500 transition-colors ${filterSegmento ? 'block' : 'hidden'}`}
+                  onClick={() => setFilterSegmento('')}
+                />
+              </div>
+            </div>
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -320,14 +374,14 @@ export const UnidadeEscolar: React.FC = () => {
                     Carregando...
                   </td>
                 </tr>
-              ) : escolas.length === 0 ? (
+              ) : filteredEscolas.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
-                    Nenhuma escola cadastrada ainda.
+                    {searchTerm || filterSegmento ? 'Nenhuma escola encontrada para esta busca.' : 'Nenhuma escola cadastrada ainda.'}
                   </td>
                 </tr>
               ) : (
-                escolas.map((escola) => (
+                filteredEscolas.map((escola) => (
                   <tr key={escola.id} className={`hover:bg-slate-50 transition-colors ${escola.ativo === false ? 'opacity-50' : ''}`}>
                     <td className="px-6 py-4">
                       <div className="font-medium text-gray-800">{escola.nome}</div>
@@ -338,7 +392,7 @@ export const UnidadeEscolar: React.FC = () => {
                         <div className="flex flex-wrap gap-1">
                           {escola.segmentos.map(seg => (
                             <span key={seg} className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px] uppercase font-semibold">
-                              {seg.replace('CONJUNTO UNIFORMA ESCOLAR ', '')}
+                              {seg.replace('CONJUNTO UNIFORMA ESCOLAR ', '').replace('EJA', 'SEJA')}
                             </span>
                           ))}
                         </div>

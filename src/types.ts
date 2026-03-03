@@ -52,6 +52,8 @@ export interface UsuarioCadastro {
   id: string;
   nome: string;
   email_escola: string;
+  email_usuario?: string;
+  role?: 'admin' | 'usuario';
 }
 
 export interface Uniforme {

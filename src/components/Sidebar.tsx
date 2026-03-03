@@ -1,31 +1,33 @@
 import React, { useState } from 'react';
 import {
-  LayoutDashboard,
+  ArrowLeftRight,
   Settings,
   School,
   Users,
-  Shirt,
   Database,
-  Info,
-  ArrowLeftRight,
-  BarChart3,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  X,
+  LayoutDashboard,
+  FileText,
+  Shirt,
+  Info
 } from 'lucide-react';
 
 interface SidebarProps {
   activeView: string;
   setActiveView: (view: string) => void;
   isAdmin?: boolean;
+  onClose?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, isAdmin = false }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, isAdmin = false, onClose }) => {
   const [isConfigOpen, setIsConfigOpen] = useState(true);
 
   const menuItems = [
     { id: 'lancamentos', label: 'Lançamentos', icon: LayoutDashboard },
     { id: 'transferencias', label: 'Transferências', icon: ArrowLeftRight },
-    ...(isAdmin ? [{ id: 'admin-dashboard', label: 'Administrador', icon: BarChart3 }] : []),
+    ...(isAdmin ? [{ id: 'admin-dashboard', label: 'Administrador', icon: FileText }] : []),
   ];
 
   const configItems = [
@@ -37,71 +39,81 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, isA
   ];
 
   return (
-    <aside className="w-64 bg-blue-900 text-white flex flex-col h-full shadow-xl">
-      <div className="p-6 flex items-center space-x-3 border-b border-blue-800">
-        <School size={28} className="text-blue-300" />
-        <h1 className="text-xl font-bold tracking-tight">SMEDU-Uniforme</h1>
+    <aside className="w-72 bg-white dark:bg-[#1e1e1e] text-gray-800 dark:text-gray-200 flex flex-col h-full shadow-2xl border-r border-gray-100 dark:border-[#333] transition-all duration-300">
+      {/* Header com Botão Fechar */}
+      <div className="p-4 flex items-center justify-between bg-[#005A9C] text-white">
+        <h1 className="text-lg font-bold">Uniforme Escolar</h1>
+        {onClose && (
+          <button onClick={onClose} className="hover:bg-white/10 p-1 rounded transition-colors">
+            <X size={24} />
+          </button>
+        )}
       </div>
 
-      <nav className="flex-1 overflow-y-auto py-4">
-        <ul className="space-y-1 px-3">
+      <nav className="flex-1 overflow-y-auto bg-white dark:bg-[#1e1e1e]">
+        <ul>
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeView === item.id;
             return (
-              <li key={item.id}>
+              <li key={item.id} className="border-b border-gray-100 dark:border-[#2a2a2a]">
                 <button
                   onClick={() => setActiveView(item.id)}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${isActive ? 'bg-blue-800 text-white font-medium' : 'text-blue-100 hover:bg-blue-800/50'
+                  className={`w-full flex items-center group px-5 py-4 transition-all ${isActive ? 'bg-gray-50/50' : 'hover:bg-gray-50'
                     }`}
                 >
-                  <Icon size={20} className={isActive ? 'text-blue-300' : 'text-blue-300/70'} />
-                  <span>{item.label}</span>
+                  <div className="flex items-center space-x-4 flex-1">
+                    <Icon size={20} className={isActive ? 'text-[#005A9C] dark:text-[#66b3ff]' : 'text-[#005A9C]/70'} />
+                    <span className={`text-sm ${isActive ? 'text-[#005A9C] dark:text-[#66b3ff] font-bold' : 'text-gray-600'}`}>
+                      {item.label}
+                    </span>
+                  </div>
+                  <ChevronRight size={16} className={`${isActive ? 'text-[#005A9C]' : 'text-gray-300'} group-hover:translate-x-0.5 transition-transform`} />
                 </button>
               </li>
             );
           })}
 
-          {/* Configurações Dropdown — apenas Admin */}
-          {isAdmin && (
-            <li className="pt-4">
-              <button
-                onClick={() => setIsConfigOpen(!isConfigOpen)}
-                className="w-full flex items-center justify-between px-4 py-3 rounded-lg text-blue-100 hover:bg-blue-800/50 transition-colors"
-              >
-                <div className="flex items-center space-x-3">
-                  <Settings size={20} className="text-blue-300/70" />
-                  <span className="font-medium">Configurações</span>
-                </div>
-                {isConfigOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-              </button>
+          {/* Configurações Importantes Dropdown */}
+          <li className="mt-2">
+            <button
+              onClick={() => setIsConfigOpen(!isConfigOpen)}
+              className="w-full flex items-center justify-between px-5 py-4 transition-colors hover:bg-gray-50 group border-b border-gray-100 dark:border-[#2a2a2a]"
+            >
+              <div className="flex items-center space-x-4">
+                <Settings size={22} className="text-[#d94e4e]" />
+                <span className="font-bold text-[#005A9C] dark:text-[#66b3ff]">Configurações</span>
+              </div>
+              <ChevronDown size={18} className={`text-gray-400 transition-transform ${isConfigOpen ? '' : '-rotate-90'}`} />
+            </button>
 
-              {isConfigOpen && (
-                <ul className="mt-1 space-y-1 pl-11 pr-3">
-                  {configItems.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = activeView === item.id;
-                    return (
-                      <li key={item.id}>
-                        <button
-                          onClick={() => setActiveView(item.id)}
-                          className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm transition-colors ${isActive ? 'bg-blue-800 text-white font-medium' : 'text-blue-200 hover:bg-blue-800/50'
-                            }`}
-                        >
-                          <Icon size={16} className={isActive ? 'text-blue-300' : 'text-blue-300/70'} />
-                          <span>{item.label}</span>
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </li>
-          )}
+            {isConfigOpen && (
+              <ul className="bg-white/50 dark:bg-black/5">
+                {configItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeView === item.id;
+                  return (
+                    <li key={item.id} className="border-b border-gray-50 dark:border-[#252525] last:border-0 pl-4">
+                      <button
+                        onClick={() => setActiveView(item.id)}
+                        className={`w-full flex items-center space-x-4 px-6 py-3.5 text-sm transition-colors ${isActive
+                          ? 'text-[#005A9C] dark:text-[#66b3ff] font-bold'
+                          : 'text-gray-500 hover:bg-gray-50 hover:text-[#005A9C]'
+                          }`}
+                      >
+                        <Icon size={18} className={isActive ? 'text-[#005A9C]' : 'text-[#005A9C]/60'} />
+                        <span>{item.label}</span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </li>
         </ul>
       </nav>
 
-      <div className="p-4 border-t border-blue-800 text-xs text-blue-300/60 text-center">
+      <div className="p-4 border-t border-gray-100 dark:border-[#333] text-[10px] text-gray-400 text-center bg-gray-50/30">
         Versão 1.0.0
       </div>
     </aside>

@@ -7,17 +7,26 @@ import {
     Search,
     Package,
     DollarSign,
-    Loader2
+    Loader2,
+    Edit2,
+    X,
+    Check,
+    FileText,
+    FileSpreadsheet
 } from 'lucide-react';
 import { Uniforme } from '../types';
 import { SEGMENTOS_ENSINO, TAMANHOS_DISPONIVEIS, CATEGORIAS_UNIFORMES, UNIDADES_MEDIDA } from '../constants';
 import { supabase } from '../lib/supabaseClient';
+import { exportarCatalogoPDF, exportarCatalogoExcel } from '../utils/exportUtils';
 
 export const CadastrosUniformes: React.FC = () => {
     const [uniformes, setUniformes] = useState<Uniforme[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+
+    // Estado de Edição
+    const [editingId, setEditingId] = useState<string | null>(null);
 
     // Extrair chave da categoria a partir do segmento selecionado
     const getCategoriaKey = (segmento: string) => {
@@ -60,7 +69,7 @@ export const CadastrosUniformes: React.FC = () => {
                     tamanho: item.tamanho,
                     quantidade: item.quantidade,
                     precoUnitario: item.preco_unitario,
-                    precoTotal: item.preco_total,
+                    precoTotal: item.quantidade * item.preco_unitario, // Calculate locally
                     dataCadastro: item.data_cadastro
                 }));
                 setUniformes(mappedData);
@@ -83,45 +92,84 @@ export const CadastrosUniformes: React.FC = () => {
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!formData.segmento || !formData.descricao || !formData.quantidade) {
-            alert('Por favor, preencha os campos obrigatórios (Segmento, Descrição e Quantidade).');
+        if (!formData.segmento || !formData.descricao || (formData.quantidade === 0 && !editingId)) {
+            alert('Por favor, preencha os campos obrigatórios (Segmento e Descrição).');
             return;
         }
 
         try {
             setSaving(true);
-            const { error } = await supabase
-                .from('uniformes_catalogo')
-                .insert([{
-                    segmento: formData.segmento,
-                    unidade: formData.unidade,
-                    modelo: formData.modelo,
-                    descricao: formData.descricao,
-                    tamanho: formData.tamanho,
-                    quantidade: formData.quantidade,
-                    preco_unitario: formData.precoUnitario
-                }]);
 
-            if (error) throw error;
+            if (editingId) {
+                // UPDATE
+                const { error } = await supabase
+                    .from('uniformes_catalogo')
+                    .update({
+                        segmento: formData.segmento,
+                        unidade: formData.unidade,
+                        modelo: formData.modelo,
+                        descricao: formData.descricao,
+                        tamanho: formData.tamanho,
+                        quantidade: formData.quantidade,
+                        preco_unitario: formData.precoUnitario
+                    })
+                    .eq('id', editingId);
+
+                if (error) throw error;
+                alert('Uniforme atualizado com sucesso!');
+            } else {
+                // INSERT
+                const { error } = await supabase
+                    .from('uniformes_catalogo')
+                    .insert([{
+                        segmento: formData.segmento,
+                        unidade: formData.unidade,
+                        modelo: formData.modelo,
+                        descricao: formData.descricao,
+                        tamanho: formData.tamanho,
+                        quantidade: formData.quantidade,
+                        preco_unitario: formData.precoUnitario
+                    }]);
+
+                if (error) throw error;
+            }
 
             await fetchUniformes();
+            cancelEdit();
 
-            // Reset Form
-            setFormData({
-                segmento: '',
-                unidade: '',
-                modelo: '',
-                descricao: '',
-                tamanho: '',
-                quantidade: 0,
-                precoUnitario: 0
-            });
         } catch (error) {
             console.error('Erro ao salvar uniforme:', error);
-            alert('Erro ao salvar no banco de dados.');
+            alert('Erro ao salvar no banco de dados. Verifique a conexão ou se o e-mail administrativo possui permissões.');
         } finally {
             setSaving(false);
         }
+    };
+
+    const handleEdit = (uniforme: Uniforme) => {
+        setEditingId(uniforme.id);
+        setFormData({
+            segmento: uniforme.segmento,
+            unidade: uniforme.unidade,
+            modelo: uniforme.modelo,
+            descricao: uniforme.descricao,
+            tamanho: uniforme.tamanho,
+            quantidade: uniforme.quantidade,
+            precoUnitario: uniforme.precoUnitario
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const cancelEdit = () => {
+        setEditingId(null);
+        setFormData({
+            segmento: '',
+            unidade: '',
+            modelo: '',
+            descricao: '',
+            tamanho: '',
+            quantidade: 0,
+            precoUnitario: 0
+        });
     };
 
     const handleDelete = async (id: string) => {
@@ -159,10 +207,22 @@ export const CadastrosUniformes: React.FC = () => {
             </div>
 
             {/* Form Card */}
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-                <div className="bg-slate-50/50 px-8 py-4 border-b border-gray-100 flex items-center space-x-2">
-                    <Plus size={20} className="text-blue-600" />
-                    <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wider">Novo Cadastro</h3>
+            <div className={`bg-white rounded-3xl border ${editingId ? 'border-blue-200 ring-4 ring-blue-50' : 'border-gray-100'} shadow-sm overflow-hidden transition-all duration-300`}>
+                <div className={`${editingId ? 'bg-blue-600' : 'bg-slate-50/50'} px-8 py-4 border-b border-gray-100 flex items-center justify-between`}>
+                    <div className="flex items-center space-x-2">
+                        {editingId ? <Edit2 size={20} className="text-white" /> : <Plus size={20} className="text-blue-600" />}
+                        <h3 className={`text-sm font-bold uppercase tracking-wider ${editingId ? 'text-white' : 'text-gray-700'}`}>
+                            {editingId ? 'Editando Uniforme' : 'Novo Cadastro'}
+                        </h3>
+                    </div>
+                    {editingId && (
+                        <button
+                            onClick={cancelEdit}
+                            className="text-white/80 hover:text-white flex items-center gap-1 text-[10px] font-black uppercase tracking-widest bg-white/10 px-3 py-1 rounded-full border border-white/20 transition-all"
+                        >
+                            <X size={14} /> Cancelar Edição
+                        </button>
+                    )}
                 </div>
 
                 <form onSubmit={handleSave} className="p-8 space-y-6">
@@ -174,7 +234,7 @@ export const CadastrosUniformes: React.FC = () => {
                                 value={formData.segmento}
                                 onChange={(e) => {
                                     handleInputChange(e);
-                                    setFormData(prev => ({ ...prev, descricao: '' }));
+                                    if (!editingId) setFormData(prev => ({ ...prev, descricao: '' }));
                                 }}
                                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-medium"
                             >
@@ -275,9 +335,9 @@ export const CadastrosUniformes: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="bg-blue-50/50 p-3 rounded-2xl border border-blue-100/50">
-                            <label className="block text-[9px] font-black text-blue-400 uppercase tracking-widest mb-1">Preço Total Estimado</label>
-                            <p className="text-xl font-black text-blue-600">
+                        <div className={`p-4 rounded-2xl border transition-all ${editingId ? 'bg-blue-600 border-blue-600 shadow-lg shadow-blue-100' : 'bg-blue-50 border-blue-100'}`}>
+                            <label className={`block text-[9px] font-black uppercase tracking-widest mb-1 ${editingId ? 'text-blue-100' : 'text-blue-400'}`}>Preço Total Estimado</label>
+                            <p className={`text-xl font-black ${editingId ? 'text-white' : 'text-blue-600'}`}>
                                 R$ {(formData.quantidade * formData.precoUnitario).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                             </p>
                         </div>
@@ -286,14 +346,16 @@ export const CadastrosUniformes: React.FC = () => {
                             <button
                                 type="submit"
                                 disabled={saving}
-                                className="flex items-center px-8 py-3.5 bg-blue-700 text-white rounded-2xl hover:bg-blue-800 transition-all font-bold shadow-lg shadow-blue-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className={`flex items-center px-10 py-4 text-white rounded-2xl transition-all font-bold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed ${editingId ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-200' : 'bg-blue-700 hover:bg-blue-800 shadow-blue-300'}`}
                             >
                                 {saving ? (
-                                    <Loader2 size={20} className="mr-2 animate-spin" />
+                                    <Loader2 size={24} className="mr-2 animate-spin" />
+                                ) : editingId ? (
+                                    <Check size={24} className="mr-2" />
                                 ) : (
-                                    <Save size={20} className="mr-2" />
+                                    <Save size={24} className="mr-2" />
                                 )}
-                                {saving ? 'Salvando...' : 'Cadastrar Uniforme'}
+                                {saving ? 'Salvando...' : editingId ? 'Salvar Alterações' : 'Cadastrar Uniforme'}
                             </button>
                         </div>
                     </div>
@@ -308,15 +370,36 @@ export const CadastrosUniformes: React.FC = () => {
                         <h3 className="text-sm font-bold text-gray-700 uppercase tracking-widest">Uniformes Cadastrados</h3>
                     </div>
 
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                        <input
-                            type="text"
-                            placeholder="Buscar por modelo, segmento ou unidade..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none w-full md:w-80 transition-all"
-                        />
+                    <div className="flex flex-col md:flex-row items-center gap-3">
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => exportarCatalogoPDF(filteredUniformes)}
+                                className="flex items-center px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-xl hover:bg-red-100 transition-all text-[10px] font-black uppercase tracking-widest"
+                                title="Gerar PDF do Catálogo"
+                            >
+                                <FileText size={16} className="mr-2" />
+                                PDF
+                            </button>
+                            <button
+                                onClick={() => exportarCatalogoExcel(filteredUniformes)}
+                                className="flex items-center px-4 py-2 bg-green-50 text-green-600 border border-green-200 rounded-xl hover:bg-green-100 transition-all text-[10px] font-black uppercase tracking-widest"
+                                title="Exportar para Excel"
+                            >
+                                <FileSpreadsheet size={16} className="mr-2" />
+                                Excel
+                            </button>
+                        </div>
+
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                            <input
+                                type="text"
+                                placeholder="Buscar no catálogo..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none w-full md:w-64 transition-all"
+                            />
+                        </div>
                     </div>
                 </div>
 
@@ -350,9 +433,9 @@ export const CadastrosUniformes: React.FC = () => {
                                 </tr>
                             ) : (
                                 filteredUniformes.map(u => (
-                                    <tr key={u.id} className="hover:bg-slate-50/50 transition-colors">
+                                    <tr key={u.id} className={`hover:bg-slate-50/50 transition-colors ${editingId === u.id ? 'bg-blue-50/30' : ''}`}>
                                         <td className="px-8 py-4">
-                                            <p className="font-bold text-gray-800">{u.segmento.replace('CONJUNTO UNIFORMA ESCOLAR ', '')}</p>
+                                            <p className="font-bold text-gray-800">{u.segmento.replace('CONJUNTO UNIFORMA ESCOLAR ', '').replace('CONJUNTO UNIFORME ESCOLAR ', '')}</p>
                                             <p className="text-[10px] text-gray-400 font-black uppercase tracking-tighter">Unid: {u.unidade || '-'}</p>
                                         </td>
                                         <td className="px-8 py-4">
@@ -369,22 +452,42 @@ export const CadastrosUniformes: React.FC = () => {
                                             R$ {(u.precoUnitario ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                                         </td>
                                         <td className="px-8 py-4 text-right">
-                                            <p className="font-black text-blue-600">R$ {(u.precoTotal ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                            <p className="font-black text-blue-600">
+                                                R$ {(u.quantidade * u.precoUnitario).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                            </p>
                                         </td>
                                         <td className="px-8 py-4 text-center">
-                                            <button
-                                                onClick={() => handleDelete(u.id)}
-                                                className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-                                                title="Excluir"
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
+                                            <div className="flex items-center justify-center gap-2">
+                                                <button
+                                                    onClick={() => handleEdit(u)}
+                                                    className={`p-2 transition-colors ${editingId === u.id ? 'text-blue-600' : 'text-gray-400 hover:text-blue-600'}`}
+                                                    title="Editar"
+                                                >
+                                                    <Edit2 size={18} />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(u.id)}
+                                                    className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                                                    title="Excluir"
+                                                >
+                                                    <Trash2 size={18} />
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))
                             )}
                         </tbody>
                     </table>
+                </div>
+
+                <div className="px-8 py-4 bg-slate-50 border-t border-gray-100 flex justify-between items-center">
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                        Total de itens: {filteredUniformes.length}
+                    </p>
+                    <p className="text-sm font-bold text-gray-700">
+                        Valor Total Consolidado: <span className="text-blue-600 ml-1">R$ {filteredUniformes.reduce((acc, curr) => acc + (curr.quantidade * curr.precoUnitario), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                    </p>
                 </div>
             </div>
         </div>

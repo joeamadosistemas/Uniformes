@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from './lib/supabaseClient';
 import { Sidebar } from './components/Sidebar';
@@ -8,14 +8,26 @@ import { Usuarios } from './views/Usuarios';
 import { Transferencias } from './views/Transferencias';
 import { DashboardAdmin } from './views/DashboardAdmin';
 import { CadastrosUniformes } from './views/CadastrosUniformes';
-import { PlaceholderView } from './views/PlaceholderView';
+import { BackupRestauracao } from './views/BackupRestauracao';
+import { Sobre } from './views/Sobre';
 import { Login } from './views/Login';
-import { UserCircle, LogOut } from 'lucide-react';
+import { GovHeader } from './components/GovHeader';
+import { GovFooter } from './components/GovFooter';
 
 function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [loadingSession, setLoadingSession] = useState(true);
   const [activeView, setActiveView] = useState('lancamentos');
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
 
   useEffect(() => {
     // Carrega sessão existente ao iniciar
@@ -34,15 +46,14 @@ function App() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    // onAuthStateChange definirá session como null automaticamente
   };
 
   // Tela de carregamento enquanto verifica sessão
   if (loadingSession) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-[#121212]">
         <div className="flex flex-col items-center gap-3 text-gray-500">
-          <svg className="animate-spin" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg className="animate-spin text-[#005A9C]" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M21 12a9 9 0 1 1-6.219-8.56" />
           </svg>
           <span className="text-sm">Verificando sessão...</span>
@@ -60,7 +71,6 @@ function App() {
   const isAdmin = userEmail === 'cpdinfra@edu.itaguai.rj.gov.br';
 
   const renderView = () => {
-    // Bloqueia views restritas para não-admins
     const adminViews = ['admin-dashboard', 'config-escola', 'config-usuarios', 'config-uniformes', 'config-backup', 'config-sobre'];
     if (!isAdmin && adminViews.includes(activeView)) {
       return (
@@ -82,46 +92,65 @@ function App() {
       case 'config-escola': return <UnidadeEscolar />;
       case 'config-usuarios': return <Usuarios />;
       case 'config-uniformes': return <CadastrosUniformes />;
-      case 'config-backup': return <PlaceholderView title="Backup e Restauração" />;
-      case 'config-sobre': return <PlaceholderView title="Sobre o Sistema" />;
+      case 'config-backup': return <BackupRestauracao />;
+      case 'config-sobre': return <Sobre />;
       default: return <Lancamentos />;
     }
   };
 
   return (
-    <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden">
-      {/* Sidebar Navigation */}
-      <Sidebar activeView={activeView} setActiveView={setActiveView} isAdmin={isAdmin} />
+    <div className="flex flex-col min-h-screen bg-[#f2f2f2] dark:bg-[#121212] transition-colors duration-200">
+      {/* Sidebar Navigation - Fixed Overlay with Push logic on Desktop */}
+      <div className={`
+        fixed inset-y-0 left-0 z-[110] transition-all duration-300 ease-in-out bg-white dark:bg-[#1e1e1e] w-72
+        ${isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full shadow-none'}
+      `}>
+        <Sidebar
+          activeView={activeView}
+          setActiveView={(view) => {
+            setActiveView(view);
+            if (window.innerWidth < 1024) setIsSidebarOpen(false);
+          }}
+          isAdmin={isAdmin}
+          onClose={() => setIsSidebarOpen(false)}
+        />
+      </div>
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden">
-        {/* Top Header */}
-        <header className="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-8 shadow-sm z-10">
-          <h2 className="text-lg font-semibold text-gray-700 capitalize">
-            {activeView.replace('config-', '').replace('-', ' ')}
-          </h2>
-          <div className="flex items-center space-x-3 text-sm">
-            <div className="text-right">
-              <p className="font-medium text-gray-800">{isAdmin ? 'Administrador' : 'Escola'}</p>
-              <p className="text-gray-500 text-xs truncate max-w-[200px]">{userEmail}</p>
+      {/* Main Container */}
+      <div className={`flex flex-col flex-1 min-h-screen transition-all duration-300 ${isSidebarOpen ? 'lg:pl-72' : 'pl-0'}`}>
+        <GovHeader
+          userEmail={userEmail}
+          isAdmin={isAdmin}
+          onLogout={handleLogout}
+          isDarkMode={isDarkMode}
+          toggleDarkMode={() => setIsDarkMode(!isDarkMode)}
+          onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+        />
+
+        <div className="flex-1 flex flex-col overflow-hidden relative">
+          {/* Overlay only for mobile/tablet when sidebar is open */}
+          {isSidebarOpen && (
+            <div
+              className="lg:hidden fixed inset-0 bg-black/40 z-[105] transition-opacity duration-300"
+              onClick={() => setIsSidebarOpen(false)}
+            ></div>
+          )}
+
+          {/* Main Content Area */}
+          <div className="flex-1 flex flex-col h-full overflow-hidden">
+            <div className="flex-1 overflow-y-auto flex flex-col">
+              <main className="p-4 md:p-8 flex-1">
+                <div className="mx-auto w-full">
+                  <h2 className="text-2xl font-bold text-[#005A9C] dark:text-[#66b3ff] mb-6 capitalize border-b pb-2">
+                    {activeView.replace('config-', '').replace('-', ' ')}
+                  </h2>
+                  {renderView()}
+                </div>
+              </main>
+              <GovFooter />
             </div>
-            <UserCircle size={36} className="text-gray-400" />
-            <button
-              onClick={handleLogout}
-              title="Sair do Sistema"
-              className="ml-1 p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors duration-150 focus:outline-none"
-            >
-              <LogOut size={20} />
-            </button>
           </div>
-        </header>
-
-        {/* Scrollable Content */}
-        <main className="flex-1 overflow-y-auto p-8">
-          <div className="max-w-7xl mx-auto">
-            {renderView()}
-          </div>
-        </main>
+        </div>
       </div>
     </div>
   );
