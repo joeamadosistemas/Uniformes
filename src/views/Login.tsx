@@ -23,7 +23,15 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         });
 
         if (authError) {
-            setError('E-mail ou senha inválidos. Verifique suas credenciais.');
+            console.error('Erro de Autenticação:', authError);
+
+            if (authError.message === 'Invalid login credentials') {
+                setError('E-mail ou senha inválidos. Verifique suas credenciais.');
+            } else if (authError.status === 400 || authError.status === 401) {
+                setError('Credenciais inválidas ou conta não confirmada.');
+            } else {
+                setError(`Erro na conexão: ${authError.message}. Verifique as configurações do Netlify.`);
+            }
             setLoading(false);
         } else {
             // Sessão gerenciada pelo onAuthStateChange no App.tsx
