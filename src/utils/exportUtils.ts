@@ -1,7 +1,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
-import { RegistroUniforme, Uniforme } from '../types';
+import { RegistroUniforme, Uniforme, Recebimento } from '../types';
 import { format } from 'date-fns';
 import { LOGO_ITAGUAI_BASE64 } from './logoBase64';
 
@@ -386,4 +386,160 @@ export const exportarCatalogoExcel = (uniformes: Uniforme[]) => {
 
   // Salvar
   XLSX.writeFile(workbook, `catalogo_precos_uniformes_${format(new Date(), 'yyyyMMdd')}.xlsx`);
+};
+export const exportarRecebimentosExcel = (
+  recebimentos: Recebimento[],
+  escolaNome: string,
+  modelosInfo: { id: string, nome: string, descricao: string, tamanhos: string[] }[]
+) => {
+  const aoa: any[][] = [];
+  const merges: { s: { r: number, c: number }, e: { r: number, c: number } }[] = [];
+
+  // Agrupar por modelo para criar tabelas separadas ou uma grande tabela
+  // A imagem mostra um modelo por vez (ou pelo menos um cabeçalho de modelo gigante)
+  const porModelo = new Map<string, Recebimento[]>();
+  recebimentos.forEach(r => {
+    if (!porModelo.has(r.modelo_id)) porModelo.set(r.modelo_id, []);
+    porModelo.get(r.modelo_id)!.push(r);
+  });
+
+  const lastColIdx = (tamanhos: string[]) => tamanhos.length + 1;
+
+  let currentRow = 0;
+
+  Array.from(porModelo.entries()).forEach(([modeloId, itens], modIdx) => {
+    const modelo = modelosInfo.find(m => m.id === modeloId);
+    if (!modelo) return;
+
+    const maxCol = lastColIdx(modelo.tamanhos);
+
+    // 1. Cabeçalho Institucional
+    aoa.push(['PREFEITURA MUNICIPAL DE ITAGUAÍ']);
+    merges.push({ s: { r: currentRow, c: 0 }, e: { r: currentRow, c: maxCol } });
+    currentRow++;
+
+    aoa.push(['SECRETARIA MUNICIPAL DE EDUCAÇÃO']);
+    merges.push({ s: { r: currentRow, c: 0 }, e: { r: currentRow, c: maxCol } });
+    currentRow++;
+
+    aoa.push([escolaNome.toUpperCase()]);
+    merges.push({ s: { r: currentRow, c: 0 }, e: { r: currentRow, c: maxCol } });
+    currentRow++;
+
+    aoa.push(['']); // Espaço
+    currentRow++;
+
+    // 2. Cabeçalho da Tabela (Estrutura da Imagem)
+    // Linha de Título do Modelo (Mesclada no topo dos tamanhos)
+    const modelHeaderRow = Array(maxCol + 1).fill('');
+    modelHeaderRow[0] = 'UNIDADE ESCOLAR /';
+    modelHeaderRow[1] = `${modelo.nome.toUpperCase()}`;
+    aoa.push(modelHeaderRow);
+
+    // Mescla "UNIDADE ESCOLAR / SOLICITAÇÕES..." na primeira coluna (2 linhas)
+    merges.push({ s: { r: currentRow, c: 0 }, e: { r: currentRow + 1, c: 0 } });
+    // Mescla o Título do Modelo nas colunas de tamanhos
+    merges.push({ s: { r: currentRow, c: 1 }, e: { r: currentRow, c: maxCol - 1 } });
+
+    // Segunda linha do título esquerdo
+    const subTitleRow = Array(maxCol + 1).fill('');
+    subTitleRow[0] = 'SOLICITAÇÕES DO PRÉ AO 9º ANO';
+    subTitleRow[1] = `- ${modelo.descricao} -`;
+    aoa.push(subTitleRow);
+
+    // Mescla a descrição do modelo na segunda linha
+    merges.push({ s: { r: currentRow + 1, c: 1 }, e: { r: currentRow + 1, c: maxCol - 1 } });
+
+    // Mescla "TOTAL ENTREGUE" na última coluna (2 linhas)
+    modelHeaderRow[maxCol] = 'TOTAL';
+    subTitleRow[maxCol] = 'ENTREGUE';
+    merges.push({ s: { r: currentRow, c: maxCol }, e: { r: currentRow + 1, c: maxCol } });
+
+    currentRow += 2;
+
+    // 3. Cabeçalho de Tamanhos (Apenas Nº X)
+    // A descrição já está na linha de cima (mesclada), então aqui encurtamos para ficar elegante
+    const sizeHeaderRow = ["", ...modelo.tamanhos.map(t => {
+      // Se for apenas número, mantém N.º X. Se for BB/P/M, mantém o texto.
+      return isNaN(Number(t)) ? t : `N.º ${t}`;
+    }), ""];
+    aoa.push(sizeHeaderRow);
+    currentRow++;
+
+    // 4. Dados
+    const dataRow: any[] = [escolaNome.toUpperCase()];
+    let rowTotal = 0;
+    modelo.tamanhos.forEach(t => {
+      const item = itens.find(i => i.tamanho === t);
+      const qtd = item ? item.quantidade : 0;
+      dataRow.push(qtd);
+      rowTotal += qtd;
+    });
+    dataRow.push(rowTotal);
+    aoa.push(dataRow);
+    currentRow++;
+
+    // Espaço entre modelos (Mais respiro)
+    aoa.push([]);
+    aoa.push([]);
+    aoa.push([]);
+    currentRow += 3;
+  });
+
+  const worksheet = XLSX.utils.aoa_to_sheet(aoa);
+  worksheet['!merges'] = merges;
+
+  // Ajuste de largura das colunas (UX: Colunsa de tamanhos mais estreitas e uniformes)
+  const wscols = [
+    { wch: 45 }, // Unidade Escolar
+    ...Array(20).fill({ wch: 8 }), // Tamanhos mais estreitos
+    { wch: 15 }  // Total
+  ];
+  worksheet['!cols'] = wscols;
+
+  // Tenta configurar paisagem (suporte limitado em JSON, mas ajuda em softwares que leem metadados)
+  worksheet['!margins'] = { left: 0.7, right: 0.7, top: 0.75, bottom: 0.75, header: 0.3, footer: 0.3 };
+
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Recebimentos");
+
+  XLSX.writeFile(workbook, `recebimento_uniformes_${format(new Date(), 'yyyyMMdd')}.xlsx`);
+};
+
+export const exportarRecebimentosPDF = (
+  recebimentos: Recebimento[],
+  escolaNome: string
+) => {
+  const doc = new jsPDF('landscape');
+
+  // Desenha o cabeçalho sem a escola para destacar manualmente
+  const headerNextY = drawGovHeader(doc, 'Relatório de Recebimento de Uniformes', []);
+
+  // Destaque do Nome da Escola
+  doc.setFontSize(11);
+  doc.setTextColor(0, 90, 156); // Azul institucional #005A9C
+  doc.setFont("helvetica", "bold");
+  doc.text(`UNIDADE ESCOLAR: ${escolaNome.toUpperCase()}`, 14, 50);
+
+  const tableColumn = ["MODELO", "DESCRIÇÃO", "TAMANHO", "QUANTIDADE"];
+  const tableRows = recebimentos.map(r => [
+    r.modelo_nome,
+    r.descricao,
+    r.tamanho,
+    r.quantidade.toString()
+  ]);
+
+  autoTable(doc, {
+    head: [tableColumn],
+    body: tableRows,
+    startY: headerNextY + 2,
+    styles: { fontSize: 9 },
+    headStyles: { fillColor: [0, 90, 156] }, // Cor #005A9C
+    alternateRowStyles: { fillColor: [245, 245, 245] },
+    columnStyles: {
+      3: { halign: 'center', cellWidth: 30 }
+    }
+  });
+
+  doc.save(`recebimento_uniformes_${format(new Date(), 'yyyyMMdd')}.pdf`);
 };

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { RegistroUniforme } from '../types';
 import { CATEGORIAS_UNIFORMES, TAMANHOS_DISPONIVEIS } from '../constants';
 import { Plus, Trash2, Save, RefreshCw, X, ChevronDown } from 'lucide-react';
+import { useT } from '../lib/LanguageContext';
 
 interface UniformItem {
   id: string;
@@ -25,6 +26,8 @@ interface Props {
   onCancelEdit?: () => void;
   categoriaDefault?: string;
   categoriaLocked?: boolean;
+  /** Lista de categorias que a escola está autorizada a usar. Vazio = todas. */
+  categoriasPermitidas?: string[];
 }
 
 const newItem = (): UniformItem => ({
@@ -42,7 +45,8 @@ const newBloco = (): CategoriaBloco => ({
   items: [newItem()],
 });
 
-export const UniformForm: React.FC<Props> = ({ onSave, registroEmEdicao, onCancelEdit, categoriaDefault = '', categoriaLocked = false }) => {
+export const UniformForm: React.FC<Props> = ({ onSave, registroEmEdicao, onCancelEdit, categoriaDefault = '', categoriaLocked = false, categoriasPermitidas = [] }) => {
+  const { t } = useT();
   const [qtdAlunos, setQtdAlunos] = useState(0);
   const [blocos, setBlocos] = useState<CategoriaBloco[]>(() => [{ ...newBloco(), categoria: categoriaDefault }]);
 
@@ -118,11 +122,11 @@ export const UniformForm: React.FC<Props> = ({ onSave, registroEmEdicao, onCance
     // Validação
     for (const bloco of blocos) {
       if (!bloco.categoria) {
-        alert('Por favor, selecione a Categoria em todos os blocos.');
+        alert(t.common.selecioneUnidade); // Or similar key, but let's use a specific one if needed
         return;
       }
       if (bloco.items.some(item => !item.tipo_uniforme)) {
-        alert(`Por favor, selecione o Tipo de Uniforme em todos os itens do bloco "${bloco.categoria}".`);
+        alert(t.lancamentos.selecione);
         return;
       }
     }
@@ -152,7 +156,7 @@ export const UniformForm: React.FC<Props> = ({ onSave, registroEmEdicao, onCance
       {/* Cabeçalho */}
       <div className="bg-white/50 dark:bg-zinc-900/50 border-b border-gray-100 dark:border-zinc-800 px-6 py-5 flex justify-between items-center transition-colors">
         <h2 className="text-xl font-black text-zinc-900 dark:text-white tracking-tight">
-          {registroEmEdicao ? 'Editar Registro' : 'Registrar Uniformes'}
+          {registroEmEdicao ? t.lancamentos.editando : t.lancamentos.novoRegistro}
         </h2>
         {registroEmEdicao && (
           <button onClick={onCancelEdit} className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 dark:bg-zinc-800 text-gray-400 hover:text-red-500 transition-all">
@@ -165,7 +169,7 @@ export const UniformForm: React.FC<Props> = ({ onSave, registroEmEdicao, onCance
         {/* Quantidade de Alunos */}
         <div className="max-w-xs space-y-2">
           <label className="block text-xs font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest ml-1">
-            Quantidade de Alunos na unidade *
+            {t.lancamentos.qtdAlunosUnidade}
           </label>
           <input
             type="number"
@@ -195,9 +199,9 @@ export const UniformForm: React.FC<Props> = ({ onSave, registroEmEdicao, onCance
                     </div>
                     <div className="flex-1">
                       <label className="block text-[10px] font-bold text-[#005A9C] dark:text-[#66b3ff] uppercase tracking-widest mb-1.5 ml-1">
-                        Categoria / Nível Escolar {blocoIdx + 1} *
+                        {t.lancamentos.categoria} {blocoIdx + 1} *
                         {blocoIdx === 0 && categoriaLocked && (
-                          <span className="ml-2 text-zinc-400 font-normal normal-case tracking-normal">(padrão da unidade)</span>
+                          <span className="ml-2 text-zinc-400 font-normal normal-case tracking-normal">{t.lancamentos.padraoUnidade}</span>
                         )}
                       </label>
                       <select
@@ -210,8 +214,12 @@ export const UniformForm: React.FC<Props> = ({ onSave, registroEmEdicao, onCance
                           }`}
                         required
                       >
-                        <option value="">Selecione a Categoria...</option>
-                        {Object.keys(CATEGORIAS_UNIFORMES).map(cat => (
+                        <option value="">{t.lancamentos.selecione}</option>
+                        {/* Mostra apenas as categorias permitidas para a escola; sem restrição para admins */}
+                        {(categoriasPermitidas.length > 0
+                          ? categoriasPermitidas.filter(cat => cat in CATEGORIAS_UNIFORMES)
+                          : Object.keys(CATEGORIAS_UNIFORMES)
+                        ).map(cat => (
                           <option key={cat} value={cat}>{cat}</option>
                         ))}
                       </select>
@@ -224,7 +232,7 @@ export const UniformForm: React.FC<Props> = ({ onSave, registroEmEdicao, onCance
                       type="button"
                       onClick={() => handleRemoveBloco(bloco.id)}
                       className="p-1.5 text-red-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors shrink-0"
-                      title="Remover esta categoria"
+                      title={t.lancamentos.excluir}
                     >
                       <Trash2 size={16} />
                     </button>
@@ -236,12 +244,12 @@ export const UniformForm: React.FC<Props> = ({ onSave, registroEmEdicao, onCance
                   <table className="w-full text-left border-collapse">
                     <thead>
                       <tr className="border-b border-gray-200">
-                        <th className="py-2 px-2 text-xs font-semibold text-gray-600 uppercase tracking-wider">Tipo de Uniforme *</th>
-                        <th className="py-2 px-2 text-xs font-semibold text-green-700 uppercase tracking-wider bg-green-50/50">Qtd Sobrando</th>
-                        <th className="py-2 px-2 text-xs font-semibold text-green-700 uppercase tracking-wider bg-green-50/50">Tam. Sobrando</th>
-                        <th className="py-2 px-2 text-xs font-semibold text-red-700 uppercase tracking-wider bg-red-50/50">Qtd Faltando</th>
-                        <th className="py-2 px-2 text-xs font-semibold text-red-700 uppercase tracking-wider bg-red-50/50">Tam. Faltando</th>
-                        <th className="py-2 px-2 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Ações</th>
+                        <th className="py-2 px-2 text-xs font-semibold text-gray-600 uppercase tracking-wider">{t.lancamentos.tipoUniforme} *</th>
+                        <th className="py-2 px-2 text-xs font-semibold text-green-700 uppercase tracking-wider bg-green-50/50">{t.lancamentos.qtdSobrando}</th>
+                        <th className="py-2 px-2 text-xs font-semibold text-green-700 uppercase tracking-wider bg-green-50/50">{t.lancamentos.tamanhoSobrando}</th>
+                        <th className="py-2 px-2 text-xs font-semibold text-red-700 uppercase tracking-wider bg-red-50/50">{t.lancamentos.qtdFaltando}</th>
+                        <th className="py-2 px-2 text-xs font-semibold text-red-700 uppercase tracking-wider bg-red-50/50">{t.lancamentos.tamanhoFaltando}</th>
+                        <th className="py-2 px-2 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">{t.common.acoes}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -319,7 +327,7 @@ export const UniformForm: React.FC<Props> = ({ onSave, registroEmEdicao, onCance
                       className="mt-2 ml-2 flex items-center text-xs font-medium text-blue-500 hover:text-blue-700 transition-colors"
                     >
                       <Plus size={14} className="mr-1" />
-                      Adicionar tipo de uniforme
+                      {t.lancamentos.adicionarTipo}
                     </button>
                   )}
                 </div>
@@ -336,7 +344,7 @@ export const UniformForm: React.FC<Props> = ({ onSave, registroEmEdicao, onCance
             className="w-full py-3 border-2 border-dashed border-blue-200 rounded-xl text-blue-500 hover:border-blue-400 hover:bg-blue-50/40 hover:text-blue-700 transition-all font-medium text-sm flex items-center justify-center gap-2"
           >
             <Plus size={18} />
-            Adicionar outra Categoria / Nível Escolar
+            {t.lancamentos.adicionarCategoria}
           </button>
         )}
 
@@ -349,7 +357,7 @@ export const UniformForm: React.FC<Props> = ({ onSave, registroEmEdicao, onCance
               onClick={onCancelEdit}
               className="px-8 py-3 bg-gray-100 dark:bg-zinc-900 text-gray-600 dark:text-zinc-400 rounded-xl hover:bg-gray-200 dark:hover:bg-zinc-800 transition-all font-bold text-sm tracking-wide"
             >
-              Cancelar
+              {t.common.cancelar}
             </button>
           )}
           <button
@@ -357,7 +365,7 @@ export const UniformForm: React.FC<Props> = ({ onSave, registroEmEdicao, onCance
             className="flex items-center px-10 py-3.5 bg-gradient-to-r from-[#005A9C] to-[#004a80] text-white rounded-xl hover:scale-[1.02] active:scale-95 transition-all font-black text-sm uppercase tracking-widest shadow-lg shadow-blue-500/20"
           >
             {registroEmEdicao ? <RefreshCw size={18} className="mr-2" /> : <Save size={18} className="mr-3" />}
-            {registroEmEdicao ? 'Atualizar Registro' : 'Salvar no Banco de Dados'}
+            {registroEmEdicao ? t.lancamentos.atualizarRegistro : t.lancamentos.salvarNoBanco}
           </button>
         </div>
       </form>

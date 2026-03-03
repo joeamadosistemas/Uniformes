@@ -8,38 +8,41 @@ import {
     Users,
     History
 } from 'lucide-react';
+import { useT } from '../lib/LanguageContext';
 
 export const Sobre: React.FC = () => {
+    const { t } = useT();
+
     const recursos = [
         {
             icon: <LayoutDashboard className="text-blue-500" size={24} />,
-            title: "Painel de Controle Inteligente",
-            description: "Visualização consolidada de métricas essenciais, permitindo que gestores identifiquem instantaneamente excedentes ou carências de uniformes em toda a rede municipal."
+            title: t.sobre.recurso1T,
+            description: t.sobre.recurso1D
         },
         {
             icon: <School className="text-emerald-500" size={24} />,
-            title: "Gestão Unificada de Unidades",
-            description: "Controle detalhado das 69 unidades escolares, com filtragem avançada por segmentos de ensino (Creche ao EJA) e monitoramento de status ativo/inativo."
+            title: t.sobre.recurso2T,
+            description: t.sobre.recurso2D
         },
         {
             icon: <Users className="text-violet-500" size={24} />,
-            title: "Segurança de Nível Administrativo",
-            description: "Sistema robusto de autenticação integrado ao Supabase Auth, com hierarquia de permissões (Admin/Usuário) e gestão centralizada de credenciais e perfis."
+            title: t.sobre.recurso3T,
+            description: t.sobre.recurso3D
         },
         {
             icon: <FileSpreadsheet className="text-orange-500" size={24} />,
-            title: "Relatórios Institucionais de Elite",
-            description: "Motor de exportação para PDF e Excel com identidade visual oficial de Itaguaí, incluindo o Brasão de Armas e cabeçalhos governamentais padronizados."
+            title: t.sobre.recurso4T,
+            description: t.sobre.recurso4D
         },
         {
             icon: <Database className="text-cyan-500" size={24} />,
-            title: "Arquitetura Cloud Escalável",
-            description: "Infraestrutura moderna utilizando Supabase para persistência de dados em tempo real, garantindo integridade, backups automáticos e alta disponibilidade."
+            title: t.sobre.recurso5T,
+            description: t.sobre.recurso5D
         },
         {
             icon: <ShieldCheck className="text-rose-500" size={24} />,
-            title: "Conformidade e Acessibilidade",
-            description: "Interface projetada sob as premissas do Design System governamental, oferecendo modo noturno, contraste otimizado e navegação responsiva."
+            title: t.sobre.recurso6T,
+            description: t.sobre.recurso6D
         }
     ];
 
@@ -55,11 +58,10 @@ export const Sobre: React.FC = () => {
                 </div>
 
                 <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight">
-                    Sistema de Gestão de Uniformes Escolares
+                    {t.sobre.tituloHero}
                 </h1>
                 <p className="text-blue-100 text-lg md:text-xl max-w-3xl mx-auto font-light leading-relaxed">
-                    Uma plataforma de alta performance desenvolvida para a Secretaria Municipal de Educação de Itaguaí,
-                    unindo inovação tecnológica à eficiência na gestão de recursos educacionais.
+                    {t.sobre.subtituloHero}
                 </p>
             </div>
 
@@ -86,26 +88,26 @@ export const Sobre: React.FC = () => {
                 <div className="space-y-2">
                     <h4 className="text-lg font-bold text-[#005A9C] dark:text-[#66b3ff] flex items-center gap-2">
                         <History size={20} />
-                        Versão do Sistema: 2.0.4
+                        {t.sobre.versao}: 2.0.4
                     </h4>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Última atualização: Março de 2026 • Desenvolvido com foco em excelência operacional.
+                        {t.sobre.ultimaAtu}
                     </p>
                 </div>
                 <div className="flex items-center gap-6">
                     <div className="text-center">
                         <p className="text-2xl font-black text-gray-800 dark:text-gray-100">69</p>
-                        <p className="text-[10px] uppercase font-bold text-gray-400 tracking-widest">Unidades</p>
+                        <p className="text-[10px] uppercase font-bold text-gray-400 tracking-widest">{t.sobre.unidades}</p>
                     </div>
                     <div className="w-px h-8 bg-gray-200 dark:bg-[#333]"></div>
                     <div className="text-center">
                         <p className="text-2xl font-black text-gray-800 dark:text-gray-100">100%</p>
-                        <p className="text-[10px] uppercase font-bold text-gray-400 tracking-widest">Cloud</p>
+                        <p className="text-[10px] uppercase font-bold text-gray-400 tracking-widest">{t.sobre.cloud}</p>
                     </div>
                     <div className="w-px h-8 bg-gray-200 dark:bg-[#333]"></div>
                     <div className="text-center">
                         <p className="text-2xl font-black text-[#005A9C] dark:text-[#66b3ff]">PDF</p>
-                        <p className="text-[10px] uppercase font-bold text-gray-400 tracking-widest">Reports</p>
+                        <p className="text-[10px] uppercase font-bold text-gray-400 tracking-widest">{t.sobre.reports}</p>
                     </div>
                 </div>
             </div>

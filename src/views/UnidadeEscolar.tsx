@@ -3,8 +3,10 @@ import { EscolaCadastro } from '../types';
 import { Save, Trash2, School, Check, Loader2, Pencil, Power, X, Search, Filter } from 'lucide-react';
 import { SEGMENTOS_ENSINO } from '../constants';
 import { supabase } from '../lib/supabaseClient';
+import { useT } from '../lib/LanguageContext';
 
 export const UnidadeEscolar: React.FC = () => {
+  const { t } = useT();
   const [escolas, setEscolas] = useState<EscolaCadastro[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSegmento, setFilterSegmento] = useState('');
@@ -36,7 +38,7 @@ export const UnidadeEscolar: React.FC = () => {
       if (data) setEscolas(data as EscolaCadastro[]);
     } catch (error) {
       console.error('Erro ao buscar escolas:', error);
-      alert('Erro ao carregar as escolas.');
+      alert(t.cadastros.erroCarregar);
     } finally {
       setLoading(false);
     }
@@ -57,7 +59,7 @@ export const UnidadeEscolar: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nome || segmentosSelecionados.length === 0) {
-      alert('Por favor, preencha o nome e selecione ao menos um segmento.');
+      alert(t.common.preenchaCampos);
       return;
     }
 
@@ -75,7 +77,7 @@ export const UnidadeEscolar: React.FC = () => {
       setSegmentosSelecionados([]);
     } catch (error) {
       console.error('Erro ao salvar escola:', error);
-      alert('Erro ao salvar a escola no banco de dados.');
+      alert(t.common.erroSalvar);
     } finally {
       setSaving(false);
     }
@@ -102,7 +104,7 @@ export const UnidadeEscolar: React.FC = () => {
       setEditando(null);
     } catch (error) {
       console.error('Erro ao editar escola:', error);
-      alert('Erro ao salvar as alterações.');
+      alert(t.common.erroSalvar);
     } finally {
       setSaving(false);
     }
@@ -123,19 +125,19 @@ export const UnidadeEscolar: React.FC = () => {
       setEscolas(prev => prev.map(e => e.id === escola.id ? { ...e, ativo: novoStatus } : e));
     } catch (error) {
       console.error('Erro ao alterar status:', error);
-      alert('Erro ao atualizar o status da escola.');
+      alert(t.common.erroGeral);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Deseja realmente excluir esta unidade escolar?')) {
+    if (window.confirm(t.escolas.confirmDeletar)) {
       try {
         const { error } = await supabase.from('escolas').delete().eq('id', id);
         if (error) throw error;
         setEscolas(prev => prev.filter(e => e.id !== id));
       } catch (error) {
         console.error('Erro ao excluir escola:', error);
-        alert('Erro ao deletar a escola.');
+        alert(t.common.erroExcluir);
       }
     }
   };
@@ -160,7 +162,7 @@ export const UnidadeEscolar: React.FC = () => {
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold text-gray-800 flex items-center">
                 <Pencil size={18} className="mr-2 text-blue-600" />
-                Editar Escola
+                {t.escolas.titulo.replace('Cadastro de ', 'Editar ')}
               </h3>
               <button onClick={() => setEditando(null)} className="p-1.5 hover:bg-gray-100 rounded-lg">
                 <X size={18} className="text-gray-500" />
@@ -169,7 +171,7 @@ export const UnidadeEscolar: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nome da Escola *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t.escolas.nomeEscola} *</label>
                 <input
                   type="text"
                   value={editNome}
@@ -178,7 +180,7 @@ export const UnidadeEscolar: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t.login.email}</label>
                 <input
                   type="email"
                   value={editEmail}
@@ -216,7 +218,7 @@ export const UnidadeEscolar: React.FC = () => {
                 onClick={() => setEditando(null)}
                 className="px-5 py-2 text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
               >
-                Cancelar
+                {t.lancamentos.cancelar}
               </button>
               <button
                 onClick={handleSaveEdit}
@@ -224,7 +226,7 @@ export const UnidadeEscolar: React.FC = () => {
                 className="flex items-center px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm disabled:opacity-50"
               >
                 {saving ? <Loader2 size={16} className="mr-2 animate-spin" /> : <Save size={16} className="mr-2" />}
-                Salvar Alterações
+                {t.transferencias.salvarAlteracoes}
               </button>
             </div>
           </div>
@@ -234,16 +236,16 @@ export const UnidadeEscolar: React.FC = () => {
       <div>
         <h2 className="text-2xl font-bold text-gray-800 mb-2 flex items-center">
           <School className="mr-3 text-blue-600" />
-          Cadastro de Unidade Escolar
+          {t.escolas.titulo}
         </h2>
-        <p className="text-gray-600">Registre as escolas que utilizarão o sistema.</p>
+        <p className="text-gray-600">{t.escolas.subtitulo}</p>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nome da Escola *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t.escolas.nomeEscola} *</label>
               <input
                 type="text"
                 value={nome}
@@ -254,7 +256,7 @@ export const UnidadeEscolar: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">E-mail da Escola</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t.escolas.emailEscola}</label>
               <input
                 type="email"
                 value={email}
@@ -266,7 +268,7 @@ export const UnidadeEscolar: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Segmentos de Ensino (Etapas Atendidas) *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{t.escolas.segmentosEnsino} *</label>
             <div className="flex flex-wrap gap-2">
               {SEGMENTOS_ENSINO.map((seg) => {
                 const isSelected = segmentosSelecionados.includes(seg);
@@ -304,7 +306,7 @@ export const UnidadeEscolar: React.FC = () => {
               className="flex items-center px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50"
             >
               {saving ? <Loader2 size={18} className="mr-2 animate-spin" /> : <Save size={18} className="mr-2" />}
-              {saving ? 'Salvando...' : 'Salvar Escola'}
+              {saving ? t.cadastros.salvando : t.escolas.salvarEscola}
             </button>
           </div>
         </form>
@@ -313,8 +315,8 @@ export const UnidadeEscolar: React.FC = () => {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100 bg-slate-50 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-gray-800">Escolas Cadastradas</h3>
-            <span className="text-xs text-gray-500">{filteredEscolas.length} de {escolas.length} escola(s)</span>
+            <h3 className="font-semibold text-gray-800">{t.escolas.cadastradas}</h3>
+            <span className="text-xs text-gray-500">{filteredEscolas.length} de {escolas.length} {t.escolas.titulo.toLowerCase().replace('cadastro de ', '')}(s)</span>
           </div>
 
           <div className="flex flex-col md:flex-row gap-3">
@@ -324,7 +326,7 @@ export const UnidadeEscolar: React.FC = () => {
               </div>
               <input
                 type="text"
-                placeholder="Buscar por nome ou e-mail da escola..."
+                placeholder={t.escolas.buscarEscola}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all shadow-sm"
@@ -339,7 +341,7 @@ export const UnidadeEscolar: React.FC = () => {
                 onChange={(e) => setFilterSegmento(e.target.value)}
                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all shadow-sm appearance-none"
               >
-                <option value="">Todos os Segmentos</option>
+                <option value="">{t.escolas.todosSegmentos}</option>
                 {SEGMENTOS_ENSINO.map(seg => (
                   <option key={seg} value={seg}>
                     {seg.replace('CONJUNTO UNIFORMA ESCOLAR ', '').replace('EJA', 'SEJA')}
@@ -360,24 +362,24 @@ export const UnidadeEscolar: React.FC = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-100">
-                <th className="px-6 py-3 font-medium">Escola / E-mail</th>
-                <th className="px-6 py-3 font-medium">Segmentos Atendidos</th>
-                <th className="px-6 py-3 font-medium text-center">Status</th>
-                <th className="px-6 py-3 font-medium text-right">Ações</th>
+                <th className="px-6 py-3 font-medium">{t.escolas.nomeEscola} / E-mail</th>
+                <th className="px-6 py-3 font-medium">{t.escolas.segmentosEnsino}</th>
+                <th className="px-6 py-3 font-medium text-center">{t.lancamentos.status}</th>
+                <th className="px-6 py-3 font-medium text-right">{t.common.acoes}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 text-sm">
               {loading ? (
                 <tr>
                   <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
-                    <Loader2 size={24} className="mx-auto animate-spin opacity-30 mb-2" />
-                    Carregando...
+                    <Loader2 size={18} className="mx-auto animate-spin opacity-30 mb-2" />
+                    {t.common.carregando}
                   </td>
                 </tr>
               ) : filteredEscolas.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
-                    {searchTerm || filterSegmento ? 'Nenhuma escola encontrada para esta busca.' : 'Nenhuma escola cadastrada ainda.'}
+                    {searchTerm || filterSegmento ? t.escolas.nenhumaEncontrada : t.lancamentos.semRegistros}
                   </td>
                 </tr>
               ) : (
@@ -405,7 +407,7 @@ export const UnidadeEscolar: React.FC = () => {
                         ? 'bg-red-100 text-red-600'
                         : 'bg-green-100 text-green-600'
                         }`}>
-                        {escola.ativo === false ? 'Inativa' : 'Ativa'}
+                        {escola.ativo === false ? t.escolas.inativa : t.escolas.ativa}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">

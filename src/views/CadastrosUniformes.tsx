@@ -14,12 +14,14 @@ import {
     FileText,
     FileSpreadsheet
 } from 'lucide-react';
+import { useT } from '../lib/LanguageContext';
 import { Uniforme } from '../types';
 import { SEGMENTOS_ENSINO, TAMANHOS_DISPONIVEIS, CATEGORIAS_UNIFORMES, UNIDADES_MEDIDA } from '../constants';
 import { supabase } from '../lib/supabaseClient';
 import { exportarCatalogoPDF, exportarCatalogoExcel } from '../utils/exportUtils';
 
 export const CadastrosUniformes: React.FC = () => {
+    const { t } = useT();
     const [uniformes, setUniformes] = useState<Uniforme[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
@@ -76,7 +78,7 @@ export const CadastrosUniformes: React.FC = () => {
             }
         } catch (error) {
             console.error('Erro ao buscar uniformes:', error);
-            alert('Erro ao carregar os dados do catálogo.');
+            alert(t.cadastros.erroCarregar);
         } finally {
             setLoading(false);
         }
@@ -116,7 +118,7 @@ export const CadastrosUniformes: React.FC = () => {
                     .eq('id', editingId);
 
                 if (error) throw error;
-                alert('Uniforme atualizado com sucesso!');
+                alert(t.cadastros.sucessoAtualizar);
             } else {
                 // INSERT
                 const { error } = await supabase
@@ -173,7 +175,7 @@ export const CadastrosUniformes: React.FC = () => {
     };
 
     const handleDelete = async (id: string) => {
-        if (window.confirm('Deseja excluir este cadastro?')) {
+        if (window.confirm(t.cadastros.confirmExcluir)) {
             try {
                 const { error } = await supabase
                     .from('uniformes_catalogo')
@@ -201,8 +203,8 @@ export const CadastrosUniformes: React.FC = () => {
         <div className="space-y-8 pb-20">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-3xl font-bold text-gray-800">Cadastro de Uniformes</h2>
-                    <p className="text-gray-500">Gerencie o catálogo de uniformes e preços (Sincronizado via Supabase)</p>
+                    <h2 className="text-3xl font-bold text-gray-800">{t.cadastros.titulo}</h2>
+                    <p className="text-gray-500">{t.cadastros.subtitulo}</p>
                 </div>
             </div>
 
@@ -212,7 +214,7 @@ export const CadastrosUniformes: React.FC = () => {
                     <div className="flex items-center space-x-2">
                         {editingId ? <Edit2 size={20} className="text-white" /> : <Plus size={20} className="text-blue-600" />}
                         <h3 className={`text-sm font-bold uppercase tracking-wider ${editingId ? 'text-white' : 'text-gray-700'}`}>
-                            {editingId ? 'Editando Uniforme' : 'Novo Cadastro'}
+                            {editingId ? t.cadastros.editando : t.cadastros.novo}
                         </h3>
                     </div>
                     {editingId && (
@@ -228,7 +230,7 @@ export const CadastrosUniformes: React.FC = () => {
                 <form onSubmit={handleSave} className="p-8 space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="md:col-span-1">
-                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Segmento *</label>
+                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">{t.cadastros.segmento} *</label>
                             <select
                                 name="segmento"
                                 value={formData.segmento}
@@ -238,7 +240,7 @@ export const CadastrosUniformes: React.FC = () => {
                                 }}
                                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-medium"
                             >
-                                <option value="">Selecione...</option>
+                                <option value="">{t.lancamentos.selecione}</option>
                                 {SEGMENTOS_ENSINO.map(s => (
                                     <option key={s} value={s}>{s.replace('CONJUNTO UNIFORMA ESCOLAR ', '')}</option>
                                 ))}
@@ -246,14 +248,14 @@ export const CadastrosUniformes: React.FC = () => {
                         </div>
 
                         <div>
-                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Unid. *</label>
+                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">{t.cadastros.unid} *</label>
                             <select
                                 name="unidade"
                                 value={formData.unidade}
                                 onChange={handleInputChange}
                                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-medium"
                             >
-                                <option value="">Selecione...</option>
+                                <option value="">{t.lancamentos.selecione}</option>
                                 {UNIDADES_MEDIDA.map(u => (
                                     <option key={u} value={u}>{u}</option>
                                 ))}
@@ -275,7 +277,7 @@ export const CadastrosUniformes: React.FC = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                         <div className="md:col-span-2">
-                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Descrição *</label>
+                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">{t.cadastros.descricao} *</label>
                             <select
                                 name="descricao"
                                 value={formData.descricao}
@@ -283,7 +285,7 @@ export const CadastrosUniformes: React.FC = () => {
                                 disabled={!formData.segmento}
                                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                <option value="">Selecione o Segmento primeiro...</option>
+                                <option value="">{t.cadastros.precisaSegmento}</option>
                                 {formData.segmento && CATEGORIAS_UNIFORMES[getCategoriaKey(formData.segmento)]?.map(m => (
                                     <option key={m} value={m}>{m}</option>
                                 ))}
@@ -291,14 +293,14 @@ export const CadastrosUniformes: React.FC = () => {
                         </div>
 
                         <div>
-                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Tamanho</label>
+                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">{t.cadastros.tamanho}</label>
                             <select
                                 name="tamanho"
                                 value={formData.tamanho}
                                 onChange={handleInputChange}
                                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-medium"
                             >
-                                <option value="">Selecione...</option>
+                                <option value="">{t.lancamentos.selecione}</option>
                                 {TAMANHOS_DISPONIVEIS.map(t => (
                                     <option key={t} value={t}>{t}</option>
                                 ))}
@@ -306,7 +308,7 @@ export const CadastrosUniformes: React.FC = () => {
                         </div>
 
                         <div>
-                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Quantidade *</label>
+                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">{t.cadastros.quantidade} *</label>
                             <input
                                 type="number"
                                 name="quantidade"
@@ -320,7 +322,7 @@ export const CadastrosUniformes: React.FC = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
                         <div>
-                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Preço Unitário (R$)</label>
+                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">{t.cadastros.precoUnitario}</label>
                             <div className="relative">
                                 <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                                 <input
@@ -336,7 +338,7 @@ export const CadastrosUniformes: React.FC = () => {
                         </div>
 
                         <div className={`p-4 rounded-2xl border transition-all ${editingId ? 'bg-blue-600 border-blue-600 shadow-lg shadow-blue-100' : 'bg-blue-50 border-blue-100'}`}>
-                            <label className={`block text-[9px] font-black uppercase tracking-widest mb-1 ${editingId ? 'text-blue-100' : 'text-blue-400'}`}>Preço Total Estimado</label>
+                            <label className={`block text-[9px] font-black uppercase tracking-widest mb-1 ${editingId ? 'text-blue-100' : 'text-blue-400'}`}>{t.cadastros.precoTotalEst}</label>
                             <p className={`text-xl font-black ${editingId ? 'text-white' : 'text-blue-600'}`}>
                                 R$ {(formData.quantidade * formData.precoUnitario).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                             </p>
@@ -355,7 +357,7 @@ export const CadastrosUniformes: React.FC = () => {
                                 ) : (
                                     <Save size={24} className="mr-2" />
                                 )}
-                                {saving ? 'Salvando...' : editingId ? 'Salvar Alterações' : 'Cadastrar Uniforme'}
+                                {saving ? t.cadastros.salvando : editingId ? t.cadastros.salvarAlteracoes : t.cadastros.cadastrar}
                             </button>
                         </div>
                     </div>
@@ -367,7 +369,7 @@ export const CadastrosUniformes: React.FC = () => {
                 <div className="px-8 py-6 border-b border-gray-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-center space-x-2">
                         <Package size={20} className="text-gray-400" />
-                        <h3 className="text-sm font-bold text-gray-700 uppercase tracking-widest">Uniformes Cadastrados</h3>
+                        <h3 className="text-sm font-bold text-gray-700 uppercase tracking-widest">{t.cadastros.cadastrados}</h3>
                     </div>
 
                     <div className="flex flex-col md:flex-row items-center gap-3">
@@ -394,7 +396,7 @@ export const CadastrosUniformes: React.FC = () => {
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                             <input
                                 type="text"
-                                placeholder="Buscar no catálogo..."
+                                placeholder={t.cadastros.buscar}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none w-full md:w-64 transition-all"
@@ -407,13 +409,12 @@ export const CadastrosUniformes: React.FC = () => {
                     <table className="w-full text-left">
                         <thead>
                             <tr className="bg-slate-50/50">
-                                <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Segmento / Unid.</th>
-                                <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Modelo / Descrição</th>
-                                <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Tamanho</th>
-                                <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Qtd</th>
-                                <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Preço Un.</th>
+                                <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">{t.cadastros.segmento} / {t.cadastros.unid}</th>
+                                <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">{t.cadastros.modelo} / {t.cadastros.descricao}</th>
+                                <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">{t.cadastros.tamanho}</th>
+                                <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">{t.transferencias.quantidade}</th>
                                 <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Total</th>
-                                <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Ações</th>
+                                <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">{t.common.acoes}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50 text-sm">
@@ -421,14 +422,14 @@ export const CadastrosUniformes: React.FC = () => {
                                 <tr>
                                     <td colSpan={7} className="px-8 py-20 text-center text-gray-400 font-medium">
                                         <Loader2 size={48} className="mx-auto mb-4 animate-spin opacity-20" />
-                                        Carregando dados...
+                                        {t.common.carregando}
                                     </td>
                                 </tr>
                             ) : filteredUniformes.length === 0 ? (
                                 <tr>
                                     <td colSpan={7} className="px-8 py-20 text-center text-gray-400 font-medium">
                                         <Shirt size={48} className="mx-auto mb-4 opacity-20" />
-                                        Nenhum uniforme cadastrado ainda.
+                                        {t.lancamentos.semRegistros}
                                     </td>
                                 </tr>
                             ) : (
@@ -436,10 +437,10 @@ export const CadastrosUniformes: React.FC = () => {
                                     <tr key={u.id} className={`hover:bg-slate-50/50 transition-colors ${editingId === u.id ? 'bg-blue-50/30' : ''}`}>
                                         <td className="px-8 py-4">
                                             <p className="font-bold text-gray-800">{u.segmento.replace('CONJUNTO UNIFORMA ESCOLAR ', '').replace('CONJUNTO UNIFORME ESCOLAR ', '')}</p>
-                                            <p className="text-[10px] text-gray-400 font-black uppercase tracking-tighter">Unid: {u.unidade || '-'}</p>
+                                            <p className="text-[10px] text-gray-400 font-black uppercase tracking-tighter">{t.cadastros.unid}: {u.unidade || '-'}</p>
                                         </td>
                                         <td className="px-8 py-4">
-                                            <p className="font-bold text-gray-700">Modelo: {u.modelo || '-'}</p>
+                                            <p className="font-bold text-gray-700">{t.cadastros.modelo}: {u.modelo || '-'}</p>
                                             <p className="text-[10px] text-gray-400 italic line-clamp-1">{u.descricao || '-'}</p>
                                         </td>
                                         <td className="px-8 py-4 text-center">
@@ -461,14 +462,14 @@ export const CadastrosUniformes: React.FC = () => {
                                                 <button
                                                     onClick={() => handleEdit(u)}
                                                     className={`p-2 transition-colors ${editingId === u.id ? 'text-blue-600' : 'text-gray-400 hover:text-blue-600'}`}
-                                                    title="Editar"
+                                                    title={t.common.editar}
                                                 >
                                                     <Edit2 size={18} />
                                                 </button>
                                                 <button
                                                     onClick={() => handleDelete(u.id)}
                                                     className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-                                                    title="Excluir"
+                                                    title={t.common.excluir}
                                                 >
                                                     <Trash2 size={18} />
                                                 </button>
@@ -483,10 +484,10 @@ export const CadastrosUniformes: React.FC = () => {
 
                 <div className="px-8 py-4 bg-slate-50 border-t border-gray-100 flex justify-between items-center">
                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                        Total de itens: {filteredUniformes.length}
+                        {t.cadastros.totalItens}: {filteredUniformes.length}
                     </p>
                     <p className="text-sm font-bold text-gray-700">
-                        Valor Total Consolidado: <span className="text-blue-600 ml-1">R$ {filteredUniformes.reduce((acc, curr) => acc + (curr.quantidade * curr.precoUnitario), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                        {t.cadastros.valorConsolidado}: <span className="text-blue-600 ml-1">R$ {filteredUniformes.reduce((acc, curr) => acc + (curr.quantidade * curr.precoUnitario), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                     </p>
                 </div>
             </div>

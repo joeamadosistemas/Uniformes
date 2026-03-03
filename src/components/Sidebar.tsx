@@ -11,8 +11,10 @@ import {
   LayoutDashboard,
   FileText,
   Shirt,
+  ClipboardList,
   Info
 } from 'lucide-react';
+import { useT } from '../lib/LanguageContext';
 
 interface SidebarProps {
   activeView: string;
@@ -23,19 +25,24 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, isAdmin = false, onClose }) => {
   const [isConfigOpen, setIsConfigOpen] = useState(true);
+  const { t } = useT();
 
   const menuItems = [
-    { id: 'lancamentos', label: 'Lançamentos', icon: LayoutDashboard },
-    { id: 'transferencias', label: 'Transferências', icon: ArrowLeftRight },
-    ...(isAdmin ? [{ id: 'admin-dashboard', label: 'Administrador', icon: FileText }] : []),
+    { id: 'lancamentos', label: t.sidebar.lancamentos, icon: LayoutDashboard },
+    { id: 'recebimentos', label: t.sidebar.recebimentos, icon: ClipboardList },
+    { id: 'transferencias', label: t.sidebar.transferencias, icon: ArrowLeftRight },
+    ...(isAdmin ? [
+      { id: 'admin-dashboard', label: t.sidebar.administrador, icon: FileText },
+      { id: 'controle-recebimento', label: t.sidebar.controleRecebimento, icon: ClipboardList }
+    ] : []),
   ];
 
   const configItems = [
-    { id: 'config-uniformes', label: 'Cadastros Uniformes', icon: Shirt },
-    { id: 'config-escola', label: 'Unidade Escolar', icon: School },
-    { id: 'config-usuarios', label: 'Usuários', icon: Users },
-    { id: 'config-backup', label: 'Backup e Restauração', icon: Database },
-    { id: 'config-sobre', label: 'Sobre o Sistema', icon: Info },
+    { id: 'config-uniformes', label: t.sidebar.cadastrosUniformes, icon: Shirt },
+    { id: 'config-escola', label: t.sidebar.unidadeEscolar, icon: School },
+    { id: 'config-usuarios', label: t.sidebar.usuarios, icon: Users },
+    { id: 'config-backup', label: t.sidebar.backupRestauracao, icon: Database },
+    { id: 'config-sobre', label: t.sidebar.sobreSistema, icon: Info },
   ];
 
   return (
@@ -81,7 +88,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, isA
             );
           })}
 
-          {/* Configurações Importantes Dropdown */}
+          {/* Configurações Dropdown */}
           <li className="mt-4 px-3 border-t border-gray-100 dark:border-zinc-900 pt-4">
             <button
               onClick={() => setIsConfigOpen(!isConfigOpen)}
@@ -89,7 +96,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, isA
             >
               <div className="flex items-center space-x-4">
                 <Settings size={20} className="text-gray-400 group-hover:text-[#d94e4e] transition-colors" />
-                <span className="text-sm font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-widest">Configurações</span>
+                <span className="text-sm font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-widest">{t.sidebar.configuracoes}</span>
               </div>
               <ChevronDown size={16} className={`text-gray-300 transition-transform duration-300 ${isConfigOpen ? '' : '-rotate-90'}`} />
             </button>
@@ -121,7 +128,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, isA
       </nav>
 
       <div className="p-6 border-t border-gray-100 dark:border-zinc-900 text-[10px] font-medium text-gray-400 dark:text-zinc-600 tracking-widest uppercase">
-        Versão 1.0.0
+        {t.sidebar.versao} 1.0.0
       </div>
     </aside>
   );

@@ -1,12 +1,14 @@
 import React from 'react';
 import { RegistroUniforme } from '../types';
-import { Users, AlertTriangle, TrendingDown, ClipboardList } from 'lucide-react';
+import { AlertTriangle, TrendingDown, ClipboardList } from 'lucide-react';
+import { useT } from '../lib/LanguageContext';
 
 interface Props {
   registros: RegistroUniforme[];
 }
 
 export const DashboardStats: React.FC<Props> = ({ registros }) => {
+  const { t } = useT();
   const totais = registros.reduce(
     (acc, curr) => ({
       sobrando: acc.sobrando + (curr.qtd_sobrando || 0),
@@ -22,7 +24,7 @@ export const DashboardStats: React.FC<Props> = ({ registros }) => {
           <ClipboardList size={24} />
         </div>
         <div>
-          <p className="text-xs font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-wider">Registros Realizados</p>
+          <p className="text-xs font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-wider">{t.lancamentos.registros}</p>
           <p className="text-3xl font-black text-zinc-900 dark:text-white leading-none mt-1">{registros.length}</p>
         </div>
       </div>
@@ -32,7 +34,7 @@ export const DashboardStats: React.FC<Props> = ({ registros }) => {
           <AlertTriangle size={24} />
         </div>
         <div>
-          <p className="text-xs font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-wider">Total Faltando</p>
+          <p className="text-xs font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-wider">{t.lancamentos.faltando}</p>
           <p className="text-3xl font-black text-zinc-900 dark:text-white leading-none mt-1">{totais.faltando}</p>
         </div>
       </div>
@@ -42,7 +44,7 @@ export const DashboardStats: React.FC<Props> = ({ registros }) => {
           <TrendingDown size={24} />
         </div>
         <div>
-          <p className="text-xs font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-wider">Total Sobrando</p>
+          <p className="text-xs font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-wider">{t.lancamentos.sobrando}</p>
           <p className="text-3xl font-black text-zinc-900 dark:text-white leading-none mt-1">{totais.sobrando}</p>
         </div>
       </div>

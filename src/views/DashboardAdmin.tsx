@@ -12,8 +12,10 @@ import {
 } from 'lucide-react';
 import { EscolaCadastro, RegistroUniforme } from '../types';
 import { exportarRelatorioEscolas, exportarResumoEstoque } from '../utils/exportUtils';
+import { useT } from '../lib/LanguageContext';
 
 export const DashboardAdmin: React.FC = () => {
+    const { t } = useT();
     const [activeTab, setActiveTab] = useState<'informaram' | 'faltam' | 'qtd-faltando' | 'qtd-sobrando'>('informaram');
     const [escolas, setEscolas] = useState<EscolaCadastro[]>([]);
     const [registros, setRegistros] = useState<RegistroUniforme[]>([]);
@@ -53,13 +55,13 @@ export const DashboardAdmin: React.FC = () => {
 
     const handleExportPDF = () => {
         if (activeTab === 'informaram') {
-            exportarRelatorioEscolas(escolasQueInformaram.map(e => ({ nome: e.nome, email: e.email, status: 'Informado' })), 'Unidades que Informaram');
+            exportarRelatorioEscolas(escolasQueInformaram.map(e => ({ nome: e.nome, email: e.email, status: t.dashboard.jaInformaram })), t.dashboard.unidadesInformaram);
         } else if (activeTab === 'faltam') {
-            exportarRelatorioEscolas(escolasQueFaltam.map(e => ({ nome: e.nome, email: e.email, status: 'Pendente' })), 'Unidades Pendentes');
+            exportarRelatorioEscolas(escolasQueFaltam.map(e => ({ nome: e.nome, email: e.email, status: t.dashboard.unidadesPendentes })), t.dashboard.unidadesPendentes);
         } else if (activeTab === 'qtd-faltando') {
-            exportarResumoEstoque(resumoPorEscola, 'Relatório de Itens Faltantes por Unidade');
+            exportarResumoEstoque(resumoPorEscola, t.dashboard.qtdTotalFaltando);
         } else if (activeTab === 'qtd-sobrando') {
-            exportarResumoEstoque(resumoPorEscola, 'Relatório de Itens Sobrantes por Unidade');
+            exportarResumoEstoque(resumoPorEscola, t.dashboard.qtdTotalSobrando);
         }
     };
 
@@ -68,8 +70,8 @@ export const DashboardAdmin: React.FC = () => {
             {/* Header & Export */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-3xl font-bold text-gray-800">Painel do Administrador</h2>
-                    <p className="text-gray-500">Acompanhamento consolidado de todas as unidades escolares</p>
+                    <h2 className="text-3xl font-bold text-gray-800">{t.dashboard.titulo}</h2>
+                    <p className="text-gray-500">{t.dashboard.subtitulo}</p>
                 </div>
                 <div className="flex items-center space-x-3">
                     <button
@@ -93,11 +95,11 @@ export const DashboardAdmin: React.FC = () => {
                         <CheckCircle2 size={24} />
                     </div>
                     <div>
-                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Unidades Informaram</p>
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t.dashboard.unidadesInformaram}</p>
                         <h4 className="text-2xl font-black text-gray-800">{escolasQueInformaram.length}</h4>
                     </div>
                     <div className="text-[10px] text-green-600 font-bold bg-green-50 px-2 py-1 rounded w-fit">
-                        {((escolasQueInformaram.length / (escolas.length || 1)) * 100).toFixed(0)}% do total
+                        {((escolasQueInformaram.length / (escolas.length || 1)) * 100).toFixed(0)}% {t.dashboard.jaInformaram.toLowerCase()}
                     </div>
                 </div>
 
@@ -106,11 +108,11 @@ export const DashboardAdmin: React.FC = () => {
                         <AlertCircle size={24} />
                     </div>
                     <div>
-                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Unidades Pendentes</p>
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t.dashboard.unidadesPendentes}</p>
                         <h4 className="text-2xl font-black text-gray-800">{escolasQueFaltam.length}</h4>
                     </div>
                     <div className="text-[10px] text-red-600 font-bold bg-red-50 px-2 py-1 rounded w-fit">
-                        {((escolasQueFaltam.length / (escolas.length || 1)) * 100).toFixed(0)}% pendente
+                        {((escolasQueFaltam.length / (escolas.length || 1)) * 100).toFixed(0)}% {t.dashboard.unidadesPendentes.toLowerCase()}
                     </div>
                 </div>
 
@@ -119,10 +121,10 @@ export const DashboardAdmin: React.FC = () => {
                         <TrendingDown size={24} />
                     </div>
                     <div>
-                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Qtd. Total Faltando</p>
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t.dashboard.qtdTotalFaltando}</p>
                         <h4 className="text-2xl font-black text-gray-800">{totalGeralFaltando}</h4>
                     </div>
-                    <p className="text-[10px] text-gray-400 font-medium">Soma de todas as unidades</p>
+                    <p className="text-[10px] text-gray-400 font-medium">{t.dashboard.subtitulo}</p>
                 </div>
 
                 <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-3">
@@ -130,10 +132,10 @@ export const DashboardAdmin: React.FC = () => {
                         <TrendingUp size={24} />
                     </div>
                     <div>
-                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Qtd. Total Sobrando</p>
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t.dashboard.qtdTotalSobrando}</p>
                         <h4 className="text-2xl font-black text-gray-800">{totalGeralSobrando}</h4>
                     </div>
-                    <p className="text-[10px] text-gray-400 font-medium">Soma de todas as unidades</p>
+                    <p className="text-[10px] text-gray-400 font-medium">{t.dashboard.subtitulo}</p>
                 </div>
             </div>
 
@@ -146,28 +148,28 @@ export const DashboardAdmin: React.FC = () => {
                             className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${activeTab === 'informaram' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'
                                 }`}
                         >
-                            Já Informaram
+                            {t.dashboard.jaInformaram}
                         </button>
                         <button
                             onClick={() => setActiveTab('faltam')}
                             className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${activeTab === 'faltam' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'
                                 }`}
                         >
-                            Faltam Informar
+                            {t.dashboard.faltamInformar}
                         </button>
                         <button
                             onClick={() => setActiveTab('qtd-faltando')}
                             className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${activeTab === 'qtd-faltando' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'
                                 }`}
                         >
-                            Qtd. Faltando
+                            {t.dashboard.qtdTotalFaltando}
                         </button>
                         <button
                             onClick={() => setActiveTab('qtd-sobrando')}
                             className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${activeTab === 'qtd-sobrando' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'
                                 }`}
                         >
-                            Qtd. Sobrando
+                            {t.dashboard.qtdTotalSobrando}
                         </button>
                     </div>
 
@@ -175,7 +177,7 @@ export const DashboardAdmin: React.FC = () => {
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                         <input
                             type="text"
-                            placeholder="Buscar unidade..."
+                            placeholder={t.escolas.buscarEscola}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none w-full md:w-64 transition-all"
@@ -187,17 +189,17 @@ export const DashboardAdmin: React.FC = () => {
                     <table className="w-full text-left">
                         <thead>
                             <tr className="bg-slate-50/50">
-                                <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Unidade Escolar</th>
+                                <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">{t.escolas.nomeEscola}</th>
                                 {(activeTab === 'informaram' || activeTab === 'faltam') && (
-                                    <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Contato / E-mail</th>
+                                    <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">{t.dashboard.contatoEmail}</th>
                                 )}
                                 {activeTab === 'qtd-faltando' && (
-                                    <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Quantidade Faltando</th>
+                                    <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">{t.dashboard.qtdTotalFaltando}</th>
                                 )}
                                 {activeTab === 'qtd-sobrando' && (
-                                    <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Quantidade Sobrando</th>
+                                    <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">{t.dashboard.qtdTotalSobrando}</th>
                                 )}
-                                <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Status</th>
+                                <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">{t.common.status}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50 text-sm">
@@ -215,7 +217,7 @@ export const DashboardAdmin: React.FC = () => {
                                         </td>
                                         <td className="px-8 py-4 text-gray-500">{e.email}</td>
                                         <td className="px-8 py-4 text-right">
-                                            <span className="px-2 py-1 bg-green-50 text-green-600 text-[9px] font-bold rounded uppercase tracking-wider">Concluído</span>
+                                            <span className="px-2 py-1 bg-green-50 text-green-600 text-[9px] font-bold rounded uppercase tracking-wider">{t.dashboard.jaInformaram}</span>
                                         </td>
                                     </tr>
                                 ))}
@@ -227,7 +229,7 @@ export const DashboardAdmin: React.FC = () => {
                                         <td className="px-8 py-4 text-gray-700 font-bold">{e.nome}</td>
                                         <td className="px-8 py-4 text-gray-500">{e.email}</td>
                                         <td className="px-8 py-4 text-right">
-                                            <span className="px-2 py-1 bg-red-50 text-red-600 text-[9px] font-bold rounded uppercase tracking-wider">Pendente</span>
+                                            <span className="px-2 py-1 bg-red-50 text-red-600 text-[9px] font-bold rounded uppercase tracking-wider">{t.dashboard.unidadesPendentes}</span>
                                         </td>
                                     </tr>
                                 ))}
@@ -260,7 +262,7 @@ export const DashboardAdmin: React.FC = () => {
                                             </div>
                                         </td>
                                         <td className="px-8 py-4 text-right">
-                                            <span className="px-2 py-1 bg-blue-50 text-blue-600 text-[9px] font-bold rounded uppercase tracking-wider">Ver Detalhes</span>
+                                            <span className="px-2 py-1 bg-blue-50 text-blue-600 text-[9px] font-bold rounded uppercase tracking-wider">{t.dashboard.verDetalhes}</span>
                                         </td>
                                     </tr>
                                 ))}
@@ -270,7 +272,7 @@ export const DashboardAdmin: React.FC = () => {
                                     <tr>
                                         <td colSpan={3} className="px-8 py-20 text-center text-gray-400 font-medium">
                                             <Package size={48} className="mx-auto mb-4 opacity-20" />
-                                            Nenhuma unidade encontrada nesta categoria.
+                                            {t.transferencias.semTransferencias}
                                         </td>
                                     </tr>
                                 )}

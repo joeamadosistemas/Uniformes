@@ -42,11 +42,17 @@ export interface Transferencia {
   id: string;
   tipo: 'recebida' | 'enviada';
   status: 'concluida' | 'pendente';
+  /** Nome da escola que enviou o material */
+  unidade_origem: string;
+  /** E-mail da conta que criou a transferência (fallback para resolução de nome) */
+  origem_email?: string;
+  /** Nome da escola/destino que recebeu o material */
   unidade_origem_destino: string;
   data: string;
   itens: ItemTransferencia[];
   segmentos: string[];
 }
+
 
 export interface UsuarioCadastro {
   id: string;
@@ -67,4 +73,14 @@ export interface Uniforme {
   precoUnitario: number;
   precoTotal: number;
   dataCadastro: string;
+}
+export interface Recebimento {
+  id: string;
+  escola: string;
+  data_recebimento: string;
+  modelo_id: string;
+  modelo_nome: string;
+  descricao: string;
+  tamanho: string;
+  quantidade: number;
 }

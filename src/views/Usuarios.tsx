@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { UsuarioCadastro, EscolaCadastro } from '../types';
 import { Save, Trash2, Users, Loader2, Search, Edit2, UserX, Key, Check, X, Shield, User } from 'lucide-react';
 import { supabase, supabaseAdmin } from '../lib/supabaseClient';
+import { useT } from '../lib/LanguageContext';
 
 export const Usuarios: React.FC = () => {
+  const { t } = useT();
   const [usuarios, setUsuarios] = useState<UsuarioCadastro[]>([]);
   const [escolas, setEscolas] = useState<EscolaCadastro[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,6 +54,7 @@ export const Usuarios: React.FC = () => {
       }
     } catch (error) {
       console.error('Erro ao buscar dados:', error);
+      alert(t.cadastros.erroCarregar);
     } finally {
       setLoading(false);
     }
@@ -79,11 +82,11 @@ export const Usuarios: React.FC = () => {
 
         setUsuarios(prev => prev.map(u => u.id === editingId ? { ...u, nome, email_escola: emailEscola, role: userRole } : u));
         setEditingId(null);
-        alert('Usuário atualizado com sucesso!');
+        alert(t.cadastros.sucessoAtualizar);
       } else {
         // NOVO CADASTRO: Envolve Auth + Profile
         if (!emailUsuario || !password) {
-          alert('E-mail de login e senha são obrigatórios para novos cadastros.');
+          alert(t.common.preenchaCampos);
           setSaving(false);
           return;
         }
@@ -118,12 +121,12 @@ export const Usuarios: React.FC = () => {
           if (profileError) {
             // Se falhar no profile, avisamos mas a conta no auth foi criada
             console.error('Erro ao criar perfil:', profileError.message);
-            alert('Conta de login criada, mas houve um erro ao salvar o perfil. Verifique as colunas de role e email_usuario.');
+            alert(t.common.erroGeral);
           }
 
           if (profileData) {
             setUsuarios(prev => [...prev, profileData[0] as UsuarioCadastro]);
-            alert(`Usuário ${emailUsuario} cadastrado com sucesso!`);
+            alert(t.cadastros.sucessoAtualizar);
           }
         }
       }
@@ -136,7 +139,7 @@ export const Usuarios: React.FC = () => {
       setUserRole('usuario');
     } catch (error: any) {
       console.error('Erro ao salvar:', error);
-      alert('Erro: ' + (error.message || 'Erro ao processar solicitação.'));
+      alert(error.message || t.common.erroGeral);
     } finally {
       setSaving(false);
     }
@@ -162,7 +165,7 @@ export const Usuarios: React.FC = () => {
   };
 
   const handleDelete = async (id: string, email?: string) => {
-    if (window.confirm(`Deseja realmente excluir permanentemente o usuário ${email || ''}? Esta ação removerá o acesso ao sistema.`)) {
+    if (window.confirm(t.usuarios.confirmExcluirUsu + ` ${email || ''}?`)) {
       try {
         setLoading(true);
         // 1. Remover do Authentication
@@ -176,10 +179,10 @@ export const Usuarios: React.FC = () => {
         if (error) throw error;
 
         setUsuarios(prev => prev.filter(u => u.id !== id));
-        alert('Usuário removido com sucesso.');
+        alert(t.cadastros.sucessoAtualizar);
       } catch (error) {
         console.error('Erro ao excluir:', error);
-        alert('Erro ao excluir usuário.');
+        alert(t.common.erroExcluir);
       } finally {
         setLoading(false);
       }
@@ -187,8 +190,8 @@ export const Usuarios: React.FC = () => {
   };
 
   const handleDeactivate = async (usuario: UsuarioCadastro) => {
-    const status = usuario.nome.includes('(DESATIVADO)') ? 'ativar' : 'desativar';
-    if (window.confirm(`Deseja realmente ${status} este usuário?`)) {
+    const status = usuario.nome.includes('(DESATIVADO)') ? t.common.sim.toLowerCase() : t.common.nao.toLowerCase();
+    if (window.confirm(`${t.common.editar}?`)) {
       try {
         let novoNome = usuario.nome;
         if (status === 'desativar') {
@@ -213,7 +216,7 @@ export const Usuarios: React.FC = () => {
   const handleChangePassword = async (id: string, email: string) => {
     const isAdmin = currentAdminEmail === 'cpdinfra@edu.itaguai.rj.gov.br';
     if (!isAdmin) {
-      alert('Acesso negado: Apenas o Administrador Central pode alterar senhas.');
+      alert(t.common.acessoRestrito);
       return;
     }
 
@@ -228,7 +231,7 @@ export const Usuarios: React.FC = () => {
         setLoading(true);
         const { error } = await supabaseAdmin.auth.admin.updateUserById(id, { password: newPassword });
         if (error) throw error;
-        alert(`Senha de ${email} alterada com sucesso!`);
+        alert(t.cadastros.sucessoAtualizar);
       } catch (error: any) {
         alert('Erro: ' + error.message);
       } finally {
@@ -253,8 +256,8 @@ export const Usuarios: React.FC = () => {
             <Users size={24} />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">Gestão Avançada de Usuários</h2>
-            <p className="text-gray-600">Cadastre acessos reais (Auth) e vincule aos perfis escolares.</p>
+            <h2 className="text-2xl font-bold text-gray-800">{t.usuarios.titulo}</h2>
+            <p className="text-gray-600">{t.usuarios.subtitulo}</p>
           </div>
         </div>
       </div>
@@ -265,7 +268,7 @@ export const Usuarios: React.FC = () => {
           <div className="flex items-center gap-2">
             <div className={`w-2 h-6 rounded-full ${editingId ? 'bg-blue-500' : 'bg-green-500'}`}></div>
             <h3 className="text-sm font-bold text-gray-700 uppercase tracking-tight">
-              {editingId ? 'Editando Perfil' : 'Novo Usuário do Sistema'}
+              {editingId ? t.usuarios.editandoPerfil : t.usuarios.novoUsuario}
             </h3>
           </div>
           {!editingId && <span className="text-[10px] bg-slate-100 px-3 py-1 rounded-full font-bold text-slate-500">AUTH + PROFILE</span>}
@@ -276,7 +279,7 @@ export const Usuarios: React.FC = () => {
             {/* Seção Dados Pessoais */}
             <div className="space-y-4">
               <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Nome Completo *</label>
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">{t.usuarios.nomeCompleto} *</label>
                 <input
                   type="text"
                   value={nome}
@@ -287,35 +290,35 @@ export const Usuarios: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Unidade Escolar Vinc. *</label>
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">{t.escolas.nomeEscola} *</label>
                 <select
                   value={emailEscola}
                   onChange={(e) => setEmailEscola(e.target.value)}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-medium"
                   required
                 >
-                  <option value="">Selecione...</option>
+                  <option value="">{t.lancamentos.selecione}</option>
                   {escolas.map(escola => (
                     <option key={escola.id} value={escola.email}>{escola.nome}</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Nível de Acesso (Role) *</label>
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">{t.usuarios.nivelAcesso} *</label>
                 <div className="flex gap-2">
                   <button
                     type="button"
                     onClick={() => setUserRole('usuario')}
                     className={`flex-1 flex items-center justify-center gap-2 py-3 border rounded-xl font-bold text-xs transition-all ${userRole === 'usuario' ? 'bg-blue-50 border-blue-500 text-blue-600 shadow-sm' : 'bg-white border-slate-200 text-slate-400'}`}
                   >
-                    <User size={14} /> Usuário (Diretor)
+                    <User size={14} /> {t.usuarios.usuarioDiretor}
                   </button>
                   <button
                     type="button"
                     onClick={() => setUserRole('admin')}
                     className={`flex-1 flex items-center justify-center gap-2 py-3 border rounded-xl font-bold text-xs transition-all ${userRole === 'admin' ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-200' : 'bg-white border-slate-200 text-slate-400'}`}
                   >
-                    <Shield size={14} /> Admin Central
+                    <Shield size={14} /> {t.usuarios.adminCentral}
                   </button>
                 </div>
               </div>
@@ -324,7 +327,7 @@ export const Usuarios: React.FC = () => {
             {/* Seção Dados de Login (Apenas novo ou visível) */}
             <div className={`space-y-4 ${editingId ? 'opacity-60 pointer-events-none' : ''}`}>
               <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">E-mail de Login *</label>
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">{t.usuarios.emailLogin} *</label>
                 <input
                   type="email"
                   value={emailUsuario}
@@ -336,7 +339,7 @@ export const Usuarios: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Senha Inicial *</label>
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">{t.usuarios.senhaInicial} *</label>
                 <input
                   type="password"
                   value={password}
@@ -346,7 +349,7 @@ export const Usuarios: React.FC = () => {
                   placeholder="Mínimo 6 caracteres"
                   required={!editingId}
                 />
-                {editingId && <p className="text-[9px] text-amber-600 mt-2 font-bold uppercase tracking-tight">E-mail e senha não podem ser alterados aqui. Use a ação "Alterar Senha" na lista.</p>}
+                {editingId && <p className="text-[9px] text-amber-600 mt-2 font-bold uppercase tracking-tight">{t.usuarios.avisoSenha}</p>}
               </div>
             </div>
           </div>
@@ -358,7 +361,7 @@ export const Usuarios: React.FC = () => {
                 onClick={cancelEdit}
                 className="flex items-center px-6 py-3.5 bg-gray-100 text-gray-600 rounded-2xl hover:bg-gray-200 transition-all font-bold"
               >
-                <X size={18} className="mr-2" /> Cancelar
+                <X size={18} className="mr-2" /> {t.lancamentos.cancelar}
               </button>
             )}
             <button
@@ -367,7 +370,7 @@ export const Usuarios: React.FC = () => {
               className="flex items-center px-8 py-3.5 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-all font-bold shadow-lg shadow-blue-200 disabled:opacity-50"
             >
               {saving ? <Loader2 size={18} className="mr-2 animate-spin" /> : editingId ? <Check size={18} className="mr-2" /> : <Save size={18} className="mr-2" />}
-              {saving ? 'Processando Cadastro...' : editingId ? 'Salvar Alterações' : 'Criar Usuário do Sistema'}
+              {saving ? t.usuarios.processando : editingId ? t.transferencias.salvarAlteracoes : t.usuarios.novoUsuario}
             </button>
           </div>
         </form>
@@ -377,14 +380,14 @@ export const Usuarios: React.FC = () => {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="px-8 py-6 border-b border-gray-100 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2">
-            Perfis Sincronizados
+            {t.usuarios.perfisSinc}
             {loading && <Loader2 size={14} className="text-blue-500 animate-spin" />}
           </h3>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
             <input
               type="text"
-              placeholder="Buscar por login, nome ou escola..."
+              placeholder={t.usuarios.buscarUsuarios}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all w-full md:w-80 shadow-sm"
@@ -396,16 +399,16 @@ export const Usuarios: React.FC = () => {
           <table className="w-full text-left">
             <thead>
               <tr className="bg-gray-50/30 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100">
-                <th className="px-8 py-4">Usuário / Nível</th>
-                <th className="px-8 py-4">Vínculo Escolar</th>
-                <th className="px-8 py-4 text-right pr-12">Ações</th>
+                <th className="px-8 py-4">{t.login.entrar} / {t.login.senha}</th>
+                <th className="px-8 py-4">{t.escolas.nomeEscola}</th>
+                <th className="px-8 py-4 text-right pr-12">{t.common.acoes}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 text-sm">
               {loading && usuarios.length === 0 ? (
                 <tr><td colSpan={3} className="px-8 py-20 text-center"><Loader2 className="animate-spin mx-auto opacity-20" size={40} /></td></tr>
               ) : filteredUsuarios.length === 0 ? (
-                <tr><td colSpan={3} className="px-8 py-12 text-center text-gray-500 italic">Nenhum resultado encontrado.</td></tr>
+                <tr><td colSpan={3} className="px-8 py-12 text-center text-gray-500 italic">{t.lancamentos.semRegistros}</td></tr>
               ) : (
                 filteredUsuarios.map((usuario) => {
                   const escola = escolas.find(e => e.email === usuario.email_escola);
@@ -438,7 +441,7 @@ export const Usuarios: React.FC = () => {
                           <button
                             onClick={() => handleEdit(usuario)}
                             className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                            title="Editar Perfil"
+                            title={t.common.editar}
                           >
                             <Edit2 size={16} />
                           </button>
@@ -452,14 +455,14 @@ export const Usuarios: React.FC = () => {
                           <button
                             onClick={() => handleChangePassword(usuario.id, (usuario.email_usuario || usuario.email_escola))}
                             className="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all"
-                            title="Resetar Senha"
+                            title={t.usuarios.resetarSenha}
                           >
                             <Key size={16} />
                           </button>
                           <button
                             onClick={() => handleDelete(usuario.id, usuario.nome)}
                             className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                            title="Remover Totalmente"
+                            title={t.common.excluir}
                           >
                             <Trash2 size={16} />
                           </button>

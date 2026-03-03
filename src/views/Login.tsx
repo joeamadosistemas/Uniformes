@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { LOGO_ITAGUAI_BASE64 } from '../utils/logoBase64';
+import { useT } from '../lib/LanguageContext';
 
 interface LoginProps {
     onLoginSuccess: () => void;
@@ -12,6 +13,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const { t } = useT();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -27,11 +29,11 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
             console.error('Erro de Autenticação:', authError);
 
             if (authError.message === 'Invalid login credentials') {
-                setError('E-mail ou senha inválidos. Verifique suas credenciais.');
+                setError(t.login.erroLogin);
             } else if (authError.status === 400 || authError.status === 401) {
-                setError('Credenciais inválidas ou conta não confirmada.');
+                setError(t.login.erroCredenciais);
             } else {
-                setError(`Erro na conexão: ${authError.message}. Verifique as configurações do Netlify.`);
+                setError(`${t.login.erroConexao}: ${authError.message}`);
             }
             setLoading(false);
         } else {
@@ -73,14 +75,14 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                         SMEDU | CPD
                     </h1>
                     <p className="text-blue-100 text-sm mt-1" style={{ opacity: 0.9 }}>
-                        Sistema de Controle de Uniformes
+                        {t.login.subtitulo}
                     </p>
                 </div>
 
                 {/* Formulário branco */}
                 <div className="bg-white px-8 py-8">
                     <h2 className="text-center text-gray-800 font-semibold text-lg mb-6">
-                        Acesso ao Sistema
+                        {t.login.titulo}
                     </h2>
 
                     <form onSubmit={handleSubmit} noValidate>
@@ -91,7 +93,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                                 className="block text-xs font-semibold mb-1"
                                 style={{ color: '#e53e3e' }}
                             >
-                                E-mail
+                                {t.login.email}
                             </label>
                             <div
                                 className="flex items-center border rounded-md overflow-hidden"
@@ -123,7 +125,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                                 htmlFor="password"
                                 className="block text-xs font-semibold mb-1 text-gray-700"
                             >
-                                Senha
+                                {t.login.senha}
                             </label>
                             <div
                                 className="flex items-center border rounded-md overflow-hidden"
@@ -191,10 +193,10 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                                     <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path d="M21 12a9 9 0 1 1-6.219-8.56" />
                                     </svg>
-                                    Entrando...
+                                    {t.login.entrando}
                                 </span>
                             ) : (
-                                'Entrar'
+                                t.login.entrar
                             )}
                         </button>
                     </form>

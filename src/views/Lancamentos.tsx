@@ -5,39 +5,60 @@ import { UniformTable } from '../components/UniformTable';
 import { DashboardStats } from '../components/DashboardStats';
 import { exportarParaPDF, exportarParaExcel } from '../utils/exportUtils';
 import { supabase } from '../lib/supabaseClient';
+import { useT } from '../lib/LanguageContext';
 
 /**
- * Mapeia o prefixo do e-mail da escola para a categoria padrão de uniforme.
- *   cm.*       → CRECHE
- *   emei.*     → PRÉ ESCOLA
- *   em.*       → FUNDAMENTAL 1-3 ANOS
- *   eem.*      → FUNDAMENTAL II 6 AO 9 ANOS
- *   ciep*      → FUNDAMENTAL II 6 AO 9 ANOS
+ * Extrai a categoria correspondente a um segmento cadastrado na tabela `escolas`.
+ * Os segmentos são armazenados como "CONJUNTO UNIFORMA ESCOLAR <CATEGORIA>".
+ * Retorna a parte da categoria (ex: "FUNDAMENTAL 1-3 ANOS") ou o próprio valor
+ * caso não siga esse padrão.
  */
-function getCategoriaDefault(email: string): string {
-  const prefixo = email.split('@')[0].toLowerCase();
-  if (prefixo.startsWith('cm.')) return 'CRECHE';
-  if (prefixo.startsWith('emei.')) return 'PRÉ ESCOLA';
-  if (prefixo.startsWith('em.')) return 'FUNDAMENTAL 1-3 ANOS';
-  if (prefixo.startsWith('eem.')) return 'FUNDAMENTAL II 6 AO 9 ANOS';
-  if (prefixo.startsWith('ciep')) return 'FUNDAMENTAL II 6 AO 9 ANOS';
-  return '';
+function segmentoToCategoria(segmento: string): string {
+  return segmento.replace('CONJUNTO UNIFORMA ESCOLAR ', '').trim();
 }
 
 export const Lancamentos: React.FC = () => {
+  const { t } = useT();
   const [registros, setRegistros] = useState<RegistroUniforme[]>([]);
   const [registroEmEdicao, setRegistroEmEdicao] = useState<RegistroUniforme | null>(null);
   const [filtros, setFiltros] = useState<Filtros>({ categoria: '', tipo_uniforme: '', data: '' });
   const [mensagem, setMensagem] = useState<{ texto: string; tipo: 'sucesso' | 'erro' } | null>(null);
   const [escola, setEscola] = useState('');
   const [categoriaDefault, setCategoriaDefault] = useState('');
+  const [categoriaLocked, setCategoriaLocked] = useState(false);
+  // Categorias que este escola tem permissão de registrar (vazio = todas)
+  const [categoriasPermitidas, setCategoriasPermitidas] = useState<string[]>([]);
 
-  // Lê sessão do Supabase para obter e-mail e derivar categoria padrão
+  // Busca a sessão e depois consulta os segmentos reais da escola no banco
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(async ({ data }) => {
       const email = data.session?.user?.email ?? '';
       setEscola(email);
-      setCategoriaDefault(getCategoriaDefault(email));
+
+      if (!email) return;
+
+      // Busca a escola cadastrada cujo e-mail corresponde ao usuário logado
+      const { data: escolaData, error } = await supabase
+        .from('escolas')
+        .select('segmentos')
+        .ilike('email', email)
+        .eq('ativo', true)
+        .maybeSingle();
+
+      if (!error && escolaData && Array.isArray(escolaData.segmentos) && escolaData.segmentos.length > 0) {
+        const categorias = escolaData.segmentos.map(segmentoToCategoria);
+        // Restringe o dropdown apenas às categorias cadastradas para esta escola
+        setCategoriasPermitidas(categorias);
+        // Se a escola atende apenas 1 segmento, pré-seleciona e trava o campo.
+        // Se atende vários, deixa o usuário escolher (sem travar).
+        if (categorias.length === 1) {
+          setCategoriaDefault(categorias[0]);
+          setCategoriaLocked(true);
+        } else {
+          setCategoriaDefault(''); // sem pré-seleção quando há múltiplos segmentos
+          setCategoriaLocked(false);
+        }
+      }
     });
   }, []);
 
@@ -64,7 +85,7 @@ export const Lancamentos: React.FC = () => {
           : r
       ));
       setRegistroEmEdicao(null);
-      mostrarMensagem('Registro atualizado com sucesso!');
+      mostrarMensagem(t.lancamentos.sucessoAtualizar);
     } else {
       const novosRegistros: RegistroUniforme[] = novosDados.map(dados => ({
         ...dados,
@@ -74,13 +95,13 @@ export const Lancamentos: React.FC = () => {
         diretor: '',
       }));
       setRegistros(prev => [...novosRegistros, ...prev]);
-      mostrarMensagem(`${novosRegistros.length} registro(s) salvo(s) com sucesso!`);
+      mostrarMensagem(t.lancamentos.sucessoSalvar);
     }
   };
 
   const handleDelete = (id: string) => {
     setRegistros(prev => prev.filter(r => r.id !== id));
-    mostrarMensagem('Registro excluído com sucesso!');
+    mostrarMensagem(t.lancamentos.sucessoExcluir);
   };
 
   const registrosFiltrados = registros.filter(r => {
@@ -100,8 +121,8 @@ export const Lancamentos: React.FC = () => {
       )}
 
       <div>
-        <h2 className="text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight mb-2">Lançamentos de Uniformes</h2>
-        <p className="text-gray-500 dark:text-zinc-400 font-medium">Gerencie o estoque e registre novas entradas de uniformes.</p>
+        <h2 className="text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight mb-2">{t.lancamentos.titulo}</h2>
+        <p className="text-gray-500 dark:text-zinc-400 font-medium">{t.lancamentos.subtitulo}</p>
       </div>
 
       <DashboardStats registros={registrosFiltrados} />
@@ -111,7 +132,8 @@ export const Lancamentos: React.FC = () => {
         registroEmEdicao={registroEmEdicao}
         onCancelEdit={() => setRegistroEmEdicao(null)}
         categoriaDefault={categoriaDefault}
-        categoriaLocked={categoriaDefault !== ''}
+        categoriaLocked={categoriaLocked}
+        categoriasPermitidas={categoriasPermitidas}
       />
 
 

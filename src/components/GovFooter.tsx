@@ -1,6 +1,8 @@
 import React from 'react';
+import { useT } from '../lib/LanguageContext';
 
 export const GovFooter: React.FC = () => {
+    const { t } = useT();
     return (
         <footer className="footer-container bg-[#071d41] text-white transition-colors duration-200 w-full mt-auto relative overflow-hidden">
             {/* Swiper simulated structure for the arrows and full-width background */}
@@ -16,12 +18,12 @@ export const GovFooter: React.FC = () => {
                 <div className="max-w-screen-2xl mx-auto px-12 py-10">
                     <div className="flex flex-col md:flex-row justify-between gap-8 items-start">
                         <div className="flex-1">
-                            <p className="font-bold mb-3">Informações da Secretaria Municipal de Educação | PMI</p>
+                            <p className="font-bold mb-3">{t.footer.info}</p>
                             <p className="text-sm opacity-90">Rua João Rosa Gonzales, 1242 - Engenho, Itaguaí, Rio de Janeiro - Brasil</p>
                             <p className="text-sm opacity-90 mb-4">CEP: 23.820-380</p>
                             <hr className="border-t border-white/20 mb-4" />
-                            <p className="text-sm opacity-90">Telefone: (21) 3782-9003 | RAMAL DO CPD: 2905</p>
-                            <p className="text-sm opacity-90">Horário de Funcionamento: 8h às 17h</p>
+                            <p className="text-sm opacity-90">{t.footer.tel}</p>
+                            <p className="text-sm opacity-90">{t.footer.horario}</p>
                             <p className="text-sm opacity-90">E-mail: cpdinfra@edu.itaguai.rj.gov.br</p>
                             <p className="text-sm opacity-90">E-mail: smedu@itaguai.rj.gov.br ou secretaria@edu.itaguai.rj.gov.br</p>
                         </div>
@@ -34,7 +36,7 @@ export const GovFooter: React.FC = () => {
                                     alt="Prefeitura de Itaguaí"
                                 />
                             </div>
-                            <p className="font-bold mb-2">Redes Sociais</p>
+                            <p className="font-bold mb-2">{t.footer.redes}</p>
                             <hr className="w-full border-t border-white/20 mb-4" />
                             <div className="flex gap-4">
                                 <a href="https://www.instagram.com/" target="_blank" className="text-2xl hover:text-[#66b3ff] transition-colors"><i className="fab fa-instagram"></i></a>
@@ -46,7 +48,7 @@ export const GovFooter: React.FC = () => {
             </div>
 
             <div className="bg-[#05142b] py-4 text-center text-xs opacity-80 border-t border-white/5">
-                Desenvolvido para Secretaria Municipal de Educação de Itaguaí
+                {t.footer.desenvolvimento}
             </div>
         </footer>
     );

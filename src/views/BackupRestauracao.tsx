@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Database, FileJson, FileSpreadsheet, Upload, Info } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
+import { useT } from '../lib/LanguageContext';
 
 export const BackupRestauracao: React.FC = () => {
+    const { t } = useT();
     const [loading, setLoading] = useState(false);
     const [dragActive, setDragActive] = useState(false);
     const [file, setFile] = useState<File | null>(null);
@@ -62,7 +64,7 @@ export const BackupRestauracao: React.FC = () => {
             URL.revokeObjectURL(url);
         } catch (error) {
             console.error('Erro no backup:', error);
-            alert('Falha ao gerar backup JSON.');
+            alert(t.backup.erroBackup);
         } finally {
             setLoading(false);
         }
@@ -99,7 +101,7 @@ export const BackupRestauracao: React.FC = () => {
             }
 
             if (reportData.length === 0) {
-                alert('Não há dados de estoque para gerar o relatório.');
+                alert(t.backup.semDadosEstoque);
                 return;
             }
 
@@ -123,7 +125,7 @@ export const BackupRestauracao: React.FC = () => {
             URL.revokeObjectURL(url);
         } catch (error) {
             console.error('Erro no CSV:', error);
-            alert('Falha ao gerar relatório CSV.');
+            alert(t.backup.erroCSV);
         } finally {
             setLoading(false);
         }
@@ -138,7 +140,7 @@ export const BackupRestauracao: React.FC = () => {
     const handleRestore = async () => {
         if (!file) return;
 
-        const confirm = window.confirm('ATENÇÃO: Restaurar o backup substituirá todos os dados atuais (Banco e LocalStorage). Deseja continuar?');
+        const confirm = window.confirm(t.backup.confirmRestaurar);
         if (!confirm) return;
 
         setLoading(true);
@@ -164,11 +166,11 @@ export const BackupRestauracao: React.FC = () => {
                         });
                     }
 
-                    alert('Restauração concluída com sucesso!');
+                    alert(t.backup.sucessoRestaurar);
                     window.location.reload(); // Recarregar para aplicar mudanças do localStorage
                 } catch (err) {
                     console.error(err);
-                    alert('Erro ao processar arquivo JSON.');
+                    alert(t.backup.erroJSON);
                 }
             };
             reader.readAsText(file);
@@ -185,17 +187,17 @@ export const BackupRestauracao: React.FC = () => {
                     <Database className="text-white" size={32} />
                 </div>
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-800">Backup e Restauração</h1>
-                    <p className="text-gray-500">Gerencie a segurança e portabilidade dos seus dados.</p>
+                    <h1 className="text-2xl font-bold text-gray-800">{t.backup.titulo}</h1>
+                    <p className="text-gray-500">{t.backup.subtitulo}</p>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                 {/* Card Backup Manual */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 flex flex-col">
-                    <h2 className="text-xl font-bold text-gray-800 mb-2">Backup Manual</h2>
+                    <h2 className="text-xl font-bold text-gray-800 mb-2">{t.backup.manual}</h2>
                     <p className="text-gray-500 text-sm mb-8">
-                        Crie e baixe uma cópia completa dos dados do sistema. Escolha o formato desejado abaixo.
+                        {t.backup.manualSub}
                     </p>
 
                     <div className="space-y-4 mt-auto">
@@ -205,7 +207,7 @@ export const BackupRestauracao: React.FC = () => {
                             className="w-full flex items-center justify-center gap-3 bg-[#005A9C] hover:bg-[#004a80] text-white py-4 rounded-xl font-semibold transition-all shadow-md active:scale-[0.98] disabled:opacity-50"
                         >
                             <FileJson size={22} />
-                            Baixar Backup Completo (.json)
+                            {t.backup.baixarJSON}
                         </button>
 
                         <button
@@ -214,16 +216,16 @@ export const BackupRestauracao: React.FC = () => {
                             className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-100 hover:border-[#005A9C] text-gray-700 hover:text-[#005A9C] py-4 rounded-xl font-semibold transition-all active:scale-[0.98] disabled:opacity-50"
                         >
                             <FileSpreadsheet size={22} className="text-green-600" />
-                            Baixar Relatório Excel (.csv)
+                            {t.backup.baixarCSV}
                         </button>
                     </div>
                 </div>
 
                 {/* Card Restauração */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 flex flex-col">
-                    <h2 className="text-xl font-bold text-gray-800 mb-2">Restauração</h2>
+                    <h2 className="text-xl font-bold text-gray-800 mb-2">{t.backup.restauracao}</h2>
                     <p className="text-gray-500 text-sm mb-4">
-                        Restaure o sistema a partir de um arquivo JSON. <span className="text-red-500 font-semibold">Atenção: Isso substituirá os dados atuais.</span>
+                        {t.backup.restauracaoSub} <span className="text-red-500 font-semibold">{t.backup.avisoSubstituir}</span>
                     </p>
 
                     <div
@@ -242,9 +244,9 @@ export const BackupRestauracao: React.FC = () => {
                         />
                         <Upload className={`mb-3 ${file ? 'text-green-500' : 'text-gray-300'}`} size={40} />
                         <p className="text-gray-600 font-medium text-center">
-                            {file ? file.name : 'Clique para selecionar o arquivo'}
+                            {file ? file.name : t.backup.cliqueArquivo}
                         </p>
-                        <p className="text-gray-400 text-xs mt-1">Suporta apenas arquivos .json</p>
+                        <p className="text-gray-400 text-xs mt-1">{t.backup.apenasJSON}</p>
                     </div>
 
                     <button
@@ -253,28 +255,28 @@ export const BackupRestauracao: React.FC = () => {
                         className="w-full flex items-center justify-center gap-3 bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 py-4 rounded-xl font-semibold transition-all disabled:opacity-40"
                     >
                         <Upload size={22} />
-                        Restaurar Arquivo
+                        {t.backup.restaurarArquivo}
                     </button>
                 </div>
             </div>
 
             {/* Info Card */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-                <h2 className="text-lg font-bold text-gray-800 mb-6 uppercase tracking-wider">Sobre o Backup Automático</h2>
+                <h2 className="text-lg font-bold text-gray-800 mb-6 uppercase tracking-wider">{t.backup.sobreBackupAuto}</h2>
                 <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6 flex gap-5">
                     <div className="bg-white p-2 rounded-full h-fit shadow-sm">
                         <Info className="text-blue-500" size={24} />
                     </div>
                     <div className="space-y-4">
                         <p className="text-blue-900 font-medium leading-relaxed">
-                            A implementação de um backup 100% automático (ex: todo dia às 8h para o Google Drive) não é tecnicamente viável neste ambiente de navegador.
+                            {t.backup.viabilidadeAuto}
                         </p>
                         <ul className="space-y-2 text-blue-800/80 text-sm list-disc pl-4">
-                            <li>Limitação do Navegador: A aplicação roda no seu navegador e não possui um servidor dedicado para executar tarefas agendadas autonomamente.</li>
-                            <li>Segurança: Armazenar credenciais de serviços externos diretamente no frontend não é recomendado.</li>
+                            <li>{t.backup.limitacaoNavegador}</li>
+                            <li>{t.backup.seguranca}</li>
                         </ul>
                         <p className="text-blue-900 font-semibold pt-2">
-                            Recomendação: Utilize a função de Backup Manual regularmente e salve o arquivo em um local seguro.
+                            {t.backup.recomendacao}
                         </p>
                     </div>
                 </div>
