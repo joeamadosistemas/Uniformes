@@ -46,76 +46,104 @@ function App() {
   }, [isDarkMode]);
 
   useEffect(() => {
+    let isMounted = true;
+    let currentUser = '';
+
     // Carrega sessão existente ao iniciar
     supabase.auth.getSession().then(({ data }) => {
+      if (!isMounted) return;
       setSession(data.session);
-      if (data.session?.user) loadUserRole(data.session.user.id, data.session.user.email);
-      else setLoadingSession(false);
+      const newUserId = data.session?.user?.id;
+      if (newUserId) {
+        currentUser = newUserId;
+        loadUserRole(newUserId, data.session?.user?.email);
+      } else {
+        setLoadingSession(false);
+      }
     });
 
     // Escuta mudanças de autenticação em tempo real
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      if (!isMounted) return;
       setSession(newSession);
-      if (newSession?.user) loadUserRole(newSession.user.id, newSession.user.email);
-      else { setUserRole('Operador'); setLoadingSession(false); }
+      const newUserId = newSession?.user?.id;
+
+      // Só recarrega roles se o usuário mudou (evita fetch em token refresh)
+      if (newUserId && newUserId !== currentUser) {
+        currentUser = newUserId;
+        loadUserRole(newSession.user.id, newSession.user.email);
+      } else if (!newUserId) {
+        currentUser = '';
+        setUserRole('Operador');
+        setLoadingSession(false);
+      }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const loadUserRole = async (userId: string, userEmail?: string) => {
     setLoadingSession(true);
     let foundEscolaNome = false;
 
-    // Tenta carregar do Profile
-    const { data: profile, error } = await supabase
-      .from('Profile')
-      .select('role, nome, email_escola')
-      .eq('id', userId)
-      .single();
+    try {
+      // Tenta carregar do Profile
+      const { data: profile, error } = await supabase
+        .from('Profile')
+        .select('role, nome, email_escola')
+        .eq('id', userId)
+        .maybeSingle();
 
-    if (!error && profile) {
-      if (profile.role) setUserRole(profile.role);
-      if (profile.nome) setUserName(profile.nome);
+      if (!error && profile) {
+        if (profile.role) setUserRole(profile.role);
+        if (profile.nome) setUserName(profile.nome);
 
-      if (profile.email_escola) {
-        const { data: escola } = await supabase
+        if (profile.email_escola) {
+          const { data: escola } = await supabase
+            .from('escolas')
+            .select('nome')
+            .eq('email', profile.email_escola)
+            .maybeSingle();
+
+          if (escola && escola.nome) {
+            setEscolaNome(escola.nome);
+            foundEscolaNome = true;
+          }
+        }
+      } else {
+        // Fallback para caso haja profiles antigas ou apenas roles
+        const { data: profileOld, error: oldError } = await supabase
+          .from('profiles')
+          .select('role, nome')
+          .eq('id', userId)
+          .maybeSingle();
+
+        if (!oldError && profileOld) {
+          if (profileOld.role) setUserRole(profileOld.role);
+          if (profileOld.nome) setUserName(profileOld.nome);
+        }
+      }
+
+      // Se ainda não encontrou o nome da escola pelo perfil criado,
+      // tenta buscar a escola pelo e-mail de login, sendo comum a escola logar
+      // com o seu próprio endereço cadastrado na base "escolas".
+      if (!foundEscolaNome && userEmail) {
+        const { data: escolaFallback, error: fallbackError } = await supabase
           .from('escolas')
           .select('nome')
-          .eq('email', profile.email_escola)
-          .single();
-        if (escola && escola.nome) {
-          setEscolaNome(escola.nome);
+          .eq('email', userEmail)
+          .maybeSingle();
+
+        if (!fallbackError && escolaFallback && escolaFallback.nome) {
+          setEscolaNome(escolaFallback.nome);
           foundEscolaNome = true;
         }
       }
-    } else {
-      // Fallback para caso haja profiles antigas ou apenas roles
-      const { data: profileOld } = await supabase
-        .from('profiles')
-        .select('role, nome')
-        .eq('id', userId)
-        .single();
-      if (profileOld) {
-        if (profileOld.role) setUserRole(profileOld.role);
-        if (profileOld.nome) setUserName(profileOld.nome);
-      }
-    }
-
-    // Se ainda não encontrou o nome da escola pelo perfil criado,
-    // tenta buscar a escola pelo e-mail de login, sendo comum a escola logar
-    // com o seu próprio endereço cadastrado na base "escolas".
-    if (!foundEscolaNome && userEmail) {
-      const { data: escolaFallback } = await supabase
-        .from('escolas')
-        .select('nome')
-        .eq('email', userEmail)
-        .single();
-
-      if (escolaFallback && escolaFallback.nome) {
-        setEscolaNome(escolaFallback.nome);
-        foundEscolaNome = true;
-      }
+    } catch (err) {
+      console.warn('Erro silencioso ao carregar role/escola:', err);
     }
 
     if (!foundEscolaNome) {
