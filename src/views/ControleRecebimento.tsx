@@ -1,16 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-    School,
-    CheckCircle2,
-    Clock,
-    Search,
-    Filter,
-    BarChart3,
-    ArrowUpRight,
-    AlertCircle,
-    Loader2,
-    FileText
-} from 'lucide-react';
+import { School, CheckCircle2, Clock, Search, Filter, BarChart3, ArrowUpRight, AlertCircle, Loader2, FileText, RefreshCw } from 'lucide-react';
 import { supabase, supabaseAdmin } from '../lib/supabaseClient';
 import { useT } from '../lib/LanguageContext';
 import { EscolaCadastro } from '../types';
@@ -29,6 +18,7 @@ export const ControleRecebimento: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState<'todos' | 'concluido' | 'pendente'>('todos');
     const [filterSegmento, setFilterSegmento] = useState<string>('todos');
+    const [refreshing, setRefreshing] = useState(false);
 
     useEffect(() => {
         fetchStatusEscolas();
@@ -37,6 +27,7 @@ export const ControleRecebimento: React.FC = () => {
     const fetchStatusEscolas = async () => {
         try {
             setLoading(true);
+            setRefreshing(true);
 
             // 1. Buscar todas as escolas
             const { data: todasEscolas, error: errorEscolas } = await supabase
@@ -218,6 +209,15 @@ export const ControleRecebimento: React.FC = () => {
                                 {t.dashboardControle.pendente}
                             </button>
                         </div>
+
+                        <button
+                            onClick={fetchStatusEscolas}
+                            disabled={refreshing}
+                            className="flex items-center gap-2 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-gray-600 dark:text-zinc-300 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95"
+                            title="Atualizar lista"
+                        >
+                            <RefreshCw size={16} className={refreshing ? 'animate-spin' : ''} />
+                        </button>
 
                         <button
                             onClick={handleExportPDF}

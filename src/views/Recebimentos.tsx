@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Plus, Trash2, FileSpreadsheet, FileText, Edit2, Check, X, Loader2, ClipboardList, Layers } from 'lucide-react';
+import { Package, Plus, Trash2, FileSpreadsheet, FileText, Edit2, Check, X, Loader2, ClipboardList, Layers, RefreshCw, AlertCircle } from 'lucide-react';
 import { useT } from '../lib/LanguageContext';
 import { RECEBIMENTOS_MODELOS, RecebimentoModelo } from '../constants/recebimentosConstants';
 import { Recebimento } from '../types';
@@ -86,8 +86,14 @@ export const Recebimentos: React.FC = () => {
                                 setRecebimentos(JSON.parse(dadosSalvos));
                             }
                             setIsInitialLoadDone(true);
-                            if (dbError) setIsSynced(false);
-                            else if (dadosSalvos) setIsSynced(null); // Pendente de confirmação
+                            if (dbError) {
+                                setIsSynced(false);
+                            } else if (dadosSalvos && JSON.parse(dadosSalvos).length > 0) {
+                                // Temos dados locais mas o banco está vazio/sem acesso
+                                setIsSynced(false);
+                            } else {
+                                setIsSynced(true); // Ambos vazios = Em dia
+                            }
                         }
                     });
 
@@ -426,21 +432,33 @@ export const Recebimentos: React.FC = () => {
                         {new Set(recebimentos.map(r => r.modelo_id)).size}
                     </p>
                     {/* Status de Sincronização */}
-                    <div className="absolute top-2 right-2 flex items-center gap-2">
+                    <div className="absolute top-3 right-3 flex items-center gap-2">
                         {isSynced === true ? (
-                            <div title="Sincronizado com a nuvem">
-                                <Check className="text-green-500 w-4 h-4" />
+                            <div className="flex items-center gap-1.5 bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-full border border-green-100 dark:border-green-900/30" title="Sincronizado com a nuvem">
+                                <Check className="text-green-500 w-3.5 h-3.5" />
+                                <span className="text-[10px] font-bold text-green-600 dark:text-green-400 uppercase tracking-tight">Sincronizado</span>
                             </div>
                         ) : isSynced === false ? (
-                            <div className="flex items-center gap-1 bg-red-50 dark:bg-red-900/20 px-2 py-1 rounded-lg border border-red-100 dark:border-red-900/30">
-                                <span className="text-[8px] font-bold text-red-500 uppercase">Local</span>
-                                <button onClick={sincronizarTudo} disabled={saving} className="text-red-500 hover:text-red-600 transition-colors" title="Sincronizar dados locais">
-                                    <X className="w-3 h-3" />
+                            <div className="flex items-center gap-2 bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 rounded-full border border-amber-100 dark:border-amber-900/30 animate-pulse">
+                                <div className="flex items-center gap-1">
+                                    <AlertCircle className="text-amber-500 w-3.5 h-3.5" />
+                                    <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-tight">Pendente</span>
+                                </div>
+                                <div className="w-[1px] h-3 bg-amber-200 dark:bg-amber-800" />
+                                <button
+                                    onClick={sincronizarTudo}
+                                    disabled={saving}
+                                    className="flex items-center gap-1 text-amber-600 hover:text-amber-700 transition-colors"
+                                    title="Sincronizar dados locais agora"
+                                >
+                                    <RefreshCw className={`w-3.5 h-3.5 ${saving ? 'animate-spin' : ''}`} />
+                                    <span className="text-[10px] font-black uppercase">Sincronizar</span>
                                 </button>
                             </div>
                         ) : (
-                            <div title="Sincronizando...">
-                                <Loader2 className="text-amber-500 w-4 h-4 animate-spin" />
+                            <div className="flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-full border border-blue-100 dark:border-blue-900/30" title="Verificando sincronização...">
+                                <Loader2 className="text-blue-500 w-3.5 h-3.5 animate-spin" />
+                                <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-tight">Verificando...</span>
                             </div>
                         )}
                     </div>
