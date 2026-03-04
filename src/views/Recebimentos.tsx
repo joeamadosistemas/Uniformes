@@ -21,6 +21,7 @@ export const Recebimentos: React.FC = () => {
     const [saving, setSaving] = useState(false);
     const [mensagem, setMensagem] = useState<{ texto: string; tipo: 'sucesso' | 'erro' } | null>(null);
     const [isInitialLoadDone, setIsInitialLoadDone] = useState(false);
+    const [isSynced, setIsSynced] = useState<boolean | null>(null); // null: loading, true: synced, false: error
 
     useEffect(() => {
         let isMounted = true;
@@ -76,6 +77,7 @@ export const Recebimentos: React.FC = () => {
                         if (!dbError && dbData && dbData.length > 0) {
                             setRecebimentos(dbData);
                             setIsInitialLoadDone(true);
+                            setIsSynced(true);
                         } else {
                             // Fallback para LocalStorage se o banco falhar, estiver offline ou vazio
                             const storageKey = `@Uniformes:recebimentos:${normalizedEmail}`;
@@ -84,6 +86,8 @@ export const Recebimentos: React.FC = () => {
                                 setRecebimentos(JSON.parse(dadosSalvos));
                             }
                             setIsInitialLoadDone(true);
+                            if (dbError) setIsSynced(false);
+                            else if (dadosSalvos) setIsSynced(null); // Pendente de confirmação
                         }
                     });
 
@@ -218,9 +222,11 @@ export const Recebimentos: React.FC = () => {
                 .insert(payload);
 
             if (error) {
-                console.warn('Erro ao salvar no Supabase (é provável que a tabela ainda não exista):', error.message);
-                // Não interrompemos o fluxo, pois o localStorage garante a persistência local
+                console.warn('Erro ao salvar no Supabase:', error.message);
+                setIsSynced(false);
+                mostrarMensagem('Dados salvos apenas LOCALMENTE. O servidor não respondeu.', 'erro');
             } else {
+                setIsSynced(true);
                 mostrarMensagem(t.recebimentos.sucessoSalvar);
             }
 
@@ -371,7 +377,7 @@ export const Recebimentos: React.FC = () => {
                 </div>
 
                 {/* Card 3: Modelos */}
-                <div className="bg-white dark:bg-zinc-900 py-5 px-2 md:p-6 rounded-3xl shadow-[0_4px_12px_rgba(0,0,0,0.06)] flex flex-col items-center justify-center text-center">
+                <div className="bg-white dark:bg-zinc-900 py-5 px-2 md:p-6 rounded-3xl shadow-[0_4px_12px_rgba(0,0,0,0.06)] flex flex-col items-center justify-center text-center relative overflow-hidden">
                     <div className="p-3 bg-purple-50 dark:bg-purple-900/20 text-purple-500 rounded-2xl mb-2">
                         <Layers className="w-6 h-6 md:w-8 md:h-8" strokeWidth={2} />
                     </div>
@@ -381,6 +387,16 @@ export const Recebimentos: React.FC = () => {
                     <p className="text-xl md:text-4xl font-black text-slate-800 dark:text-white leading-none">
                         {new Set(recebimentos.map(r => r.modelo_id)).size}
                     </p>
+                    {/* Status de Sincronização */}
+                    <div className="absolute top-2 right-2">
+                        {isSynced === true ? (
+                            <Check className="text-green-500 w-4 h-4" title="Sincronizado com a nuvem" />
+                        ) : isSynced === false ? (
+                            <X className="text-red-500 w-4 h-4" title="Erro na sincronização (Apenas Local)" />
+                        ) : (
+                            <Loader2 className="text-amber-500 w-4 h-4 animate-spin" title="Sincronizando..." />
+                        )}
+                    </div>
                 </div>
             </div>
 

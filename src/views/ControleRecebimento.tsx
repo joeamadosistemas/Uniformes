@@ -11,7 +11,7 @@ import {
     Loader2,
     FileText
 } from 'lucide-react';
-import { supabase } from '../lib/supabaseClient';
+import { supabase, supabaseAdmin } from '../lib/supabaseClient';
 import { useT } from '../lib/LanguageContext';
 import { EscolaCadastro } from '../types';
 import { SEGMENTOS_ENSINO } from '../constants';
@@ -48,8 +48,9 @@ export const ControleRecebimento: React.FC = () => {
             if (errorEscolas) throw errorEscolas;
 
             // 2. Buscar e-mails únicos de escolas que já lançaram recebimentos
-            // Aumentamos o limite para garantir que pegamos registros de todas as escolas
-            const { data: lancamentos, error: errorLancamentos } = await supabase
+            // Usamos supabaseAdmin se disponível para garantir que o administrador veja todos os registros (bypass RLS)
+            const client = supabaseAdmin || supabase;
+            const { data: lancamentos, error: errorLancamentos } = await client
                 .from('recebimentos')
                 .select('escola, data_recebimento')
                 .order('data_recebimento', { ascending: false })
