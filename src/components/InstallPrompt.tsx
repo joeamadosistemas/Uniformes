@@ -76,15 +76,15 @@ export const InstallPrompt: React.FC = () => {
                     </p>
 
                     {isIOS ? (
-                        <div className="mt-2 flex items-center gap-1.5 text-xs text-[#005A9C] dark:text-[#66b3ff] bg-blue-50 dark:bg-zinc-800/50 p-2 rounded-lg border border-blue-100 dark:border-zinc-700/50">
-                            Toque em <Share size={12} className="inline-block" /> e <b>Adicionar à Tela Inicial</b>
+                        <div className="mt-2 flex items-center gap-1.5 text-[11px] text-[#005A9C] dark:text-[#66b3ff] bg-blue-50 dark:bg-zinc-800/50 p-2 rounded-lg border border-blue-100 dark:border-zinc-700/50">
+                            Toque em <Share size={12} className="inline-block" /> Compartilhar &gt; <b>Adicionar à Tela de Início</b>
                         </div>
                     ) : (
                         <button
                             onClick={handleInstallClick}
                             className="mt-2 w-full py-1.5 px-3 bg-[#005A9C] dark:bg-[#1452b5] text-white text-xs font-bold rounded-lg shadow-sm active:scale-95 transition-all text-center flex justify-center items-center gap-2"
                         >
-                            <Download size={14} /> Instalar App
+                            <Download size={14} /> Instalar
                         </button>
                     )}
                 </div>
