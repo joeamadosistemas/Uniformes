@@ -1,6 +1,5 @@
 import React from 'react';
 import { Package, ClipboardList, ArrowLeftRight } from 'lucide-react';
-import { useT } from '../lib/LanguageContext';
 
 interface Props {
     activeView: string;
@@ -8,8 +7,6 @@ interface Props {
 }
 
 export const BottomNav: React.FC<Props> = ({ activeView, setActiveView }) => {
-    const { t } = useT();
-
     const navItems = [
         { id: 'recebimentos', label: 'Recebimentos', icon: Package },
         { id: 'lancamentos', label: 'Inventário', icon: ClipboardList },
@@ -17,8 +14,8 @@ export const BottomNav: React.FC<Props> = ({ activeView, setActiveView }) => {
     ];
 
     return (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 z-[100] bg-white dark:bg-[#1e1e1e] border-t border-gray-200 dark:border-zinc-800 pb-safe">
-            <div className="flex justify-around items-center h-16 px-2">
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-[100] bg-[#5193EB] dark:bg-[#1452b5] shadow-[0_-4px_20px_rgba(0,0,0,0.15)] rounded-t-3xl border-t border-white/20">
+            <div className="flex justify-around items-center h-[76px] px-2 pb-2">
                 {navItems.map((item) => {
                     const Icon = item.icon;
                     const isActive = activeView === item.id;
@@ -27,15 +24,13 @@ export const BottomNav: React.FC<Props> = ({ activeView, setActiveView }) => {
                         <button
                             key={item.id}
                             onClick={() => setActiveView(item.id)}
-                            className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${isActive
-                                ? 'text-[#005A9C] dark:text-[#66b3ff]'
-                                : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+                            className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-all duration-300 ${isActive
+                                ? 'text-white'
+                                : 'text-white/60 hover:text-white/80'
                                 }`}
                         >
-                            <div className={`p-1 rounded-full transition-all duration-300 ${isActive ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}>
-                                <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
-                            </div>
-                            <span className={`text-[10px] font-medium ${isActive ? 'font-bold' : ''}`}>
+                            <Icon size={28} strokeWidth={isActive ? 2.5 : 2} className={isActive ? 'drop-shadow-sm' : ''} />
+                            <span className={`text-[11px] tracking-wide text-center leading-tight ${isActive ? 'font-black drop-shadow-sm' : 'font-medium'}`}>
                                 {item.label}
                             </span>
                         </button>

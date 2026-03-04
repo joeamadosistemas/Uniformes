@@ -30,7 +30,7 @@ function App() {
     const saved = localStorage.getItem('theme');
     return saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
   });
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [userRole, setUserRole] = useState<string>('Operador');
   const [userName, setUserName] = useState<string>('');
   const [escolaNome, setEscolaNome] = useState<string>('SMEDU');
@@ -236,7 +236,7 @@ function App() {
               <div className="flex-1 overflow-y-auto flex flex-col">
                 <main className="p-4 md:p-8 flex-1 pb-24 md:pb-8">
                   <div className="mx-auto w-full">
-                    <h2 className="text-2xl font-bold text-[#005A9C] dark:text-[#66b3ff] mb-6 capitalize border-b pb-2">
+                    <h2 className="hidden md:block text-2xl font-bold text-[#005A9C] dark:text-[#66b3ff] mb-6 capitalize border-b pb-2">
                       {activeView === 'lancamentos' ? t.pageTitles.lancamentos :
                         activeView === 'recebimentos' ? t.pageTitles.recebimentos :
                           activeView === 'transferencias' ? t.pageTitles.transferencias :

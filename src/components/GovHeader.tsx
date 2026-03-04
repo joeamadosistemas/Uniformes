@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Moon, Sun, Accessibility, Cookie, ChevronDown } from 'lucide-react';
+import { Moon, Sun, ChevronDown } from 'lucide-react';
 import { useT } from '../lib/LanguageContext';
 import type { Lang } from '../lib/i18n';
 
@@ -26,20 +26,20 @@ export const GovHeader: React.FC<GovHeaderProps> = ({
     const handleLang = (l: Lang) => { setLang(l); setLangOpen(false); };
 
     return (
-        <header className="bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md border-b border-gray-100 dark:border-zinc-800 shadow-sm sticky top-0 z-[100] transition-all duration-300">
-            {/* Top Header */}
-            <div className="flex justify-between items-center px-4 md:px-8 py-2 border-b border-gray-50 dark:border-zinc-800/50">
-                <div className="flex items-center gap-4">
-                    <img
-                        className="h-5 md:h-6"
-                        src="https://novoportal.itaguai.rj.gov.br/@@obter_logo_portal/logo25.png"
-                        alt="Prefeitura de Itaguaí"
-                    />
-                    <div className="w-px h-6 bg-gray-100 dark:bg-zinc-800"></div>
-                    <span className="text-xs md:text-sm font-medium text-gray-500 dark:text-zinc-400">Estado do Rio de Janeiro</span>
+        <header className="bg-white dark:bg-zinc-950 border-b border-gray-100 dark:border-zinc-800 shadow-sm sticky top-0 z-[100] transition-all duration-300">
+            {/* Top Row: Logo & Controls */}
+            <div className="flex justify-between items-start px-4 md:px-8 pt-4 pb-2">
+                <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                        <img
+                            className="h-7 md:h-8 object-contain"
+                            src="https://novoportal.itaguai.rj.gov.br/@@obter_logo_portal/logo25.png"
+                            alt="Prefeitura de Itaguaí"
+                        />
+                    </div>
                 </div>
 
-                <div className="flex items-center gap-3 md:gap-4">
+                <div className="flex items-center gap-2 md:gap-4">
                     <a href="https://novoportal.itaguai.rj.gov.br/paginas/jornal-oficial" target="_blank" className="hidden sm:block text-xs md:text-sm text-[#005A9C] dark:text-[#66b3ff] font-medium hover:underline">{t.header.jornal}</a>
                     <div className="hidden sm:block w-px h-4 bg-gray-200 dark:bg-[#333]"></div>
                     <a href="https://portal.transparencia.itaguai.rj.gov.br/" target="_blank" className="hidden sm:block text-xs md:text-sm text-[#005A9C] dark:text-[#66b3ff] font-medium hover:underline">{t.header.transparencia}</a>
@@ -49,12 +49,11 @@ export const GovHeader: React.FC<GovHeaderProps> = ({
                     <div className="relative">
                         <button
                             onClick={() => setLangOpen(!langOpen)}
-                            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-xs font-bold text-[#005A9C] dark:text-[#66b3ff] hover:bg-blue-50 dark:hover:bg-zinc-800 transition-all"
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-[10px] md:text-xs font-bold text-[#005A9C] dark:text-[#66b3ff] hover:bg-blue-50 dark:hover:bg-zinc-800 transition-all"
                             title={t.header.selecionarIdioma}
                         >
-                            <span>{LANG_FLAGS[lang]}</span>
                             <span>{LANG_LABELS[lang]}</span>
-                            <ChevronDown size={13} className={`transition-transform duration-200 ${langOpen ? 'rotate-180' : ''}`} />
+                            <ChevronDown size={14} className={`transition-transform duration-200 ${langOpen ? 'rotate-180' : ''}`} />
                         </button>
 
                         {langOpen && (
@@ -75,78 +74,66 @@ export const GovHeader: React.FC<GovHeaderProps> = ({
 
                     <button
                         onClick={toggleDarkMode}
-                        className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 text-[#005A9C] dark:text-[#66b3ff] hover:scale-110 active:scale-95 transition-all duration-200"
+                        className="w-8 h-8 flex items-center justify-center rounded-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 text-[#005A9C] dark:text-[#66b3ff] hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all duration-200 shadow-sm"
                         title={t.header.alternarTema}
                     >
-                        {isDarkMode ? <Sun size={18} className="animate-in spin-in duration-500" /> : <Moon size={18} className="animate-in spin-in duration-500" />}
+                        {isDarkMode ? <Sun size={16} className="animate-in spin-in duration-500" /> : <Moon size={16} className="animate-in spin-in duration-500" />}
                     </button>
-                    <button className="text-[#1452b5] dark:text-[#66b3ff] p-1" title={t.header.acessibilidade}><Accessibility size={18} /></button>
-                    <button className="text-[#1452b5] dark:text-[#66b3ff] p-1" title={t.header.privacidade}><Cookie size={18} /></button>
-                </div>
-            </div>
 
-            {/* Bottom Header */}
-            <div className="header-bottom flex flex-col px-4 md:px-8 py-3 gap-2">
-                {/* Desktop layout: Single line, Mobile: multi-line */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between w-full">
-                    {/* Upper row area (Mobile) / Left area (Desktop) */}
-                    <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 w-full md:w-auto">
-
-                        {/* Title text */}
-                        <div className="flex items-center gap-2 ml-10 md:ml-0 mb-1 md:mb-0">
-                            <a href="#" className="font-bold text-xs md:text-sm text-[#005A9C] dark:text-[#66b3ff] hover:underline whitespace-nowrap">Secretaria Municipal de Educação</a>
-                            <a href="#" className="text-xs md:text-sm text-[#005A9C] dark:text-[#66b3ff] hover:underline whitespace-nowrap hidden sm:inline">Portal SESME-C</a>
-                        </div>
-
-                        {/* Hamburger + Main Path */}
-                        <div className="flex items-center gap-2">
-                            <i
-                                id="menu-toggle"
-                                className="fa-solid fa-bars menu-icon text-[#005A9C] dark:text-[#66b3ff] text-2xl cursor-pointer"
-                                onClick={onMenuToggle}
-                            ></i>
-                            <span className="text-gray-300 dark:text-[#333] hidden md:inline">|</span>
-                            <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-xs md:text-sm text-[#005A9C] dark:text-[#66b3ff] whitespace-nowrap hidden sm:inline">| Uniforme Escolar |</span>
-                                    <span className="text-xs md:text-sm text-[#005A9C] dark:text-[#66b3ff] whitespace-nowrap sm:hidden">Uniforme Escolar |</span>
-                                    <span className="text-xs md:text-sm font-bold text-zinc-900 dark:text-white uppercase tracking-tight whitespace-nowrap">{t.header.telaAdministrativa}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Unidade Escolar */}
-                        <div className="flex items-center gap-1 ml-10 md:ml-0 mt-1 md:mt-0 md:pl-2 md:border-l border-gray-300 dark:border-zinc-700">
-                            <span className="text-xs md:text-sm text-gray-600 dark:text-gray-400">{t.header.unidadeEscolar}:</span>
-                            <span className="text-xs md:text-sm font-bold text-[#005A9C] dark:text-[#66b3ff] cursor-pointer" contentEditable>{schoolName || 'SMEDU'}</span>
-                        </div>
-                    </div>
-
-                    {/* Right area: User profile */}
-                    <div className="absolute right-4 top-[58px] md:relative md:top-0 ml-auto group z-50">
-                        <div className="flex items-center gap-2 cursor-pointer">
-                            <i className="fa-solid fa-user-circle text-[28px] md:text-[32px] text-[#005A9C] dark:text-[#66b3ff]"></i>
-                            <span className="hidden lg:inline font-medium text-sm text-gray-700 dark:text-gray-300">
-                                {isAdmin ? t.header.administrador : t.header.usuario}
-                            </span>
-                        </div>
-
-                        <div className="absolute top-full right-0 mt-2 w-64 glass shadow-2xl rounded-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible translate-y-2 group-hover:translate-y-0 transition-all duration-300 z-50 overflow-hidden">
+                    {/* User Profile Dropdown */}
+                    <div className="relative group">
+                        <button className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-50 dark:bg-zinc-900 border border-blue-100 dark:border-zinc-800 text-[#005A9C] dark:text-[#66b3ff] hover:bg-blue-100 dark:hover:bg-zinc-800 transition-all shadow-sm">
+                            <i className="fa-solid fa-user text-xs"></i>
+                        </button>
+                        <div className="absolute top-full right-0 mt-2 w-56 glass shadow-xl rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible translate-y-2 group-hover:translate-y-0 transition-all duration-300 z-50 overflow-hidden origin-top-right">
                             <ul className="py-2">
-                                <li className="border-b border-gray-50 dark:border-[#333] last:border-0">
-                                    <a href="#" className="flex items-center gap-3 px-4 py-3 text-xs md:text-sm text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#333]">
-                                        <i className="fa-solid fa-user text-[#005A9C] text-base"></i>
-                                        <span className="truncate font-medium">{userName || userEmail || t.header.meuPerfil}</span>
-                                    </a>
+                                <li className="border-b border-gray-100 dark:border-[#333]">
+                                    <div className="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 truncate">
+                                        <span className="font-bold block text-gray-700 dark:text-gray-200">{userName || userEmail || t.header.meuPerfil}</span>
+                                        {isAdmin ? t.header.administrador : t.header.usuario}
+                                    </div>
                                 </li>
                                 <li>
-                                    <button onClick={onLogout} className="w-full flex items-center gap-3 px-4 py-3 text-xs md:text-sm text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-[#331111] text-left">
-                                        <i className="fa-solid fa-right-from-bracket text-red-500 text-base"></i>
+                                    <button onClick={onLogout} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 text-left transition-colors">
+                                        <i className="fa-solid fa-right-from-bracket"></i>
                                         <span className="font-medium">{t.header.sair}</span>
                                     </button>
                                 </li>
                             </ul>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Department Name */}
+            <div className="px-4 md:px-8 pb-3">
+                <span className="text-[13px] md:text-sm font-bold text-[#005A9C] dark:text-[#66b3ff] leading-none block">Secretaria Municipal de Educação</span>
+            </div>
+
+            {/* Bottom Row: Path & School */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between px-4 md:px-8 pb-4 pt-2 gap-2 relative z-40">
+                <div className="flex items-center gap-3">
+                    <i
+                        id="menu-toggle"
+                        className="fa-solid fa-bars menu-icon text-[#005A9C] dark:text-[#66b3ff] text-2xl cursor-pointer hover:bg-blue-50 p-1.5 rounded-lg transition-colors"
+                        onClick={onMenuToggle}
+                    ></i>
+                    <div className="flex flex-col">
+                        <div className="flex items-center gap-1.5">
+                            <span className="text-[13px] md:text-sm text-[#005A9C] dark:text-[#66b3ff] whitespace-nowrap">Uniforme Escolar</span>
+                            <span className="text-gray-300 dark:text-zinc-600">|</span>
+                            <span className="text-[12px] md:text-xs font-black text-zinc-900 dark:text-white uppercase tracking-tight">TELA ADMINISTRATIVA</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* School Unit Display */}
+                <div className="pl-11 md:pl-0 mt-1 md:mt-0 flex justify-start md:justify-end w-full md:w-auto">
+                    <div className="flex items-center gap-1.5">
+                        <span className="text-[11px] md:text-xs text-gray-500 dark:text-gray-400">Unidade Escolar:</span>
+                        <span className="text-[12px] md:text-sm font-bold text-[#005A9C] dark:text-[#66b3ff] cursor-pointer" contentEditable suppressContentEditableWarning>
+                            {schoolName || 'CPD'}
+                        </span>
                     </div>
                 </div>
             </div>

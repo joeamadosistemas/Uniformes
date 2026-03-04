@@ -260,66 +260,63 @@ export const Recebimentos: React.FC = () => {
                     {mensagem.texto}
                 </div>
             )}
-            <div>
-                <p className="text-gray-500 dark:text-zinc-400 font-medium pb-2">
-                    {t.recebimentos.subtitulo}
+            <div className="text-center pt-4 pb-2">
+                <h1 className="text-[22px] md:text-3xl font-black text-[#005A9C] dark:text-[#66b3ff] mb-1">
+                    Recebimento De Uniformes
+                </h1>
+                <p className="text-[13px] md:text-base text-gray-500 dark:text-zinc-400 font-medium">
+                    Informe a quantidade recebida de cada modelo e tamanho
                 </p>
             </div>
 
-            {/* Metric Cards - Enhanced UI */}
-            <div className="flex flex-col gap-3 mb-8 mt-4">
+            {/* Metric Cards - Exact UI match */}
+            <div className="grid grid-cols-3 gap-3 md:gap-6 mb-4 md:mb-8 mt-2">
                 {/* Card 1: Registros */}
-                <div className="group relative bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm hover:shadow-md transition-all duration-300 flex flex-row items-center">
-                    <div className="p-4 bg-[#eef4fc] dark:bg-blue-900/20 text-[#5193EB] rounded-2xl mr-4 group-hover:bg-[#5193EB] group-hover:text-white transition-colors duration-300">
-                        <ClipboardList size={28} strokeWidth={2} />
+                <div className="bg-white dark:bg-zinc-900 py-5 px-2 md:p-6 rounded-3xl shadow-[0_4px_12px_rgba(0,0,0,0.06)] flex flex-col items-center justify-center text-center">
+                    <div className="p-3 bg-[#eef4fc] dark:bg-blue-900/20 text-[#5193EB] rounded-2xl mb-2">
+                        <ClipboardList className="w-6 h-6 md:w-8 md:h-8" strokeWidth={2} />
                     </div>
-                    <div className="flex flex-col justify-center">
-                        <p className="text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest group-hover:text-[#5193EB] transition-colors leading-none mb-1">
-                            Registros Lançados
-                        </p>
-                        <p className="text-2xl font-black text-slate-800 dark:text-white leading-none">
-                            {recebimentos.length}
-                        </p>
-                    </div>
+                    <p className="text-[9px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-[0.15em] mb-1">
+                        Registros
+                    </p>
+                    <p className="text-xl md:text-4xl font-black text-slate-800 dark:text-white leading-none">
+                        {recebimentos.length}
+                    </p>
                 </div>
 
                 {/* Card 2: Peças */}
-                <div className="group relative bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm hover:shadow-md transition-all duration-300 flex flex-row items-center">
-                    <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500 rounded-2xl mr-4 group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-300">
-                        <Package size={28} strokeWidth={2} />
+                <div className="bg-white dark:bg-zinc-900 py-5 px-2 md:p-6 rounded-3xl shadow-[0_4px_12px_rgba(0,0,0,0.06)] flex flex-col items-center justify-center text-center">
+                    <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500 rounded-2xl mb-2">
+                        <Package className="w-6 h-6 md:w-8 md:h-8" strokeWidth={2} />
                     </div>
-                    <div className="flex flex-col justify-center">
-                        <p className="text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest group-hover:text-emerald-500 transition-colors leading-none mb-1">
-                            Peças Recebidas
-                        </p>
-                        <p className="text-2xl font-black text-slate-800 dark:text-white leading-none">
-                            {recebimentos.reduce((acc, curr) => acc + (curr.quantidade || 0), 0)}
-                        </p>
-                    </div>
+                    <p className="text-[9px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-[0.15em] mb-1">
+                        Peças
+                    </p>
+                    <p className="text-xl md:text-4xl font-black text-slate-800 dark:text-white leading-none">
+                        {recebimentos.reduce((acc, curr) => acc + (curr.quantidade || 0), 0)}
+                    </p>
                 </div>
 
                 {/* Card 3: Modelos */}
-                <div className="group relative bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm hover:shadow-md transition-all duration-300 flex flex-row items-center">
-                    <div className="p-4 bg-purple-50 dark:bg-purple-900/20 text-purple-500 rounded-2xl mr-4 group-hover:bg-purple-500 group-hover:text-white transition-colors duration-300">
-                        <Layers size={28} strokeWidth={2} />
+                <div className="bg-white dark:bg-zinc-900 py-5 px-2 md:p-6 rounded-3xl shadow-[0_4px_12px_rgba(0,0,0,0.06)] flex flex-col items-center justify-center text-center">
+                    <div className="p-3 bg-purple-50 dark:bg-purple-900/20 text-purple-500 rounded-2xl mb-2">
+                        <Layers className="w-6 h-6 md:w-8 md:h-8" strokeWidth={2} />
                     </div>
-                    <div className="flex flex-col justify-center">
-                        <p className="text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest group-hover:text-purple-500 transition-colors leading-none mb-1">
-                            Modelos Diversos
-                        </p>
-                        <p className="text-2xl font-black text-slate-800 dark:text-white leading-none">
-                            {new Set(recebimentos.map(r => r.modelo_id)).size}
-                        </p>
-                    </div>
+                    <p className="text-[9px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-[0.15em] mb-1">
+                        Modelos
+                    </p>
+                    <p className="text-xl md:text-4xl font-black text-slate-800 dark:text-white leading-none">
+                        {new Set(recebimentos.map(r => r.modelo_id)).size}
+                    </p>
                 </div>
             </div>
 
             {/* Form Card */}
-            <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-gray-100 dark:border-zinc-800 p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <div className="space-y-2">
-                        <label className="text-base font-black text-gray-800 dark:text-zinc-200 uppercase tracking-wider block">
-                            {t.recebimentos.modelo}
+            <div className="bg-white dark:bg-zinc-900 rounded-3xl shadow-[0_4px_12px_rgba(0,0,0,0.06)] p-5 md:p-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div className="space-y-3">
+                        <label className="text-xs md:text-sm font-black text-gray-900 dark:text-zinc-200 uppercase tracking-widest block">
+                            MODELO
                         </label>
                         <select
                             className="w-full h-12 bg-gray-50 dark:bg-zinc-800 border-none rounded-xl px-4 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#005A9C] transition-all cursor-pointer"
