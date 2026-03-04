@@ -89,53 +89,56 @@ export const DashboardAdmin: React.FC = () => {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-3">
-                    <div className="p-2 bg-blue-50 text-blue-600 rounded-lg w-fit">
-                        <CheckCircle2 size={24} />
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-6">
+                <div className="bg-[#005A9C] dark:bg-[#1452b5] p-4 md:p-6 rounded-3xl border border-transparent shadow-lg shadow-blue-500/20 space-y-3 relative overflow-hidden">
+                    <div className="p-2 md:p-3 bg-white/20 text-white rounded-xl w-fit backdrop-blur-sm shadow-inner shrink-0 relative z-10">
+                        <CheckCircle2 className="w-5 h-5 md:w-6 md:h-6" />
                     </div>
-                    <div>
-                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t.dashboard.unidadesInformaram}</p>
-                        <h4 className="text-2xl font-black text-gray-800">{escolasQueInformaram.length}</h4>
+                    <div className="relative z-10">
+                        <p className="text-[10px] md:text-xs font-bold text-white/80 uppercase tracking-wider">{t.dashboard.unidadesInformaram}</p>
+                        <h4 className="text-2xl md:text-3xl font-black text-white">{escolasQueInformaram.length}</h4>
                     </div>
-                    <div className="text-[10px] text-green-600 font-bold bg-green-50 px-2 py-1 rounded w-fit">
+                    <div className="text-[9px] md:text-[10px] text-blue-900 font-bold bg-white/80 px-2 flex items-center h-5 md:h-6 rounded w-fit relative z-10">
                         {((escolasQueInformaram.length / (escolas.length || 1)) * 100).toFixed(0)}% {t.dashboard.jaInformaram.toLowerCase()}
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-3">
-                    <div className="p-2 bg-red-50 text-red-600 rounded-lg w-fit">
-                        <AlertCircle size={24} />
+                <div className="bg-[#eef2ff] dark:bg-zinc-800/80 p-4 md:p-6 rounded-3xl border border-blue-100 dark:border-zinc-700 shadow-sm space-y-3 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-red-400/10 rounded-bl-full -z-10"></div>
+                    <div className="p-2 md:p-3 bg-white dark:bg-zinc-700 text-red-500 rounded-xl w-fit shadow-sm shrink-0 relative z-10">
+                        <AlertCircle className="w-5 h-5 md:w-6 md:h-6" />
                     </div>
-                    <div>
-                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t.dashboard.unidadesPendentes}</p>
-                        <h4 className="text-2xl font-black text-gray-800">{escolasQueFaltam.length}</h4>
+                    <div className="relative z-10">
+                        <p className="text-[10px] md:text-xs font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-wider">{t.dashboard.unidadesPendentes}</p>
+                        <h4 className="text-2xl md:text-3xl font-black text-gray-800 dark:text-white">{escolasQueFaltam.length}</h4>
                     </div>
-                    <div className="text-[10px] text-red-600 font-bold bg-red-50 px-2 py-1 rounded w-fit">
+                    <div className="text-[9px] md:text-[10px] text-red-600 font-bold bg-red-50 px-2 flex items-center h-5 md:h-6 rounded w-fit relative z-10">
                         {((escolasQueFaltam.length / (escolas.length || 1)) * 100).toFixed(0)}% {t.dashboard.unidadesPendentes.toLowerCase()}
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-3">
-                    <div className="p-2 bg-orange-50 text-orange-600 rounded-lg w-fit">
-                        <TrendingDown size={24} />
+                <div className="bg-[#eef2ff] dark:bg-zinc-800/80 p-4 md:p-6 rounded-3xl border border-blue-100 dark:border-zinc-700 shadow-sm space-y-3 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-orange-400/10 rounded-bl-full -z-10"></div>
+                    <div className="p-2 md:p-3 bg-white dark:bg-zinc-700 text-orange-500 rounded-xl w-fit shadow-sm shrink-0 relative z-10">
+                        <TrendingDown className="w-5 h-5 md:w-6 md:h-6" />
                     </div>
-                    <div>
-                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t.dashboard.qtdTotalFaltando}</p>
-                        <h4 className="text-2xl font-black text-gray-800">{totalGeralFaltando}</h4>
+                    <div className="relative z-10">
+                        <p className="text-[10px] md:text-xs font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-wider">{t.dashboard.qtdTotalFaltando}</p>
+                        <h4 className="text-2xl md:text-3xl font-black text-gray-800 dark:text-white">{totalGeralFaltando}</h4>
                     </div>
-                    <p className="text-[10px] text-gray-400 font-medium">{t.dashboard.subtitulo}</p>
+                    <p className="text-[9px] md:text-[10px] text-gray-400 font-medium relative z-10">{t.dashboard.subtitulo}</p>
                 </div>
 
-                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-3">
-                    <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg w-fit">
-                        <TrendingUp size={24} />
+                <div className="bg-[#eef2ff] dark:bg-zinc-800/80 p-4 md:p-6 rounded-3xl border border-blue-100 dark:border-zinc-700 shadow-sm space-y-3 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-400/10 rounded-bl-full -z-10"></div>
+                    <div className="p-2 md:p-3 bg-white dark:bg-zinc-700 text-emerald-500 rounded-xl w-fit shadow-sm shrink-0 relative z-10">
+                        <TrendingUp className="w-5 h-5 md:w-6 md:h-6" />
                     </div>
-                    <div>
-                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t.dashboard.qtdTotalSobrando}</p>
-                        <h4 className="text-2xl font-black text-gray-800">{totalGeralSobrando}</h4>
+                    <div className="relative z-10">
+                        <p className="text-[10px] md:text-xs font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-wider">{t.dashboard.qtdTotalSobrando}</p>
+                        <h4 className="text-2xl md:text-3xl font-black text-gray-800 dark:text-white">{totalGeralSobrando}</h4>
                     </div>
-                    <p className="text-[10px] text-gray-400 font-medium">{t.dashboard.subtitulo}</p>
+                    <p className="text-[9px] md:text-[10px] text-gray-400 font-medium relative z-10">{t.dashboard.subtitulo}</p>
                 </div>
             </div>
 

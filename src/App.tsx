@@ -18,6 +18,7 @@ import { GovHeader } from './components/GovHeader';
 import { GovFooter } from './components/GovFooter';
 import { CadastroModelos } from './views/CadastroModelos';
 import { InstallPrompt } from './components/InstallPrompt';
+import { BottomNav } from './components/BottomNav';
 
 
 function App() {
@@ -233,7 +234,7 @@ function App() {
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col h-full overflow-hidden">
               <div className="flex-1 overflow-y-auto flex flex-col">
-                <main className="p-4 md:p-8 flex-1">
+                <main className="p-4 md:p-8 flex-1 pb-24 md:pb-8">
                   <div className="mx-auto w-full">
                     <h2 className="text-2xl font-bold text-[#005A9C] dark:text-[#66b3ff] mb-6 capitalize border-b pb-2">
                       {activeView === 'lancamentos' ? t.pageTitles.lancamentos :
@@ -255,6 +256,7 @@ function App() {
               </div>
             </div>
           </div>
+          <BottomNav activeView={activeView} setActiveView={setActiveView} />
           <InstallPrompt />
         </div>
       </div>
