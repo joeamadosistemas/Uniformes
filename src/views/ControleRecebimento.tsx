@@ -355,7 +355,7 @@ export const ControleRecebimento: React.FC = () => {
 
             {/* Modal de Detalhes da Unidade */}
             {showModal && selectedEscola && (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-300">
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-300">
                     <div className="bg-white dark:bg-zinc-900 w-full max-w-5xl max-h-[90vh] rounded-[3rem] shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-300 border border-white/10">
                         {/* Modal Header */}
                         <div className="p-10 border-b border-gray-100 dark:border-zinc-800 relative bg-white dark:bg-zinc-900">
