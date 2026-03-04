@@ -90,9 +90,9 @@ function App() {
     let foundEscolaNome = false;
 
     try {
-      // Tenta carregar do Profile
+      // Tenta carregar do profiles
       const { data: profile, error } = await supabase
-        .from('Profile')
+        .from('profiles')
         .select('role, nome, email_escola')
         .eq('id', userId)
         .maybeSingle();
@@ -264,19 +264,6 @@ function App() {
               <div className="flex-1 overflow-y-auto flex flex-col">
                 <main className="p-4 md:p-8 flex-1 pb-24 md:pb-8">
                   <div className="mx-auto w-full">
-                    <h2 className="hidden md:block text-2xl font-bold text-[#005A9C] dark:text-[#66b3ff] mb-6 capitalize border-b pb-2">
-                      {activeView === 'lancamentos' ? t.pageTitles.lancamentos :
-                        activeView === 'recebimentos' ? t.pageTitles.recebimentos :
-                          activeView === 'transferencias' ? t.pageTitles.transferencias :
-                            activeView === 'admin-dashboard' ? t.pageTitles.adminDashboard :
-                              activeView === 'controle-recebimento' ? t.pageTitles.controleRecebimento :
-                                activeView === 'config-escola' ? t.pageTitles.unidadeEscolar :
-                                  activeView === 'config-usuarios' ? t.pageTitles.usuarios :
-                                    activeView === 'config-uniformes' ? t.pageTitles.cadastrosUniformes :
-                                      activeView === 'config-modelos' ? t.pageTitles.cadastroModelos :
-                                        activeView === 'config-backup' ? t.pageTitles.backupRestauracao :
-                                          activeView === 'config-sobre' ? t.pageTitles.sobre : t.pageTitles.lancamentos}
-                    </h2>
                     {renderView()}
                   </div>
                 </main>

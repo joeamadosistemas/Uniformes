@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { School, CheckCircle2, Clock, Search, Filter, BarChart3, ArrowUpRight, AlertCircle, Loader2, FileText, RefreshCw, X } from 'lucide-react';
+import { School, CheckCircle2, Clock, Search, Filter, BarChart3, ArrowUpRight, AlertCircle, Loader2, FileText, RefreshCw, X, Layers } from 'lucide-react';
 import { supabase, supabaseAdmin } from '../lib/supabaseClient';
 import { useT } from '../lib/LanguageContext';
 import { EscolaCadastro } from '../types';

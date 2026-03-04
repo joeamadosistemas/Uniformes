@@ -38,7 +38,7 @@ export const Recebimentos: React.FC = () => {
             if (userId) {
                 // Get user role from Profile table
                 supabase
-                    .from('Profile')
+                    .from('profiles')
                     .select('role')
                     .eq('id', userId)
                     .single()
@@ -383,14 +383,7 @@ export const Recebimentos: React.FC = () => {
                     {mensagem.texto}
                 </div>
             )}
-            <div className="text-center pt-4 pb-2">
-                <h1 className="text-[22px] md:text-3xl font-black text-[#005A9C] dark:text-[#66b3ff] mb-1">
-                    Recebimento De Uniformes
-                </h1>
-                <p className="text-[13px] md:text-base text-gray-500 dark:text-zinc-400 font-medium">
-                    Informe a quantidade recebida de cada modelo e tamanho
-                </p>
-            </div>
+            <div className="pt-4 pb-2" />
 
             {/* Metric Cards - Exact UI match */}
             <div className="grid grid-cols-3 gap-3 md:gap-6 mb-4 md:mb-8 mt-2">
