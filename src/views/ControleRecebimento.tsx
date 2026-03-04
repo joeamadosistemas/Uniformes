@@ -23,10 +23,11 @@ export const ControleRecebimento: React.FC = () => {
     const [detalhesRecebimento, setDetalhesRecebimento] = useState<any[]>([]);
     const [loadingDetalhes, setLoadingDetalhes] = useState(false);
     const [showModal, setShowModal] = useState(false);
+    const [selectedYear, setSelectedYear] = useState<number>(2026);
 
     useEffect(() => {
         fetchStatusEscolas();
-    }, []);
+    }, [selectedYear]);
 
     const fetchStatusEscolas = async () => {
         try {
@@ -42,11 +43,16 @@ export const ControleRecebimento: React.FC = () => {
 
             if (errorEscolas) throw errorEscolas;
 
-            // 2. Buscar e-mails únicos de escolas que já lançaram recebimentos
+            // 2. Buscar e-mails únicos de escolas que já lançaram recebimentos no ano selecionado
             const client = supabaseAdmin || supabase;
+            const startDate = `${selectedYear}-01-01T00:00:00Z`;
+            const endDate = `${selectedYear}-12-31T23:59:59Z`;
+
             const { data: lancamentos, error: errorLancamentos } = await client
                 .from('recebimentos')
                 .select('escola, data_recebimento')
+                .gte('data_recebimento', startDate)
+                .lte('data_recebimento', endDate)
                 .order('data_recebimento', { ascending: false })
                 .limit(10000);
 
@@ -187,15 +193,30 @@ export const ControleRecebimento: React.FC = () => {
             {/* List Table */}
             <div className="bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-gray-100 dark:border-zinc-800 shadow-xl shadow-gray-200/50 dark:shadow-none overflow-hidden">
                 <div className="p-8 border-b border-gray-50 dark:border-zinc-800 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white dark:bg-zinc-900">
-                    <div className="relative flex-1 max-w-md group">
-                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={20} />
-                        <input
-                            type="text"
-                            placeholder={t.dashboardControle.buscarEscola}
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-14 pr-6 py-4 bg-gray-50 dark:bg-zinc-800/50 border border-transparent focus:border-blue-500/30 rounded-[1.25rem] focus:ring-4 focus:ring-blue-500/5 outline-none transition-all text-sm font-bold dark:text-white"
-                        />
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 bg-gray-50 dark:bg-zinc-800 px-4 py-2 rounded-xl border border-transparent focus-within:border-blue-500/30 transition-all">
+                            <span className="text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Ano:</span>
+                            <select
+                                value={selectedYear}
+                                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                                className="bg-transparent border-none text-sm font-black text-[#005A9C] dark:text-[#66b3ff] focus:ring-0 cursor-pointer"
+                            >
+                                <option value={2026}>2026</option>
+                                <option value={2025}>2025</option>
+                                <option value={2024}>2024</option>
+                            </select>
+                        </div>
+
+                        <div className="relative flex-1 max-w-md group">
+                            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={20} />
+                            <input
+                                type="text"
+                                placeholder={t.dashboardControle.buscarEscola}
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pl-14 pr-6 py-4 bg-gray-50 dark:bg-zinc-800/50 border border-transparent focus:border-blue-500/30 rounded-[1.25rem] focus:ring-4 focus:ring-blue-500/5 outline-none transition-all text-sm font-bold dark:text-white"
+                            />
+                        </div>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-4">

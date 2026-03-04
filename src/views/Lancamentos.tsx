@@ -28,6 +28,7 @@ export const Lancamentos: React.FC = () => {
   const [categoriaLocked, setCategoriaLocked] = useState(false);
   // Categorias que este escola tem permissão de registrar (vazio = todas)
   const [categoriasPermitidas, setCategoriasPermitidas] = useState<string[]>([]);
+  const [selectedYear, setSelectedYear] = useState<number>(2026);
 
   // Busca a sessão e depois consulta os segmentos reais da escola no banco
   useEffect(() => {
@@ -117,7 +118,8 @@ export const Lancamentos: React.FC = () => {
     const matchCategoria = filtros.categoria ? r.categoria === filtros.categoria : true;
     const matchTipo = filtros.tipo_uniforme ? r.tipo_uniforme === filtros.tipo_uniforme : true;
     const matchData = filtros.data ? r.data_registro.startsWith(filtros.data) : true;
-    return matchCategoria && matchTipo && matchData;
+    const matchYear = r.data_registro.startsWith(selectedYear.toString());
+    return matchCategoria && matchTipo && matchData && matchYear;
   });
 
   return (
@@ -129,8 +131,22 @@ export const Lancamentos: React.FC = () => {
         </div>
       )}
 
-      <div>
-        <p className="text-gray-500 dark:text-zinc-400 font-medium">{t.lancamentos.subtitulo}</p>
+      <div className="flex justify-between items-center bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 p-4 rounded-2xl shadow-sm">
+        <div>
+          <p className="text-gray-500 dark:text-zinc-400 font-medium">{t.lancamentos.subtitulo}</p>
+        </div>
+        <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-zinc-800 rounded-xl">
+          <span className="text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Ano:</span>
+          <select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(Number(e.target.value))}
+            className="bg-transparent border-none text-sm font-black text-[#005A9C] dark:text-[#66b3ff] focus:ring-0 cursor-pointer"
+          >
+            <option value={2026}>2026</option>
+            <option value={2025}>2025</option>
+            <option value={2024}>2024</option>
+          </select>
+        </div>
       </div>
 
       <DashboardStats registros={registrosFiltrados} />

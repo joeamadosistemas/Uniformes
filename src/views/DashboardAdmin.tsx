@@ -20,6 +20,7 @@ export const DashboardAdmin: React.FC = () => {
     const [escolas, setEscolas] = useState<EscolaCadastro[]>([]);
     const [registros, setRegistros] = useState<RegistroUniforme[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedYear, setSelectedYear] = useState<number>(2026);
 
     useEffect(() => {
         const escolasSalvas = localStorage.getItem('@Uniformes:escolas');
@@ -30,16 +31,18 @@ export const DashboardAdmin: React.FC = () => {
     }, []);
 
     // Cálculos
+    const registrosNoAno = registros.filter(r => r.data_registro.startsWith(selectedYear.toString()));
+
     const escolasQueInformaram = escolas.filter(escola =>
-        registros.some(r => r.escola === escola.nome)
+        registrosNoAno.some(r => r.escola === escola.nome)
     );
 
     const escolasQueFaltam = escolas.filter(escola =>
-        !registros.some(r => r.escola === escola.nome)
+        !registrosNoAno.some(r => r.escola === escola.nome)
     );
 
     const resumoPorEscola = escolasQueInformaram.map(escola => {
-        const registrosEscola = registros.filter(r => r.escola === escola.nome);
+        const registrosEscola = registrosNoAno.filter(r => r.escola === escola.nome);
         const totalFaltando = registrosEscola.reduce((acc, curr) => acc + (curr.qtd_faltando || 0), 0);
         const totalSobrando = registrosEscola.reduce((acc, curr) => acc + (curr.qtd_sobrando || 0), 0);
         return {
@@ -67,19 +70,34 @@ export const DashboardAdmin: React.FC = () => {
 
     return (
         <div className="space-y-8 pb-20">
-            {/* Export Actions */}
-            <div className="flex justify-end items-center space-x-3 mb-6">
-                <button
-                    onClick={handleExportPDF}
-                    className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all shadow-sm"
-                >
-                    <FileText size={18} className="mr-2 text-red-500" />
-                    PDF
-                </button>
-                <button className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all shadow-sm">
-                    <Download size={18} className="mr-2 text-green-500" />
-                    Excel
-                </button>
+            {/* Top Bar with Year and Export Actions */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 px-4 py-2 rounded-2xl shadow-sm">
+                    <span className="text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Ano:</span>
+                    <select
+                        value={selectedYear}
+                        onChange={(e) => setSelectedYear(Number(e.target.value))}
+                        className="bg-transparent border-none text-sm font-black text-[#005A9C] dark:text-[#66b3ff] focus:ring-0 cursor-pointer"
+                    >
+                        <option value={2026}>2026</option>
+                        <option value={2025}>2025</option>
+                        <option value={2024}>2024</option>
+                    </select>
+                </div>
+
+                <div className="flex items-center space-x-3">
+                    <button
+                        onClick={handleExportPDF}
+                        className="flex items-center px-4 py-2 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-sm font-bold text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-700 transition-all shadow-sm"
+                    >
+                        <FileText size={18} className="mr-2 text-red-500" />
+                        PDF
+                    </button>
+                    <button className="flex items-center px-4 py-2 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-sm font-bold text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-700 transition-all shadow-sm">
+                        <Download size={18} className="mr-2 text-green-500" />
+                        Excel
+                    </button>
+                </div>
             </div>
 
             {/* Stats Cards */}
@@ -137,7 +155,7 @@ export const DashboardAdmin: React.FC = () => {
             </div>
 
             {/* Tabs Layout */}
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-sm overflow-hidden">
                 <div className="border-b border-gray-50 px-8 py-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="flex space-x-1 bg-gray-100/50 p-1 rounded-xl">
                         <button

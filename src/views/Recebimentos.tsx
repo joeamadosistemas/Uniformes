@@ -22,6 +22,7 @@ export const Recebimentos: React.FC = () => {
     const [mensagem, setMensagem] = useState<{ texto: string; tipo: 'sucesso' | 'erro' } | null>(null);
     const [isInitialLoadDone, setIsInitialLoadDone] = useState(false);
     const [isSynced, setIsSynced] = useState<boolean | null>(null); // null: loading, true: synced, false: error
+    const [selectedYear, setSelectedYear] = useState<number>(2026);
 
     useEffect(() => {
         let isMounted = true;
@@ -64,12 +65,17 @@ export const Recebimentos: React.FC = () => {
             }
 
             if (emailUser) {
-                // Carregar registros do Supabase para esta escola
+                // Carregar registros do Supabase para esta escola e ano selecionado
                 const normalizedEmail = emailUser.toLowerCase().trim();
+                const startDate = `${selectedYear}-01-01T00:00:00Z`;
+                const endDate = `${selectedYear}-12-31T23:59:59Z`;
+
                 supabase
                     .from('recebimentos')
                     .select('*')
                     .eq('escola', normalizedEmail)
+                    .gte('data_recebimento', startDate)
+                    .lte('data_recebimento', endDate)
                     .order('data_recebimento', { ascending: false })
                     .then(({ data: dbData, error: dbError }) => {
                         if (!isMounted) return;
@@ -80,19 +86,20 @@ export const Recebimentos: React.FC = () => {
                             setIsSynced(true);
                         } else {
                             // Fallback para LocalStorage se o banco falhar, estiver offline ou vazio
-                            const storageKey = `@Uniformes:recebimentos:${normalizedEmail}`;
+                            const storageKey = `@Uniformes:recebimentos:${normalizedEmail}:${selectedYear}`;
                             const dadosSalvos = localStorage.getItem(storageKey);
                             if (dadosSalvos) {
                                 setRecebimentos(JSON.parse(dadosSalvos));
+                            } else {
+                                setRecebimentos([]);
                             }
                             setIsInitialLoadDone(true);
                             if (dbError) {
                                 setIsSynced(false);
                             } else if (dadosSalvos && JSON.parse(dadosSalvos).length > 0) {
-                                // Temos dados locais mas o banco está vazio/sem acesso
                                 setIsSynced(false);
                             } else {
-                                setIsSynced(true); // Ambos vazios = Em dia
+                                setIsSynced(true);
                             }
                         }
                     });
@@ -169,13 +176,13 @@ export const Recebimentos: React.FC = () => {
         return () => {
             isMounted = false;
         };
-    }, []);
+    }, [selectedYear]);
 
     useEffect(() => {
         if (escola && isInitialLoadDone) {
-            localStorage.setItem(`@Uniformes:recebimentos:${escola.toLowerCase().trim()}`, JSON.stringify(recebimentos));
+            localStorage.setItem(`@Uniformes:recebimentos:${escola.toLowerCase().trim()}:${selectedYear}`, JSON.stringify(recebimentos));
         }
-    }, [recebimentos, escola, isInitialLoadDone]);
+    }, [recebimentos, escola, isInitialLoadDone, selectedYear]);
 
     const handleModeloChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const modelo = modelosDisponiveis.find(m => m.id === e.target.value) || null;
@@ -383,7 +390,20 @@ export const Recebimentos: React.FC = () => {
                     {mensagem.texto}
                 </div>
             )}
-            <div className="pt-4 pb-2" />
+            <div className="pt-4 pb-2 flex justify-between items-center">
+                <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 px-4 py-2 rounded-2xl shadow-sm">
+                    <span className="text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Ano:</span>
+                    <select
+                        value={selectedYear}
+                        onChange={(e) => setSelectedYear(Number(e.target.value))}
+                        className="bg-transparent border-none text-sm font-black text-[#005A9C] dark:text-[#66b3ff] focus:ring-0 cursor-pointer"
+                    >
+                        <option value={2026}>2026</option>
+                        <option value={2025}>2025</option>
+                        <option value={2024}>2024</option>
+                    </select>
+                </div>
+            </div>
 
             {/* Metric Cards - Exact UI match */}
             <div className="grid grid-cols-3 gap-3 md:gap-6 mb-4 md:mb-8 mt-2">
