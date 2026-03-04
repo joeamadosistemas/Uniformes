@@ -20,6 +20,7 @@ export const Recebimentos: React.FC = () => {
     const [userRole, setUserRole] = useState<string>('usuario');
     const [saving, setSaving] = useState(false);
     const [mensagem, setMensagem] = useState<{ texto: string; tipo: 'sucesso' | 'erro' } | null>(null);
+    const [isInitialLoadDone, setIsInitialLoadDone] = useState(false);
 
     useEffect(() => {
         let isMounted = true;
@@ -63,29 +64,33 @@ export const Recebimentos: React.FC = () => {
 
             if (emailUser) {
                 // Carregar registros do Supabase para esta escola
+                const normalizedEmail = emailUser.toLowerCase().trim();
                 supabase
                     .from('recebimentos')
                     .select('*')
-                    .eq('escola', emailUser)
+                    .eq('escola', normalizedEmail)
                     .order('data_recebimento', { ascending: false })
                     .then(({ data: dbData, error: dbError }) => {
                         if (!isMounted) return;
-                        if (!dbError && dbData) {
+
+                        if (!dbError && dbData && dbData.length > 0) {
                             setRecebimentos(dbData);
+                            setIsInitialLoadDone(true);
                         } else {
-                            // Fallback para LocalStorage se o banco falhar ou estiver offline
-                            const storageKey = `@Uniformes:recebimentos:${emailUser}`;
+                            // Fallback para LocalStorage se o banco falhar, estiver offline ou vazio
+                            const storageKey = `@Uniformes:recebimentos:${normalizedEmail}`;
                             const dadosSalvos = localStorage.getItem(storageKey);
                             if (dadosSalvos) {
                                 setRecebimentos(JSON.parse(dadosSalvos));
                             }
+                            setIsInitialLoadDone(true);
                         }
                     });
 
                 supabase
                     .from('escolas')
                     .select('nome, segmentos')
-                    .eq('email', emailUser)
+                    .eq('email', normalizedEmail)
                     .single()
                     .then(({ data: escolaData }) => {
                         if (!isMounted) return;
@@ -94,6 +99,8 @@ export const Recebimentos: React.FC = () => {
                             setSegmentosEscola(escolaData.segmentos || []);
                         }
                     });
+            } else {
+                setIsInitialLoadDone(true);
             }
         });
 
@@ -155,10 +162,10 @@ export const Recebimentos: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        if (escola) {
-            localStorage.setItem(`@Uniformes:recebimentos:${escola}`, JSON.stringify(recebimentos));
+        if (escola && isInitialLoadDone) {
+            localStorage.setItem(`@Uniformes:recebimentos:${escola.toLowerCase().trim()}`, JSON.stringify(recebimentos));
         }
-    }, [recebimentos, escola]);
+    }, [recebimentos, escola, isInitialLoadDone]);
 
     const handleModeloChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const modelo = modelosDisponiveis.find(m => m.id === e.target.value) || null;

@@ -59,7 +59,6 @@ export const ControleRecebimento: React.FC = () => {
                 console.warn('Tabela recebimentos ainda não disponível para controle total.');
             }
 
-            // Mapear escolas que já lançaram usando o e-mail como chave (case-insensitive)
             const escolasComLancamento = new Map<string, string>(); // email -> data
             if (lancamentos) {
                 lancamentos.forEach(l => {
