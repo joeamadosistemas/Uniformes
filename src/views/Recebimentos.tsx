@@ -242,6 +242,44 @@ export const Recebimentos: React.FC = () => {
         }
     };
 
+    const sincronizarTudo = async () => {
+        if (recebimentos.length === 0) return;
+
+        try {
+            setSaving(true);
+            const payload = recebimentos.map(item => ({
+                escola: item.escola,
+                modelo_id: item.modelo_id,
+                modelo_nome: item.modelo_nome,
+                descricao: item.descricao,
+                tamanho: item.tamanho,
+                quantidade: item.quantidade,
+                data_recebimento: item.data_recebimento
+            }));
+
+            // Tentar inserir todos. O Supabase pode dar erro de duplicata se alguns já existirem, 
+            // mas como o id é gerado no banco, aqui ele vai tentar inserir todos como novos.
+            // Para ser mais robusto, poderíamos usar upsert se tivéssemos uma constraint.
+            const { error } = await supabase
+                .from('recebimentos')
+                .insert(payload);
+
+            if (error) {
+                console.error('Erro na sincronização em massa:', error);
+                mostrarMensagem('Falha ao sincronizar com o servidor.', 'erro');
+                setIsSynced(false);
+            } else {
+                mostrarMensagem('Todos os dados foram sincronizados com a nuvem!', 'sucesso');
+                setIsSynced(true);
+            }
+        } catch (error) {
+            console.error('Erro ao sincronizar:', error);
+            mostrarMensagem('Erro inesperado ao sincronizar.', 'erro');
+        } finally {
+            setSaving(false);
+        }
+    };
+
     const removerItem = async (id: string) => {
         if (window.confirm(t.recebimentos.confirmExcluir)) {
             try {
@@ -388,13 +426,22 @@ export const Recebimentos: React.FC = () => {
                         {new Set(recebimentos.map(r => r.modelo_id)).size}
                     </p>
                     {/* Status de Sincronização */}
-                    <div className="absolute top-2 right-2">
+                    <div className="absolute top-2 right-2 flex items-center gap-2">
                         {isSynced === true ? (
-                            <Check className="text-green-500 w-4 h-4" title="Sincronizado com a nuvem" />
+                            <div title="Sincronizado com a nuvem">
+                                <Check className="text-green-500 w-4 h-4" />
+                            </div>
                         ) : isSynced === false ? (
-                            <X className="text-red-500 w-4 h-4" title="Erro na sincronização (Apenas Local)" />
+                            <div className="flex items-center gap-1 bg-red-50 dark:bg-red-900/20 px-2 py-1 rounded-lg border border-red-100 dark:border-red-900/30">
+                                <span className="text-[8px] font-bold text-red-500 uppercase">Local</span>
+                                <button onClick={sincronizarTudo} disabled={saving} className="text-red-500 hover:text-red-600 transition-colors" title="Sincronizar dados locais">
+                                    <X className="w-3 h-3" />
+                                </button>
+                            </div>
                         ) : (
-                            <Loader2 className="text-amber-500 w-4 h-4 animate-spin" title="Sincronizando..." />
+                            <div title="Sincronizando...">
+                                <Loader2 className="text-amber-500 w-4 h-4 animate-spin" />
+                            </div>
                         )}
                     </div>
                 </div>
