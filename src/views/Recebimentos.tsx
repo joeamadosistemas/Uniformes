@@ -174,18 +174,21 @@ export const Recebimentos: React.FC = () => {
     const adcionarItem = async () => {
         if (!modeloSelecionado) return;
 
-        const novosItens: Recebimento[] = Object.entries(quantidades)
-            .filter(([_, qty]) => qty > 0)
-            .map(([tamanho, qty]) => ({
-                id: crypto.randomUUID(),
-                escola,
-                data_recebimento: new Date().toISOString(),
-                modelo_id: modeloSelecionado.id,
-                modelo_nome: modeloSelecionado.nome,
-                descricao: modeloSelecionado.descricao,
-                tamanho,
-                quantidade: qty,
-            }));
+        // Filtramos os tamanhos que ainda não foram lançados para este modelo
+        const tamanhosPendentes = modeloSelecionado.tamanhos.filter(tamanho =>
+            !recebimentos.some(r => r.modelo_id === modeloSelecionado.id && r.tamanho === tamanho)
+        );
+
+        const novosItens: Recebimento[] = tamanhosPendentes.map(tamanho => ({
+            id: crypto.randomUUID(),
+            escola,
+            data_recebimento: new Date().toISOString(),
+            modelo_id: modeloSelecionado.id,
+            modelo_nome: modeloSelecionado.nome,
+            descricao: modeloSelecionado.descricao,
+            tamanho,
+            quantidade: quantidades[tamanho] || 0,
+        }));
 
         if (novosItens.length === 0) return;
 
