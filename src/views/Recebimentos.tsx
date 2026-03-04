@@ -8,10 +8,7 @@ import { exportarRecebimentosExcel, exportarRecebimentosPDF } from '../utils/exp
 
 export const Recebimentos: React.FC = () => {
     const { t } = useT();
-    const [recebimentos, setRecebimentos] = useState<Recebimento[]>(() => {
-        const dadosSalvos = localStorage.getItem('@Uniformes:recebimentos');
-        return dadosSalvos ? JSON.parse(dadosSalvos) : [];
-    });
+    const [recebimentos, setRecebimentos] = useState<Recebimento[]>([]);
     const [modelosDisponiveis, setModelosDisponiveis] = useState<RecebimentoModelo[]>(RECEBIMENTOS_MODELOS);
     const [modeloSelecionado, setModeloSelecionado] = useState<RecebimentoModelo | null>(null);
     const [quantidades, setQuantidades] = useState<Record<string, number>>({});
@@ -65,6 +62,26 @@ export const Recebimentos: React.FC = () => {
             }
 
             if (emailUser) {
+                // Carregar registros do Supabase para esta escola
+                supabase
+                    .from('recebimentos')
+                    .select('*')
+                    .eq('escola', emailUser)
+                    .order('data_recebimento', { ascending: false })
+                    .then(({ data: dbData, error: dbError }) => {
+                        if (!isMounted) return;
+                        if (!dbError && dbData) {
+                            setRecebimentos(dbData);
+                        } else {
+                            // Fallback para LocalStorage se o banco falhar ou estiver offline
+                            const storageKey = `@Uniformes:recebimentos:${emailUser}`;
+                            const dadosSalvos = localStorage.getItem(storageKey);
+                            if (dadosSalvos) {
+                                setRecebimentos(JSON.parse(dadosSalvos));
+                            }
+                        }
+                    });
+
                 supabase
                     .from('escolas')
                     .select('nome, segmentos')
@@ -138,8 +155,10 @@ export const Recebimentos: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        localStorage.setItem('@Uniformes:recebimentos', JSON.stringify(recebimentos));
-    }, [recebimentos]);
+        if (escola) {
+            localStorage.setItem(`@Uniformes:recebimentos:${escola}`, JSON.stringify(recebimentos));
+        }
+    }, [recebimentos, escola]);
 
     const handleModeloChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const modelo = modelosDisponiveis.find(m => m.id === e.target.value) || null;
@@ -217,6 +236,34 @@ export const Recebimentos: React.FC = () => {
                 mostrarMensagem(t.lancamentos.sucessoExcluir);
             } catch (err) {
                 console.error('Erro ao remover item:', err);
+            }
+        }
+    };
+
+    const removerModelo = async (modeloId: string, modeloNome: string) => {
+        if (window.confirm(`Deseja realmente excluir TODOS os tamanhos do modelo "${modeloNome}"?`)) {
+            try {
+                setSaving(true);
+                // 1. Tentar remover do Supabase
+                const { error } = await supabase
+                    .from('recebimentos')
+                    .delete()
+                    .eq('modelo_id', modeloId)
+                    .eq('escola', escola);
+
+                if (error) {
+                    console.warn('Erro ao remover modelo do Supabase:', error.message);
+                }
+
+                // 2. Atualizar estado local
+                setRecebimentos(prev => prev.filter(item => item.modelo_id !== modeloId));
+                mostrarMensagem(`Todos os tamanhos do modelo "${modeloNome}" foram removidos.`);
+
+            } catch (error) {
+                console.error('Erro ao remover modelo:', error);
+                mostrarMensagem('Erro ao remover modelo.', 'erro');
+            } finally {
+                setSaving(false);
             }
         }
     };
@@ -470,8 +517,19 @@ export const Recebimentos: React.FC = () => {
                                 recebimentos.map(item => (
                                     <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors group">
                                         <td className="px-6 py-4">
-                                            <div className="text-sm font-bold text-gray-900 dark:text-white uppercase truncate max-w-xs">{item.modelo_nome}</div>
-                                            <div className="text-[10px] text-gray-500 font-medium">{item.descricao}</div>
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex-1">
+                                                    <div className="text-sm font-bold text-gray-900 dark:text-white uppercase truncate max-w-xs">{item.modelo_nome}</div>
+                                                    <div className="text-[10px] text-gray-500 font-medium">{item.descricao}</div>
+                                                </div>
+                                                <button
+                                                    onClick={() => removerModelo(item.modelo_id, item.modelo_nome)}
+                                                    className="p-1.5 text-gray-300 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                                                    title="Remover todos os tamanhos deste modelo"
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className="px-2.5 py-1 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 rounded text-[10px] font-bold border border-gray-200 dark:border-zinc-700 uppercase">
