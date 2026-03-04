@@ -18,7 +18,7 @@ export const DashboardStats: React.FC<Props> = ({ registros }) => {
   );
 
   return (
-    <div className="grid grid-cols-3 md:grid-cols-3 gap-2 md:gap-4 mb-4 md:mb-6">
+    <div className="grid grid-cols-3 gap-2 md:gap-4 mb-4 md:mb-6">
       <div className="bg-[#005A9C] dark:bg-[#1452b5] rounded-xl md:rounded-3xl p-2 md:p-6 flex flex-col justify-between shadow-lg shadow-blue-500/20 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-1 md:mb-4 gap-1 md:gap-0">
           <p className="text-[9px] sm:text-[10px] md:text-sm font-bold text-white/80 tracking-tight flex-1 pr-1 truncate">{t.lancamentos.registros}</p>

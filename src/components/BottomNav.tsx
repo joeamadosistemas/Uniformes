@@ -11,9 +11,9 @@ export const BottomNav: React.FC<Props> = ({ activeView, setActiveView }) => {
     const { t } = useT();
 
     const navItems = [
-        { id: 'recebimentos', label: t.pageTitles.recebimentos, icon: Package },
-        { id: 'lancamentos', label: (t.pageTitles as any).inventario || t.pageTitles.lancamentos || 'Inventário', icon: ClipboardList },
-        { id: 'transferencias', label: t.pageTitles.transferencias, icon: ArrowLeftRight },
+        { id: 'recebimentos', label: 'Recebimentos', icon: Package },
+        { id: 'lancamentos', label: 'Inventário', icon: ClipboardList },
+        { id: 'transferencias', label: 'Transferências', icon: ArrowLeftRight },
     ];
 
     return (

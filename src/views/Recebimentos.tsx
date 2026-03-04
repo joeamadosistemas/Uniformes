@@ -267,70 +267,49 @@ export const Recebimentos: React.FC = () => {
             </div>
 
             {/* Metric Cards - Enhanced UI */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 mt-4">
+            <div className="flex flex-col gap-3 mb-8 mt-4">
                 {/* Card 1: Registros */}
-                <div className="group relative bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                    <div className="flex items-center space-x-4">
-                        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-2xl group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
-                            <ClipboardList size={28} />
-                        </div>
-                        <div>
-                            <p className="text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-wider group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                                Registros Lançados
-                            </p>
-                            <p className="text-3xl font-black text-slate-800 dark:text-white mt-1">
-                                {recebimentos.length}
-                            </p>
-                        </div>
+                <div className="group relative bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm hover:shadow-md transition-all duration-300 flex flex-row items-center">
+                    <div className="p-4 bg-[#eef4fc] dark:bg-blue-900/20 text-[#5193EB] rounded-2xl mr-4 group-hover:bg-[#5193EB] group-hover:text-white transition-colors duration-300">
+                        <ClipboardList size={28} strokeWidth={2} />
                     </div>
-                    {/* Tooltip */}
-                    <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none -top-12 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs font-bold py-2 px-3 rounded-lg shadow-xl whitespace-nowrap z-50">
-                        Total de lançamentos realizados
-                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full w-0 h-0 border-l-[6px] border-l-transparent border-t-[6px] border-t-gray-900 border-r-[6px] border-r-transparent"></div>
+                    <div className="flex flex-col justify-center">
+                        <p className="text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest group-hover:text-[#5193EB] transition-colors leading-none mb-1">
+                            Registros Lançados
+                        </p>
+                        <p className="text-2xl font-black text-slate-800 dark:text-white leading-none">
+                            {recebimentos.length}
+                        </p>
                     </div>
                 </div>
 
                 {/* Card 2: Peças */}
-                <div className="group relative bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                    <div className="flex items-center space-x-4">
-                        <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-2xl group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-300">
-                            <Package size={28} />
-                        </div>
-                        <div>
-                            <p className="text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-wider group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                                Peças Recebidas
-                            </p>
-                            <p className="text-3xl font-black text-slate-800 dark:text-white mt-1">
-                                {recebimentos.reduce((acc, curr) => acc + (curr.quantidade || 0), 0)}
-                            </p>
-                        </div>
+                <div className="group relative bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm hover:shadow-md transition-all duration-300 flex flex-row items-center">
+                    <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500 rounded-2xl mr-4 group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-300">
+                        <Package size={28} strokeWidth={2} />
                     </div>
-                    {/* Tooltip */}
-                    <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none -top-12 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs font-bold py-2 px-3 rounded-lg shadow-xl whitespace-nowrap z-50">
-                        Soma de todas as peças no estoque
-                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full w-0 h-0 border-l-[6px] border-l-transparent border-t-[6px] border-t-gray-900 border-r-[6px] border-r-transparent"></div>
+                    <div className="flex flex-col justify-center">
+                        <p className="text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest group-hover:text-emerald-500 transition-colors leading-none mb-1">
+                            Peças Recebidas
+                        </p>
+                        <p className="text-2xl font-black text-slate-800 dark:text-white leading-none">
+                            {recebimentos.reduce((acc, curr) => acc + (curr.quantidade || 0), 0)}
+                        </p>
                     </div>
                 </div>
 
                 {/* Card 3: Modelos */}
-                <div className="group relative bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                    <div className="flex items-center space-x-4">
-                        <div className="p-4 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded-2xl group-hover:bg-purple-600 group-hover:text-white transition-colors duration-300">
-                            <Layers size={28} />
-                        </div>
-                        <div>
-                            <p className="text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-wider group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                                Modelos Diversos
-                            </p>
-                            <p className="text-3xl font-black text-slate-800 dark:text-white mt-1">
-                                {new Set(recebimentos.map(r => r.modelo_id)).size}
-                            </p>
-                        </div>
+                <div className="group relative bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm hover:shadow-md transition-all duration-300 flex flex-row items-center">
+                    <div className="p-4 bg-purple-50 dark:bg-purple-900/20 text-purple-500 rounded-2xl mr-4 group-hover:bg-purple-500 group-hover:text-white transition-colors duration-300">
+                        <Layers size={28} strokeWidth={2} />
                     </div>
-                    {/* Tooltip */}
-                    <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none -top-12 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs font-bold py-2 px-3 rounded-lg shadow-xl whitespace-nowrap z-50">
-                        Quantidade de modelos únicos
-                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full w-0 h-0 border-l-[6px] border-l-transparent border-t-[6px] border-t-gray-900 border-r-[6px] border-r-transparent"></div>
+                    <div className="flex flex-col justify-center">
+                        <p className="text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest group-hover:text-purple-500 transition-colors leading-none mb-1">
+                            Modelos Diversos
+                        </p>
+                        <p className="text-2xl font-black text-slate-800 dark:text-white leading-none">
+                            {new Set(recebimentos.map(r => r.modelo_id)).size}
+                        </p>
                     </div>
                 </div>
             </div>

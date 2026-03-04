@@ -86,49 +86,67 @@ export const GovHeader: React.FC<GovHeaderProps> = ({
             </div>
 
             {/* Bottom Header */}
-            <div className="header-bottom flex items-center px-4 md:px-8 py-3 gap-4">
-                <i
-                    id="menu-toggle"
-                    className="fa-solid fa-bars menu-icon text-[#005A9C] dark:text-[#66b3ff] text-2xl cursor-pointer"
-                    onClick={onMenuToggle}
-                ></i>
-                <div className="department-info flex flex-wrap items-center text-xs md:text-sm gap-2">
-                    <a href="#" className="font-bold text-[#005A9C] dark:text-[#66b3ff] hover:underline whitespace-nowrap">Secretaria Municipal de Educação</a>
-                    <a href="#" className="text-[#005A9C] dark:text-[#66b3ff] hover:underline whitespace-nowrap">Portal SESME-C</a>
-                    <span className="text-gray-300 dark:text-[#333]">|</span>
-                    <a href="#" className="text-[#005A9C] dark:text-[#66b3ff] hover:underline whitespace-nowrap">Uniforme Escolar</a>
-                    <span className="text-gray-200 dark:text-zinc-800">|</span>
-                    <span className="font-bold text-zinc-900 dark:text-white uppercase tracking-tight whitespace-nowrap">{t.header.telaAdministrativa}</span>
-                    <span className="text-gray-300 dark:text-[#333]">|</span>
-                    <div className="flex items-center gap-1">
-                        <span className="text-gray-600 dark:text-gray-400">{t.header.unidadeEscolar}:</span>
-                        <span className="font-bold text-[#005A9C] dark:text-[#66b3ff] cursor-pointer" contentEditable>{schoolName || 'SMEDU'}</span>
-                    </div>
-                </div>
+            <div className="header-bottom flex flex-col px-4 md:px-8 py-3 gap-2">
+                {/* Desktop layout: Single line, Mobile: multi-line */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between w-full">
+                    {/* Upper row area (Mobile) / Left area (Desktop) */}
+                    <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 w-full md:w-auto">
 
-                <div className="ml-auto relative group">
-                    <div className="flex items-center gap-2 cursor-pointer">
-                        <i className="fa-solid fa-user-circle text-2xl text-[#005A9C] dark:text-[#66b3ff]"></i>
-                        <span className="hidden md:inline font-medium text-gray-700 dark:text-gray-300">
-                            {isAdmin ? t.header.administrador : t.header.usuario}
-                        </span>
+                        {/* Title text */}
+                        <div className="flex items-center gap-2 ml-10 md:ml-0 mb-1 md:mb-0">
+                            <a href="#" className="font-bold text-xs md:text-sm text-[#005A9C] dark:text-[#66b3ff] hover:underline whitespace-nowrap">Secretaria Municipal de Educação</a>
+                            <a href="#" className="text-xs md:text-sm text-[#005A9C] dark:text-[#66b3ff] hover:underline whitespace-nowrap hidden sm:inline">Portal SESME-C</a>
+                        </div>
+
+                        {/* Hamburger + Main Path */}
+                        <div className="flex items-center gap-2">
+                            <i
+                                id="menu-toggle"
+                                className="fa-solid fa-bars menu-icon text-[#005A9C] dark:text-[#66b3ff] text-2xl cursor-pointer"
+                                onClick={onMenuToggle}
+                            ></i>
+                            <span className="text-gray-300 dark:text-[#333] hidden md:inline">|</span>
+                            <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-xs md:text-sm text-[#005A9C] dark:text-[#66b3ff] whitespace-nowrap hidden sm:inline">| Uniforme Escolar |</span>
+                                    <span className="text-xs md:text-sm text-[#005A9C] dark:text-[#66b3ff] whitespace-nowrap sm:hidden">Uniforme Escolar |</span>
+                                    <span className="text-xs md:text-sm font-bold text-zinc-900 dark:text-white uppercase tracking-tight whitespace-nowrap">{t.header.telaAdministrativa}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Unidade Escolar */}
+                        <div className="flex items-center gap-1 ml-10 md:ml-0 mt-1 md:mt-0 md:pl-2 md:border-l border-gray-300 dark:border-zinc-700">
+                            <span className="text-xs md:text-sm text-gray-600 dark:text-gray-400">{t.header.unidadeEscolar}:</span>
+                            <span className="text-xs md:text-sm font-bold text-[#005A9C] dark:text-[#66b3ff] cursor-pointer" contentEditable>{schoolName || 'SMEDU'}</span>
+                        </div>
                     </div>
 
-                    <div className="absolute top-full right-0 mt-2 w-64 glass shadow-2xl rounded-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible translate-y-2 group-hover:translate-y-0 transition-all duration-300 z-50 overflow-hidden">
-                        <ul className="py-2">
-                            <li className="border-b border-gray-50 dark:border-[#333] last:border-0">
-                                <a href="#" className="flex items-center gap-3 px-4 py-3 text-xs md:text-sm text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#333]">
-                                    <i className="fa-solid fa-user text-[#005A9C] text-base"></i>
-                                    <span className="truncate font-medium">{userName || userEmail || t.header.meuPerfil}</span>
-                                </a>
-                            </li>
-                            <li>
-                                <button onClick={onLogout} className="w-full flex items-center gap-3 px-4 py-3 text-xs md:text-sm text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-[#331111] text-left">
-                                    <i className="fa-solid fa-right-from-bracket text-red-500 text-base"></i>
-                                    <span className="font-medium">{t.header.sair}</span>
-                                </button>
-                            </li>
-                        </ul>
+                    {/* Right area: User profile */}
+                    <div className="absolute right-4 top-[58px] md:relative md:top-0 ml-auto group z-50">
+                        <div className="flex items-center gap-2 cursor-pointer">
+                            <i className="fa-solid fa-user-circle text-[28px] md:text-[32px] text-[#005A9C] dark:text-[#66b3ff]"></i>
+                            <span className="hidden lg:inline font-medium text-sm text-gray-700 dark:text-gray-300">
+                                {isAdmin ? t.header.administrador : t.header.usuario}
+                            </span>
+                        </div>
+
+                        <div className="absolute top-full right-0 mt-2 w-64 glass shadow-2xl rounded-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible translate-y-2 group-hover:translate-y-0 transition-all duration-300 z-50 overflow-hidden">
+                            <ul className="py-2">
+                                <li className="border-b border-gray-50 dark:border-[#333] last:border-0">
+                                    <a href="#" className="flex items-center gap-3 px-4 py-3 text-xs md:text-sm text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#333]">
+                                        <i className="fa-solid fa-user text-[#005A9C] text-base"></i>
+                                        <span className="truncate font-medium">{userName || userEmail || t.header.meuPerfil}</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <button onClick={onLogout} className="w-full flex items-center gap-3 px-4 py-3 text-xs md:text-sm text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-[#331111] text-left">
+                                        <i className="fa-solid fa-right-from-bracket text-red-500 text-base"></i>
+                                        <span className="font-medium">{t.header.sair}</span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
