@@ -341,9 +341,18 @@ export const Recebimentos: React.FC = () => {
                         >
                             <option value="">{t.lancamentos.selecione}</option>
                             {modelosFiltrados
-                                .filter(m => !recebimentos.some(r => r.modelo_id === m.id))
+                                .filter(m => {
+                                    const tamanhosRegistrados = recebimentos
+                                        .filter(r => r.modelo_id === m.id)
+                                        .map(r => r.tamanho);
+                                    // Oculta apenas se todos os tamanhos definidos para o modelo já estiverem na lista de recebimentos
+                                    return !m.tamanhos.every(t => tamanhosRegistrados.includes(t));
+                                })
                                 .map(m => (
-                                    <option key={m.id} value={m.id}>{m.nome} - {m.descricao}</option>
+                                    <option key={m.id} value={m.id}>
+                                        {m.nome} - {m.descricao}
+                                        {recebimentos.some(r => r.modelo_id === m.id) ? ` (${t.common.editar || 'Já Lançado'})` : ''}
+                                    </option>
                                 ))
                             }
                         </select>
@@ -358,21 +367,39 @@ export const Recebimentos: React.FC = () => {
                         </h3>
 
                         <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-2">
-                            {modeloSelecionado.tamanhos.map(tamanho => (
-                                <div key={tamanho} className="space-y-1">
-                                    <label className="text-sm font-black text-gray-700 dark:text-zinc-300 uppercase text-center block truncate px-1" title={tamanho}>
-                                        {tamanho}
-                                    </label>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        placeholder="0"
-                                        className="w-full h-9 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-lg px-1 text-center text-sm focus:ring-2 focus:ring-[#005A9C] dark:text-white"
-                                        value={quantidades[tamanho] || ''}
-                                        onChange={(e) => handleQuantidadeChange(tamanho, e.target.value)}
-                                    />
-                                </div>
-                            ))}
+                            {modeloSelecionado.tamanhos.map(tamanho => {
+                                const itemExistente = recebimentos.find(r => r.modelo_id === modeloSelecionado.id && r.tamanho === tamanho);
+                                const isRegistrado = !!itemExistente;
+
+                                return (
+                                    <div key={tamanho} className="space-y-1">
+                                        <label
+                                            className={`text-[10px] md:text-sm font-black uppercase text-center block truncate px-1 ${isRegistrado ? 'text-green-600 dark:text-green-400' : 'text-gray-700 dark:text-zinc-300'
+                                                }`}
+                                            title={tamanho}
+                                        >
+                                            {tamanho}
+                                            {isRegistrado && <span className="ml-1 text-[8px] md:text-[10px]">✓</span>}
+                                        </label>
+                                        <div className="relative">
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                placeholder="0"
+                                                className={`w-full h-9 bg-white dark:bg-zinc-900 border ${isRegistrado ? 'border-green-200 dark:border-green-900/30' : 'border-gray-200 dark:border-zinc-700'
+                                                    } rounded-lg px-1 text-center text-sm focus:ring-2 focus:ring-[#005A9C] dark:text-white transition-all`}
+                                                value={quantidades[tamanho] || ''}
+                                                onChange={(e) => handleQuantidadeChange(tamanho, e.target.value)}
+                                            />
+                                            {isRegistrado && itemExistente && (
+                                                <div className="absolute -top-1 -right-1 flex items-center justify-center w-4 h-4 bg-green-500 text-white text-[8px] font-bold rounded-full shadow-sm animate-in zoom-in duration-300" title={`Já lançado: ${itemExistente.quantidade}`}>
+                                                    {itemExistente.quantidade}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
 
                         <div className="flex justify-end pt-4">
