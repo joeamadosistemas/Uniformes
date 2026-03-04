@@ -298,7 +298,6 @@ export const Transferencias: React.FC = () => {
             )}
 
             <div>
-                <h2 className="text-3xl font-bold text-gray-800">{t.transferencias.titulo}</h2>
                 <p className="text-gray-500">{t.transferencias.subtitulo}</p>
             </div>
 

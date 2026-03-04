@@ -12,7 +12,8 @@ import {
   FileText,
   Shirt,
   ClipboardList,
-  Info
+  Info,
+  Layers
 } from 'lucide-react';
 import { useT } from '../lib/LanguageContext';
 
@@ -28,8 +29,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, isA
   const { t } = useT();
 
   const menuItems = [
-    { id: 'lancamentos', label: t.sidebar.lancamentos, icon: LayoutDashboard },
     { id: 'recebimentos', label: t.sidebar.recebimentos, icon: ClipboardList },
+    { id: 'lancamentos', label: t.sidebar.lancamentos, icon: LayoutDashboard },
     { id: 'transferencias', label: t.sidebar.transferencias, icon: ArrowLeftRight },
     ...(isAdmin ? [
       { id: 'admin-dashboard', label: t.sidebar.administrador, icon: FileText },
@@ -39,6 +40,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, isA
 
   const configItems = [
     { id: 'config-uniformes', label: t.sidebar.cadastrosUniformes, icon: Shirt },
+    { id: 'config-modelos', label: t.sidebar.cadastroModelos, icon: Layers },
     { id: 'config-escola', label: t.sidebar.unidadeEscolar, icon: School },
     { id: 'config-usuarios', label: t.sidebar.usuarios, icon: Users },
     { id: 'config-backup', label: t.sidebar.backupRestauracao, icon: Database },

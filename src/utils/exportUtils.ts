@@ -2,6 +2,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { RegistroUniforme, Uniforme, Recebimento } from '../types';
+import { RecebimentoModelo } from '../constants/recebimentosConstants';
 import { format } from 'date-fns';
 import { LOGO_ITAGUAI_BASE64 } from './logoBase64';
 
@@ -529,17 +530,126 @@ export const exportarRecebimentosPDF = (
     r.quantidade.toString()
   ]);
 
+  const totalQuantidade = recebimentos.reduce((acc, current) => acc + current.quantidade, 0);
+
   autoTable(doc, {
     head: [tableColumn],
     body: tableRows,
+    foot: [["Total Geral", "", "", totalQuantidade.toString()]],
     startY: headerNextY + 2,
     styles: { fontSize: 9 },
     headStyles: { fillColor: [0, 90, 156] }, // Cor #005A9C
+    footStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' },
     alternateRowStyles: { fillColor: [245, 245, 245] },
     columnStyles: {
       3: { halign: 'center', cellWidth: 30 }
     }
   });
 
+  // Agrupamento por Item
+  const finalY = (doc as any).lastAutoTable.finalY + 10;
+
+  const totaisPorItem: Record<string, number> = {};
+  recebimentos.forEach(r => {
+    const nomeItem = `${r.modelo_nome} - ${r.descricao}`;
+    totaisPorItem[nomeItem] = (totaisPorItem[nomeItem] || 0) + r.quantidade;
+  });
+
+  const summaryRows = Object.entries(totaisPorItem).map(([nome, qtd]) => [nome, qtd.toString()]);
+  const summaryTotal = Object.values(totaisPorItem).reduce((acc, curr) => acc + curr, 0);
+
+  doc.setFontSize(10);
+  doc.setTextColor(0, 0, 0);
+  doc.setFont("helvetica", "bold");
+  doc.text("Total Geral por Item", 14, finalY);
+
+  autoTable(doc, {
+    head: [["Item (Modelo - Descrição)", "Quantidade Total"]],
+    body: summaryRows,
+    foot: [["Total", summaryTotal.toString()]],
+    startY: finalY + 3,
+    styles: { fontSize: 9 },
+    headStyles: { fillColor: [0, 90, 156] },
+    footStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' },
+    columnStyles: {
+      1: { halign: 'center', cellWidth: 40 }
+    }
+  });
+
   doc.save(`recebimento_uniformes_${format(new Date(), 'yyyyMMdd')}.pdf`);
+};
+
+export const exportarControleRecebimentoPDF = (
+  escolas: { nome: string; email: string; segmentos?: string[]; jaLancou: boolean; dataUltimoLancamento?: string }[]
+) => {
+  const doc = new jsPDF();
+  const startY = drawGovHeader(doc, 'Controle de Recebimento por Unidade Escolar');
+
+  const tableColumn = ["Unidade Escolar", "Etapas Atendidas", "Status", "Último Lançamento"];
+  const tableRows = escolas.map(e => [
+    e.nome,
+    e.segmentos ? e.segmentos.map(s => s.replace('CONJUNTO UNIFORMA ESCOLAR ', '')).join(', ') : '-',
+    e.jaLancou ? 'CONCLUÍDO' : 'PENDENTE',
+    e.dataUltimoLancamento ? format(safeDate(e.dataUltimoLancamento), 'dd/MM/yyyy HH:mm') : '-'
+  ]);
+
+  autoTable(doc, {
+    head: [tableColumn],
+    body: tableRows,
+    startY: startY + 5,
+    styles: { fontSize: 8 },
+    headStyles: { fillColor: [0, 51, 102] },
+    columnStyles: {
+      0: { cellWidth: 60 },
+      1: { cellWidth: 50 },
+      2: { cellWidth: 30, halign: 'center' },
+      3: { cellWidth: 35, halign: 'right' }
+    },
+    didParseCell: (hookData) => {
+      // Colorize the Status column
+      if (hookData.section === 'body' && hookData.column.index === 2) {
+        if (hookData.cell.raw === 'CONCLUÍDO') {
+          hookData.cell.styles.textColor = [22, 163, 74]; // green-600
+          hookData.cell.styles.fontStyle = 'bold';
+        } else if (hookData.cell.raw === 'PENDENTE') {
+          hookData.cell.styles.textColor = [217, 119, 6]; // amber-600
+          hookData.cell.styles.fontStyle = 'bold';
+        }
+      }
+    }
+  });
+
+  doc.save(`controle_recebimento_${format(new Date(), 'yyyyMMdd')}.pdf`);
+};
+
+export const exportarModelosPDF = (
+  modelos: RecebimentoModelo[]
+) => {
+  const doc = new jsPDF();
+  const startY = drawGovHeader(doc, 'Relatório de Gestão de Modelos de Uniformes');
+
+  // ID Local, Modelo / Descrição, Tamanhos, e Segmentos
+  const tableColumn = ["ID Local", "Modelo / Descrição", "Tamanhos", "Segmentos Atendidos"];
+  const tableRows = modelos.map(m => [
+    m.id.substring(0, 8), // Show abbreviated UUIDs or full short IDs
+    `${m.nome}\n${m.descricao}`,
+    m.tamanhos.join(', '),
+    m.segmentos.map((s: string) => s.replace('CONJUNTO UNIFORMA ESCOLAR ', '')).join('\n')
+  ]);
+
+  autoTable(doc, {
+    head: [tableColumn],
+    body: tableRows,
+    startY: startY + 5,
+    styles: { fontSize: 8, cellPadding: 3 },
+    headStyles: { fillColor: [0, 51, 102] },
+    columnStyles: {
+      0: { cellWidth: 25, halign: 'center' },
+      1: { cellWidth: 65 },
+      2: { cellWidth: 50 },
+      3: { cellWidth: 40 }
+    }
+  });
+
+  doc.save(`gestao_modelos_${format(new Date(), 'yyyyMMdd')}.pdf`);
 };

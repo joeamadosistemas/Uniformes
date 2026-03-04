@@ -16,6 +16,7 @@ import { ControleRecebimento } from './views/ControleRecebimento';
 import { Login } from './views/Login';
 import { GovHeader } from './components/GovHeader';
 import { GovFooter } from './components/GovFooter';
+import { CadastroModelos } from './views/CadastroModelos';
 
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [userRole, setUserRole] = useState<string>('Operador');
   const [userName, setUserName] = useState<string>('');
+  const [escolaNome, setEscolaNome] = useState<string>('SMEDU');
 
   useEffect(() => {
     if (isDarkMode) {
@@ -45,31 +47,79 @@ function App() {
     // Carrega sessão existente ao iniciar
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
-      if (data.session?.user) loadUserRole(data.session.user.id);
+      if (data.session?.user) loadUserRole(data.session.user.id, data.session.user.email);
       else setLoadingSession(false);
     });
 
     // Escuta mudanças de autenticação em tempo real
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);
-      if (newSession?.user) loadUserRole(newSession.user.id);
+      if (newSession?.user) loadUserRole(newSession.user.id, newSession.user.email);
       else { setUserRole('Operador'); setLoadingSession(false); }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const loadUserRole = async (userId: string) => {
+  const loadUserRole = async (userId: string, userEmail?: string) => {
     setLoadingSession(true);
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('role, nome')
+    let foundEscolaNome = false;
+
+    // Tenta carregar do Profile
+    const { data: profile, error } = await supabase
+      .from('Profile')
+      .select('role, nome, email_escola')
       .eq('id', userId)
       .single();
-    if (!error && data) {
-      if (data.role) setUserRole(data.role);
-      if (data.nome) setUserName(data.nome);
+
+    if (!error && profile) {
+      if (profile.role) setUserRole(profile.role);
+      if (profile.nome) setUserName(profile.nome);
+
+      if (profile.email_escola) {
+        const { data: escola } = await supabase
+          .from('escolas')
+          .select('nome')
+          .eq('email', profile.email_escola)
+          .single();
+        if (escola && escola.nome) {
+          setEscolaNome(escola.nome);
+          foundEscolaNome = true;
+        }
+      }
+    } else {
+      // Fallback para caso haja profiles antigas ou apenas roles
+      const { data: profileOld } = await supabase
+        .from('profiles')
+        .select('role, nome')
+        .eq('id', userId)
+        .single();
+      if (profileOld) {
+        if (profileOld.role) setUserRole(profileOld.role);
+        if (profileOld.nome) setUserName(profileOld.nome);
+      }
     }
+
+    // Se ainda não encontrou o nome da escola pelo perfil criado,
+    // tenta buscar a escola pelo e-mail de login, sendo comum a escola logar
+    // com o seu próprio endereço cadastrado na base "escolas".
+    if (!foundEscolaNome && userEmail) {
+      const { data: escolaFallback } = await supabase
+        .from('escolas')
+        .select('nome')
+        .eq('email', userEmail)
+        .single();
+
+      if (escolaFallback && escolaFallback.nome) {
+        setEscolaNome(escolaFallback.nome);
+        foundEscolaNome = true;
+      }
+    }
+
+    if (!foundEscolaNome) {
+      setEscolaNome('SMEDU');
+    }
+
     setLoadingSession(false);
   };
 
@@ -108,7 +158,7 @@ function App() {
   const isAdmin = userRole === 'Super Administrador' || userRole === 'admin';
 
   const renderView = () => {
-    const adminViews = ['admin-dashboard', 'controle-recebimento', 'config-escola', 'config-usuarios', 'config-uniformes', 'config-backup', 'config-sobre'];
+    const adminViews = ['admin-dashboard', 'controle-recebimento', 'config-escola', 'config-usuarios', 'config-uniformes', 'config-modelos', 'config-backup', 'config-sobre'];
     if (!isAdmin && adminViews.includes(activeView)) {
       return (
         <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-3 py-24">
@@ -131,6 +181,7 @@ function App() {
       case 'config-escola': return <UnidadeEscolar />;
       case 'config-usuarios': return <Usuarios />;
       case 'config-uniformes': return <CadastrosUniformes />;
+      case 'config-modelos': return <CadastroModelos />;
       case 'config-backup': return <BackupRestauracao />;
       case 'config-sobre': return <Sobre />;
       default: return <Lancamentos />;
@@ -161,6 +212,7 @@ function App() {
           <GovHeader
             userEmail={userEmail}
             userName={userName}
+            schoolName={escolaNome}
             isAdmin={isAdmin}
             onLogout={handleLogout}
             isDarkMode={isDarkMode}
@@ -191,8 +243,9 @@ function App() {
                                 activeView === 'config-escola' ? t.pageTitles.unidadeEscolar :
                                   activeView === 'config-usuarios' ? t.pageTitles.usuarios :
                                     activeView === 'config-uniformes' ? t.pageTitles.cadastrosUniformes :
-                                      activeView === 'config-backup' ? t.pageTitles.backupRestauracao :
-                                        activeView === 'config-sobre' ? t.pageTitles.sobre : t.pageTitles.lancamentos}
+                                      activeView === 'config-modelos' ? t.pageTitles.cadastroModelos :
+                                        activeView === 'config-backup' ? t.pageTitles.backupRestauracao :
+                                          activeView === 'config-sobre' ? t.pageTitles.sobre : t.pageTitles.lancamentos}
                     </h2>
                     {renderView()}
                   </div>

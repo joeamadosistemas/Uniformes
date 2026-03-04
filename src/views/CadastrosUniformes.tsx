@@ -203,7 +203,6 @@ export const CadastrosUniformes: React.FC = () => {
         <div className="space-y-8 pb-20">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-3xl font-bold text-gray-800">{t.cadastros.titulo}</h2>
                     <p className="text-gray-500">{t.cadastros.subtitulo}</p>
                 </div>
             </div>

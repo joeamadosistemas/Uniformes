@@ -9,6 +9,7 @@ const LANG_LABELS: Record<Lang, string> = { pt: 'PT', en: 'EN', es: 'ES' };
 interface GovHeaderProps {
     userEmail: string;
     userName?: string;
+    schoolName?: string;
     isAdmin: boolean;
     onLogout: () => void;
     isDarkMode: boolean;
@@ -17,7 +18,7 @@ interface GovHeaderProps {
 }
 
 export const GovHeader: React.FC<GovHeaderProps> = ({
-    userEmail, userName, isAdmin, onLogout, isDarkMode, toggleDarkMode, onMenuToggle
+    userEmail, userName, schoolName, isAdmin, onLogout, isDarkMode, toggleDarkMode, onMenuToggle
 }) => {
     const { t, lang, setLang } = useT();
     const [langOpen, setLangOpen] = useState(false);
@@ -101,7 +102,7 @@ export const GovHeader: React.FC<GovHeaderProps> = ({
                     <span className="text-gray-300 dark:text-[#333]">|</span>
                     <div className="flex items-center gap-1">
                         <span className="text-gray-600 dark:text-gray-400">{t.header.unidadeEscolar}:</span>
-                        <span className="font-bold text-[#005A9C] dark:text-[#66b3ff] cursor-pointer" contentEditable>SMEDU</span>
+                        <span className="font-bold text-[#005A9C] dark:text-[#66b3ff] cursor-pointer" contentEditable>{schoolName || 'SMEDU'}</span>
                     </div>
                 </div>
 

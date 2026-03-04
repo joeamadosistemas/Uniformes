@@ -27,12 +27,13 @@ export const pt = {
 
     // Sidebar
     sidebar: {
-        lancamentos: 'Lançamentos',
+        lancamentos: 'Inventário',
         recebimentos: 'Recebimentos',
         transferencias: 'Transferências',
         administrador: 'Administrador',
         configuracoes: 'Configurações',
         cadastrosUniformes: 'Cadastros Uniformes',
+        cadastroModelos: 'Cadastro de Modelos',
         controleRecebimento: 'Controle de Recebimento',
         unidadeEscolar: 'Unidade Escolar',
         usuarios: 'Usuários',
@@ -57,7 +58,7 @@ export const pt = {
 
     // Lançamentos
     lancamentos: {
-        titulo: 'Lançamento de Uniformes',
+        titulo: 'Inventário dos Uniformes',
         subtitulo: 'Registre a distribuição de uniformes para alunos',
         totalAlunos: 'Total de Alunos Matriculados',
         novoRegistro: 'Novo Registro',
@@ -103,13 +104,14 @@ export const pt = {
         mostrando: 'Mostrando',
     },
     pageTitles: {
-        lancamentos: 'Lançamentos de Uniformes',
+        lancamentos: 'Inventário dos Uniformes',
         recebimentos: 'Recebimento de Uniformes',
         transferencias: 'Painel de Transferências',
         adminDashboard: 'Dashboard Administrativo',
         unidadeEscolar: 'Gestão de Unidades Escolares',
         usuarios: 'Gestão de Usuários',
         cadastrosUniformes: 'Catálogo de Uniformes',
+        cadastroModelos: 'Cadastro de Modelos',
         controleRecebimento: 'Controle de Recebimento de Uniformes',
         backupRestauracao: 'Backup e Restauração',
         sobre: 'Sobre o Sistema',
@@ -352,6 +354,7 @@ export const en: Translations = {
         administrador: 'Administrator',
         configuracoes: 'Settings',
         cadastrosUniformes: 'Uniform Records',
+        cadastroModelos: 'Model Registration',
         controleRecebimento: 'Receipt Control',
         unidadeEscolar: 'School Unit',
         usuarios: 'Users',
@@ -425,6 +428,7 @@ export const en: Translations = {
         unidadeEscolar: 'School Unit Management',
         usuarios: 'User Management',
         cadastrosUniformes: 'Uniform Catalog',
+        cadastroModelos: 'Model Registration',
         controleRecebimento: 'Uniform Receipt Control',
         backupRestauracao: 'Backup & Restore',
         sobre: 'About the System',
@@ -662,6 +666,7 @@ export const es: Translations = {
         administrador: 'Administrador',
         configuracoes: 'Configuración',
         cadastrosUniformes: 'Registro de Uniformes',
+        cadastroModelos: 'Registro de Modelos',
         controleRecebimento: 'Control de Recibos',
         unidadeEscolar: 'Unidad Escolar',
         usuarios: 'Usuarios',
@@ -735,6 +740,7 @@ export const es: Translations = {
         unidadeEscolar: 'Gestión de Unidades Escolares',
         usuarios: 'Gestión de Usuarios',
         cadastrosUniformes: 'Catálogo de Uniformes',
+        cadastroModelos: 'Registro de Modelos',
         controleRecebimento: 'Control de Recibo de Uniformes',
         backupRestauracao: 'Copia de Seguridad',
         sobre: 'Acerca del Sistema',

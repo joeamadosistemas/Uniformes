@@ -8,11 +8,14 @@ import {
     BarChart3,
     ArrowUpRight,
     AlertCircle,
-    Loader2
+    Loader2,
+    FileText
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useT } from '../lib/LanguageContext';
 import { EscolaCadastro } from '../types';
+import { SEGMENTOS_ENSINO } from '../constants';
+import { exportarControleRecebimentoPDF } from '../utils/exportUtils';
 
 interface EscolaStatus extends EscolaCadastro {
     jaLancou: boolean;
@@ -25,6 +28,7 @@ export const ControleRecebimento: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState<'todos' | 'concluido' | 'pendente'>('todos');
+    const [filterSegmento, setFilterSegmento] = useState<string>('todos');
 
     useEffect(() => {
         fetchStatusEscolas();
@@ -84,8 +88,18 @@ export const ControleRecebimento: React.FC = () => {
         const matchesStatus = filterStatus === 'todos' ||
             (filterStatus === 'concluido' && esc.jaLancou) ||
             (filterStatus === 'pendente' && !esc.jaLancou);
-        return matchesSearch && matchesStatus;
+
+        let matchesSegmento = true;
+        if (filterSegmento !== 'todos') {
+            matchesSegmento = Array.isArray(esc.segmentos) && esc.segmentos.includes(filterSegmento);
+        }
+
+        return matchesSearch && matchesStatus && matchesSegmento;
     });
+
+    const handleExportPDF = () => {
+        exportarControleRecebimentoPDF(escolasFiltradas);
+    };
 
     const totalEscolas = escolas.length;
     const totalLancaram = escolas.filter(e => e.jaLancou).length;
@@ -160,25 +174,50 @@ export const ControleRecebimento: React.FC = () => {
                         />
                     </div>
 
-                    <div className="flex items-center gap-2">
-                        <Filter size={18} className="text-gray-400 mr-2" />
+                    <div className="flex flex-col md:flex-row items-center gap-4">
+                        <div className="flex items-center gap-2">
+                            <Filter size={18} className="text-gray-400" />
+                            <select
+                                value={filterSegmento}
+                                onChange={(e) => setFilterSegmento(e.target.value)}
+                                className="bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl px-3 py-2 text-xs font-bold text-gray-700 dark:text-zinc-300 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
+                            >
+                                <option value="todos">TODOS OS SEGMENTOS</option>
+                                {SEGMENTOS_ENSINO.map(seg => (
+                                    <option key={seg} value={seg}>
+                                        {seg.replace('CONJUNTO UNIFORMA ESCOLAR ', '')}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="flex items-center gap-2 bg-slate-50 dark:bg-zinc-800 p-1 rounded-xl border border-slate-200 dark:border-zinc-700">
+                            <button
+                                onClick={() => setFilterStatus('todos')}
+                                className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filterStatus === 'todos' ? 'bg-[#005A9C] text-white shadow-md' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'}`}
+                            >
+                                {t.dashboardControle.todos}
+                            </button>
+                            <button
+                                onClick={() => setFilterStatus('concluido')}
+                                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filterStatus === 'concluido' ? 'bg-green-600 text-white' : 'bg-slate-50 dark:bg-zinc-800 text-gray-500 hover:bg-slate-100'}`}
+                            >
+                                {t.dashboardControle.concluido}
+                            </button>
+                            <button
+                                onClick={() => setFilterStatus('pendente')}
+                                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filterStatus === 'pendente' ? 'bg-amber-600 text-white' : 'bg-slate-50 dark:bg-zinc-800 text-gray-500 hover:bg-slate-100'}`}
+                            >
+                                {t.dashboardControle.pendente}
+                            </button>
+                        </div>
+
                         <button
-                            onClick={() => setFilterStatus('todos')}
-                            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filterStatus === 'todos' ? 'bg-[#005A9C] text-white' : 'bg-slate-50 dark:bg-zinc-800 text-gray-500 hover:bg-slate-100'}`}
+                            onClick={handleExportPDF}
+                            disabled={loading || escolasFiltradas.length === 0}
+                            className="flex items-center gap-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md shadow-red-600/10 active:scale-95 ml-2"
                         >
-                            {t.dashboardControle.todos}
-                        </button>
-                        <button
-                            onClick={() => setFilterStatus('concluido')}
-                            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filterStatus === 'concluido' ? 'bg-green-600 text-white' : 'bg-slate-50 dark:bg-zinc-800 text-gray-500 hover:bg-slate-100'}`}
-                        >
-                            {t.dashboardControle.concluido}
-                        </button>
-                        <button
-                            onClick={() => setFilterStatus('pendente')}
-                            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filterStatus === 'pendente' ? 'bg-amber-600 text-white' : 'bg-slate-50 dark:bg-zinc-800 text-gray-500 hover:bg-slate-100'}`}
-                        >
-                            {t.dashboardControle.pendente}
+                            <FileText size={16} /> PDF
                         </button>
                     </div>
                 </div>

@@ -42,13 +42,15 @@ export const Usuarios: React.FC = () => {
       if (errorEscolas) throw errorEscolas;
       if (dataEscolas) setEscolas(dataEscolas as EscolaCadastro[]);
 
-      const { data: dataUsuarios, error: errorUsuarios } = await supabase
+      const clientConfigured = supabaseAdmin || supabase;
+      const { data: dataUsuarios, error: errorUsuarios } = await clientConfigured
         .from('Profile')
         .select('*')
         .order('nome', { ascending: true });
 
       if (errorUsuarios) {
-        console.warn('Erro ao buscar perfis:', errorUsuarios.message);
+        console.warn('Aviso ao buscar perfis genéricos (provável bloqueio RLS na falta da Service Role Key):', errorUsuarios.message);
+        // Mesmo com erro, não jogue para o catch principal para não travar a tela
       } else if (dataUsuarios) {
         setUsuarios(dataUsuarios as UsuarioCadastro[]);
       }
@@ -256,7 +258,6 @@ export const Usuarios: React.FC = () => {
             <Users size={24} />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">{t.usuarios.titulo}</h2>
             <p className="text-gray-600">{t.usuarios.subtitulo}</p>
           </div>
         </div>

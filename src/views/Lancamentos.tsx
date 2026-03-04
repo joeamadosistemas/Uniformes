@@ -121,7 +121,6 @@ export const Lancamentos: React.FC = () => {
       )}
 
       <div>
-        <h2 className="text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight mb-2">{t.lancamentos.titulo}</h2>
         <p className="text-gray-500 dark:text-zinc-400 font-medium">{t.lancamentos.subtitulo}</p>
       </div>
 

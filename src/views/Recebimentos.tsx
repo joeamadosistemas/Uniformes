@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Plus, Trash2, FileSpreadsheet, FileText, Edit2, Check, X, Loader2 } from 'lucide-react';
+import { Package, Plus, Trash2, FileSpreadsheet, FileText, Edit2, Check, X, Loader2, ClipboardList, Layers } from 'lucide-react';
 import { useT } from '../lib/LanguageContext';
 import { RECEBIMENTOS_MODELOS, RecebimentoModelo } from '../constants/recebimentosConstants';
 import { Recebimento } from '../types';
@@ -8,7 +8,11 @@ import { exportarRecebimentosExcel, exportarRecebimentosPDF } from '../utils/exp
 
 export const Recebimentos: React.FC = () => {
     const { t } = useT();
-    const [recebimentos, setRecebimentos] = useState<Recebimento[]>([]);
+    const [recebimentos, setRecebimentos] = useState<Recebimento[]>(() => {
+        const dadosSalvos = localStorage.getItem('@Uniformes:recebimentos');
+        return dadosSalvos ? JSON.parse(dadosSalvos) : [];
+    });
+    const [modelosDisponiveis, setModelosDisponiveis] = useState<RecebimentoModelo[]>(RECEBIMENTOS_MODELOS);
     const [modeloSelecionado, setModeloSelecionado] = useState<RecebimentoModelo | null>(null);
     const [quantidades, setQuantidades] = useState<Record<string, number>>({});
     const [escola, setEscola] = useState('');
@@ -33,9 +37,21 @@ export const Recebimentos: React.FC = () => {
                     .select('role')
                     .eq('id', userId)
                     .single()
-                    .then(({ data: profileData }) => {
+                    .then(({ data: profileData, error }) => {
                         if (profileData?.role) {
                             setUserRole(profileData.role);
+                        } else if (error || !profileData) {
+                            // Fallback para caso haja profiles antigas (mesma lógica do App.tsx)
+                            supabase
+                                .from('profiles')
+                                .select('role')
+                                .eq('id', userId)
+                                .single()
+                                .then(({ data: oldProfileData }) => {
+                                    if (oldProfileData?.role) {
+                                        setUserRole(oldProfileData.role);
+                                    }
+                                });
                         }
                     });
             }
@@ -55,8 +71,54 @@ export const Recebimentos: React.FC = () => {
             }
         });
 
-        const dadosSalvos = localStorage.getItem('@Uniformes:recebimentos');
-        if (dadosSalvos) setRecebimentos(JSON.parse(dadosSalvos));
+        const carregarModelosCustomizados = async () => {
+            try {
+                const { data, error } = await supabase.from('modelos_recebimento').select('*').order('created_at', { ascending: false });
+                if (!error && data) {
+                    const mapped: RecebimentoModelo[] = data.map(m => ({
+                        id: m.id,
+                        nome: m.nome,
+                        descricao: m.descricao,
+                        tamanhos: Array.isArray(m.tamanhos) ? m.tamanhos : m.tamanhos.split(',').map((t: string) => t.trim()),
+                        segmentos: Array.isArray(m.segmentos) ? m.segmentos : m.segmentos.split(',').map((s: string) => s.trim())
+                    }));
+
+                    const combined = [...mapped];
+                    for (const standard of RECEBIMENTOS_MODELOS) {
+                        if (!mapped.some(m => m.id === standard.id)) {
+                            combined.push(standard);
+                        }
+                    }
+                    setModelosDisponiveis(combined);
+                } else {
+                    const local = localStorage.getItem('@Uniformes:modelos_customizados');
+                    if (local) {
+                        const parsedLocal = JSON.parse(local);
+                        const combinedLocal = [...parsedLocal];
+                        for (const standard of RECEBIMENTOS_MODELOS) {
+                            if (!parsedLocal.some((m: RecebimentoModelo) => m.id === standard.id)) {
+                                combinedLocal.push(standard);
+                            }
+                        }
+                        setModelosDisponiveis(combinedLocal);
+                    }
+                }
+            } catch (e) {
+                const local = localStorage.getItem('@Uniformes:modelos_customizados');
+                if (local) {
+                    const parsedLocal = JSON.parse(local);
+                    const combinedLocal = [...parsedLocal];
+                    for (const standard of RECEBIMENTOS_MODELOS) {
+                        if (!parsedLocal.some((m: RecebimentoModelo) => m.id === standard.id)) {
+                            combinedLocal.push(standard);
+                        }
+                    }
+                    setModelosDisponiveis(combinedLocal);
+                }
+            }
+        }
+
+        carregarModelosCustomizados();
     }, []);
 
     useEffect(() => {
@@ -64,7 +126,7 @@ export const Recebimentos: React.FC = () => {
     }, [recebimentos]);
 
     const handleModeloChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const modelo = RECEBIMENTOS_MODELOS.find(m => m.id === e.target.value) || null;
+        const modelo = modelosDisponiveis.find(m => m.id === e.target.value) || null;
         setModeloSelecionado(modelo);
         setQuantidades({});
     };
@@ -162,9 +224,11 @@ export const Recebimentos: React.FC = () => {
     };
 
     // Filtra os modelos baseados no segmento da escola e na role do usuário
-    const modelosFiltrados = RECEBIMENTOS_MODELOS.filter(modelo => {
+    const modelosFiltrados = modelosDisponiveis.filter(modelo => {
         // Administradores veem todos os modelos
-        if (userRole === 'admin') return true;
+        const userRoleLower = userRole?.toLowerCase() || '';
+        const isAdmin = userRoleLower === 'admin' || userRoleLower === 'administrador' || userRoleLower === 'super administrador' || userRoleLower.includes('admin');
+        if (isAdmin) return true;
 
         const isCreche = segmentosEscola.includes('CONJUNTO UNIFORMA ESCOLAR CRECHE');
         const isModeloCreche = modelo.segmentos.includes('CONJUNTO UNIFORMA ESCOLAR CRECHE');
@@ -180,7 +244,7 @@ export const Recebimentos: React.FC = () => {
 
     const handleExportExcel = () => {
         if (recebimentos.length === 0) return;
-        exportarRecebimentosExcel(recebimentos, escolaNome || escola, RECEBIMENTOS_MODELOS);
+        exportarRecebimentosExcel(recebimentos, escolaNome || escola, modelosDisponiveis);
     };
 
     const handleExportPDF = () => {
@@ -197,12 +261,78 @@ export const Recebimentos: React.FC = () => {
                 </div>
             )}
             <div>
-                <h2 className="text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight mb-2">
-                    {t.recebimentos.titulo}
-                </h2>
-                <p className="text-gray-500 dark:text-zinc-400 font-medium">
+                <p className="text-gray-500 dark:text-zinc-400 font-medium pb-2">
                     {t.recebimentos.subtitulo}
                 </p>
+            </div>
+
+            {/* Metric Cards - Enhanced UI */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 mt-4">
+                {/* Card 1: Registros */}
+                <div className="group relative bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                    <div className="flex items-center space-x-4">
+                        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-2xl group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
+                            <ClipboardList size={28} />
+                        </div>
+                        <div>
+                            <p className="text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-wider group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                Registros Lançados
+                            </p>
+                            <p className="text-3xl font-black text-slate-800 dark:text-white mt-1">
+                                {recebimentos.length}
+                            </p>
+                        </div>
+                    </div>
+                    {/* Tooltip */}
+                    <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none -top-12 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs font-bold py-2 px-3 rounded-lg shadow-xl whitespace-nowrap z-50">
+                        Total de lançamentos realizados
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full w-0 h-0 border-l-[6px] border-l-transparent border-t-[6px] border-t-gray-900 border-r-[6px] border-r-transparent"></div>
+                    </div>
+                </div>
+
+                {/* Card 2: Peças */}
+                <div className="group relative bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                    <div className="flex items-center space-x-4">
+                        <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-2xl group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-300">
+                            <Package size={28} />
+                        </div>
+                        <div>
+                            <p className="text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-wider group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                                Peças Recebidas
+                            </p>
+                            <p className="text-3xl font-black text-slate-800 dark:text-white mt-1">
+                                {recebimentos.reduce((acc, curr) => acc + (curr.quantidade || 0), 0)}
+                            </p>
+                        </div>
+                    </div>
+                    {/* Tooltip */}
+                    <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none -top-12 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs font-bold py-2 px-3 rounded-lg shadow-xl whitespace-nowrap z-50">
+                        Soma de todas as peças no estoque
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full w-0 h-0 border-l-[6px] border-l-transparent border-t-[6px] border-t-gray-900 border-r-[6px] border-r-transparent"></div>
+                    </div>
+                </div>
+
+                {/* Card 3: Modelos */}
+                <div className="group relative bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                    <div className="flex items-center space-x-4">
+                        <div className="p-4 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded-2xl group-hover:bg-purple-600 group-hover:text-white transition-colors duration-300">
+                            <Layers size={28} />
+                        </div>
+                        <div>
+                            <p className="text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-wider group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                                Modelos Diversos
+                            </p>
+                            <p className="text-3xl font-black text-slate-800 dark:text-white mt-1">
+                                {new Set(recebimentos.map(r => r.modelo_id)).size}
+                            </p>
+                        </div>
+                    </div>
+                    {/* Tooltip */}
+                    <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none -top-12 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs font-bold py-2 px-3 rounded-lg shadow-xl whitespace-nowrap z-50">
+                        Quantidade de modelos únicos
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full w-0 h-0 border-l-[6px] border-l-transparent border-t-[6px] border-t-gray-900 border-r-[6px] border-r-transparent"></div>
+                    </div>
+                </div>
             </div>
 
             {/* Form Card */}
