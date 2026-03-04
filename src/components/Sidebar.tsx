@@ -65,33 +65,57 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, isA
       </div>
 
       <nav className="flex-1 overflow-y-auto py-4 bg-white dark:bg-zinc-950">
-        <ul>
+        <ul className="grid grid-cols-3 gap-2 px-2 md:grid-cols-1 md:flex md:flex-col md:px-0">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeView === item.id;
             return (
-              <li key={item.id} className="px-3 mb-1">
+              <li key={item.id} className="md:px-3 md:mb-1">
                 <button
                   onClick={() => setActiveView(item.id)}
-                  className={`w-full flex items-center group px-4 py-3 rounded-xl transition-all duration-200 ${isActive
+                  className={`w-full flex flex-col md:flex-row items-center md:px-4 py-3 rounded-xl transition-all duration-200 ${isActive
                     ? 'bg-[#005A9C]/10 text-[#005A9C] dark:bg-[#66b3ff]/10 dark:text-[#66b3ff]'
                     : 'text-gray-500 dark:text-zinc-400 hover:bg-gray-50 dark:hover:bg-zinc-900 hover:text-gray-900 dark:hover:text-white'
                     }`}
                 >
-                  <div className="flex items-center space-x-4 flex-1">
-                    <Icon size={20} className={isActive ? 'text-[#005A9C] dark:text-[#66b3ff]' : 'text-gray-400 group-hover:text-[#005A9C] dark:group-hover:text-[#66b3ff]'} />
-                    <span className={`text-sm font-medium ${isActive ? 'font-bold' : ''}`}>
+                  <div className="flex flex-col md:flex-row items-center md:space-x-4 flex-1">
+                    <Icon className={`w-6 h-6 md:w-5 md:h-5 mb-1.5 md:mb-0 ${isActive ? 'text-[#005A9C] dark:text-[#66b3ff]' : 'text-gray-400 group-hover:text-[#005A9C] dark:group-hover:text-[#66b3ff]'}`} />
+                    <span className={`text-[10px] md:text-sm text-center leading-tight font-medium ${isActive ? 'font-bold' : ''}`}>
                       {item.label}
                     </span>
                   </div>
-                  <ChevronRight size={14} className={`${isActive ? 'opacity-100' : 'opacity-0'} group-hover:opacity-100 group-hover:translate-x-1 transition-all`} />
+                  <ChevronRight size={14} className={`hidden md:block ${isActive ? 'opacity-100' : 'opacity-0'} group-hover:opacity-100 group-hover:translate-x-1 transition-all`} />
                 </button>
               </li>
             );
           })}
 
-          {/* Configurações Dropdown */}
-          <li className="mt-4 px-3 border-t border-gray-100 dark:border-zinc-900 pt-4">
+          {/* Mobile Only: Flattened Config Items for the 3x4 Grid */}
+          {configItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeView === item.id;
+            return (
+              <li key={`mobile-${item.id}`} className="md:hidden">
+                <button
+                  onClick={() => setActiveView(item.id)}
+                  className={`w-full flex flex-col items-center py-3 rounded-xl transition-all duration-200 ${isActive
+                    ? 'bg-[#005A9C]/10 text-[#005A9C] dark:bg-[#66b3ff]/10 dark:text-[#66b3ff]'
+                    : 'text-gray-500 dark:text-zinc-400 hover:bg-gray-50 dark:hover:bg-zinc-900 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                >
+                  <div className="flex flex-col items-center flex-1">
+                    <Icon className={`w-6 h-6 mb-1.5 ${isActive ? 'text-[#005A9C] dark:text-[#66b3ff]' : 'text-gray-400'}`} />
+                    <span className={`text-[10px] text-center leading-tight font-medium ${isActive ? 'font-bold' : ''}`}>
+                      {item.label}
+                    </span>
+                  </div>
+                </button>
+              </li>
+            );
+          })}
+
+          {/* Configurações Dropdown (Desktop Only) */}
+          <li className="hidden md:block mt-4 px-3 border-t border-gray-100 dark:border-zinc-900 pt-4">
             <button
               onClick={() => setIsConfigOpen(!isConfigOpen)}
               className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all hover:bg-gray-50 dark:hover:bg-zinc-900 group"

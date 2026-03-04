@@ -17,6 +17,7 @@ import { Login } from './views/Login';
 import { GovHeader } from './components/GovHeader';
 import { GovFooter } from './components/GovFooter';
 import { CadastroModelos } from './views/CadastroModelos';
+import { InstallPrompt } from './components/InstallPrompt';
 
 
 function App() {
@@ -193,7 +194,7 @@ function App() {
       <div className="flex flex-col min-h-screen bg-[#f2f2f2] dark:bg-[#121212] transition-colors duration-200">
         {/* Sidebar Navigation - Fixed Overlay with Push logic on Desktop */}
         <div className={`
-          fixed inset-y-0 left-0 z-[110] transition-all duration-300 ease-in-out bg-white dark:bg-[#1e1e1e] w-72
+          fixed inset-y-0 left-0 z-[110] transition-all duration-300 ease-in-out bg-white dark:bg-[#1e1e1e] w-full lg:w-72
           ${isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full shadow-none'}
         `}>
           <Sidebar
@@ -254,6 +255,7 @@ function App() {
               </div>
             </div>
           </div>
+          <InstallPrompt />
         </div>
       </div>
     </LanguageProvider>
