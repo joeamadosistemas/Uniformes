@@ -29,8 +29,8 @@ export const Recebimentos: React.FC = () => {
             const emailUser = data.session?.user?.email ?? '';
             const userId = data.session?.user?.id;
 
-            if (emailUser && emailUser !== escola) {
-                setEscola(emailUser);
+            if (emailUser && emailUser.toLowerCase() !== escola.toLowerCase()) {
+                setEscola(emailUser.toLowerCase());
             }
 
             if (userId) {

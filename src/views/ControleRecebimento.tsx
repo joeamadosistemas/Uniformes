@@ -47,32 +47,39 @@ export const ControleRecebimento: React.FC = () => {
 
             if (errorEscolas) throw errorEscolas;
 
-            // 2. Buscar nomes únicos de escolas que já lançaram recebimentos
+            // 2. Buscar e-mails únicos de escolas que já lançaram recebimentos
+            // Aumentamos o limite para garantir que pegamos registros de todas as escolas
             const { data: lancamentos, error: errorLancamentos } = await supabase
                 .from('recebimentos')
-                .select('escola, created_at');
+                .select('escola, data_recebimento')
+                .order('data_recebimento', { ascending: false })
+                .limit(10000);
 
             if (errorLancamentos) {
                 console.warn('Tabela recebimentos ainda não disponível para controle total.');
             }
 
-            // Mapear escolas que já lançaram
-            const escolasComLancamento = new Map<string, string>(); // nome -> data
+            // Mapear escolas que já lançaram usando o e-mail como chave (case-insensitive)
+            const escolasComLancamento = new Map<string, string>(); // email -> data
             if (lancamentos) {
                 lancamentos.forEach(l => {
-                    const dataAtual = l.created_at;
-                    const dataExistente = escolasComLancamento.get(l.escola);
+                    const emailKey = (l.escola || '').toLowerCase().trim();
+                    const dataAtual = l.data_recebimento;
+                    const dataExistente = escolasComLancamento.get(emailKey);
                     if (!dataExistente || new Date(dataAtual) > new Date(dataExistente)) {
-                        escolasComLancamento.set(l.escola, dataAtual);
+                        escolasComLancamento.set(emailKey, dataAtual);
                     }
                 });
             }
 
-            const mappedEscolas: EscolaStatus[] = todasEscolas.map(esc => ({
-                ...esc,
-                jaLancou: escolasComLancamento.has(esc.nome),
-                dataUltimoLancamento: escolasComLancamento.get(esc.nome)
-            }));
+            const mappedEscolas: EscolaStatus[] = todasEscolas.map(esc => {
+                const emailKey = (esc.email || '').toLowerCase().trim();
+                return {
+                    ...esc,
+                    jaLancou: escolasComLancamento.has(emailKey),
+                    dataUltimoLancamento: escolasComLancamento.get(emailKey)
+                };
+            });
 
             setEscolas(mappedEscolas);
 
