@@ -305,9 +305,6 @@ export const Transferencias: React.FC = () => {
                 </div>
             )}
 
-            <div>
-                <p className="text-gray-500">{t.transferencias.subtitulo}</p>
-            </div>
 
             {/* Tabs Navigation */}
             <div className="flex space-x-2 bg-gray-100/50 p-1.5 rounded-xl w-fit">

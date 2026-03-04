@@ -67,25 +67,19 @@ export const DashboardAdmin: React.FC = () => {
 
     return (
         <div className="space-y-8 pb-20">
-            {/* Header & Export */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h2 className="text-3xl font-bold text-gray-800">{t.dashboard.titulo}</h2>
-                    <p className="text-gray-500">{t.dashboard.subtitulo}</p>
-                </div>
-                <div className="flex items-center space-x-3">
-                    <button
-                        onClick={handleExportPDF}
-                        className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all shadow-sm"
-                    >
-                        <FileText size={18} className="mr-2 text-red-500" />
-                        PDF
-                    </button>
-                    <button className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all shadow-sm">
-                        <Download size={18} className="mr-2 text-green-500" />
-                        Excel
-                    </button>
-                </div>
+            {/* Export Actions */}
+            <div className="flex justify-end items-center space-x-3 mb-6">
+                <button
+                    onClick={handleExportPDF}
+                    className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all shadow-sm"
+                >
+                    <FileText size={18} className="mr-2 text-red-500" />
+                    PDF
+                </button>
+                <button className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all shadow-sm">
+                    <Download size={18} className="mr-2 text-green-500" />
+                    Excel
+                </button>
             </div>
 
             {/* Stats Cards */}

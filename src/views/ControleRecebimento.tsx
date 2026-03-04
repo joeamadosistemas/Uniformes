@@ -210,22 +210,25 @@ export const ControleRecebimento: React.FC = () => {
                             </button>
                         </div>
 
-                        <button
-                            onClick={fetchStatusEscolas}
-                            disabled={refreshing}
-                            className="flex items-center gap-2 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-gray-600 dark:text-zinc-300 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95"
-                            title="Atualizar lista"
-                        >
-                            <RefreshCw size={16} className={refreshing ? 'animate-spin' : ''} />
-                        </button>
+                        {/* Export & Refresh Actions */}
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={fetchStatusEscolas}
+                                disabled={refreshing}
+                                className="flex items-center gap-2 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-gray-600 dark:text-zinc-300 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95"
+                                title="Atualizar lista"
+                            >
+                                <RefreshCw size={16} className={refreshing ? 'animate-spin' : ''} />
+                            </button>
 
-                        <button
-                            onClick={handleExportPDF}
-                            disabled={loading || escolasFiltradas.length === 0}
-                            className="flex items-center gap-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md shadow-red-600/10 active:scale-95 ml-2"
-                        >
-                            <FileText size={16} /> PDF
-                        </button>
+                            <button
+                                onClick={handleExportPDF}
+                                disabled={loading || escolasFiltradas.length === 0}
+                                className="flex items-center gap-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md shadow-red-600/10 active:scale-95 ml-2"
+                            >
+                                <FileText size={16} /> PDF
+                            </button>
+                        </div>
                     </div>
                 </div>
 

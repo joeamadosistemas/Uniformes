@@ -201,12 +201,6 @@ export const CadastrosUniformes: React.FC = () => {
 
     return (
         <div className="space-y-8 pb-20">
-            <div className="flex items-center justify-between">
-                <div>
-                    <p className="text-gray-500">{t.cadastros.subtitulo}</p>
-                </div>
-            </div>
-
             {/* Form Card */}
             <div className={`bg-white rounded-3xl border ${editingId ? 'border-blue-200 ring-4 ring-blue-50' : 'border-gray-100'} shadow-sm overflow-hidden transition-all duration-300`}>
                 <div className={`${editingId ? 'bg-blue-600' : 'bg-slate-50/50'} px-8 py-4 border-b border-gray-100 flex items-center justify-between`}>

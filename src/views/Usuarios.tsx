@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { UsuarioCadastro, EscolaCadastro } from '../types';
-import { Save, Trash2, Users, Loader2, Search, Edit2, UserX, Key, Check, X, Shield, User } from 'lucide-react';
+import { Save, Trash2, Loader2, Search, Edit2, UserX, Key, Check, X, Shield, User } from 'lucide-react';
 import { supabase, supabaseAdmin } from '../lib/supabaseClient';
 import { useT } from '../lib/LanguageContext';
 
@@ -11,60 +11,36 @@ export const Usuarios: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-
-  // Estados para Cadastro/Edição
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [nome, setNome] = useState('');
-  const [emailEscola, setEmailEscola] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
-  // Novos campos para Auth e Role
-  const [emailUsuario, setEmailUsuario] = useState('');
-  const [password, setPassword] = useState('');
-  const [userRole, setUserRole] = useState<'admin' | 'usuario'>('usuario');
-
-  const [currentAdminEmail, setCurrentAdminEmail] = useState<string | null>(null);
+  const [formData, setFormData] = useState({
+    nome: '',
+    email: '',
+    senha: '',
+    perfil: 'Escola' as 'Admin' | 'Escola',
+    escola_id: ''
+  });
 
   useEffect(() => {
-    let isMounted = true;
-
     fetchData();
-    supabase.auth.getSession().then(({ data }) => {
-      if (isMounted) {
-        setCurrentAdminEmail(data.session?.user?.email || null);
-      }
-    });
-
-    return () => {
-      isMounted = false;
-    };
   }, []);
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      const { data: dataEscolas, error: errorEscolas } = await supabase
-        .from('escolas')
-        .select('*')
-        .order('nome', { ascending: true });
+      const [uRes, eRes] = await Promise.all([
+        supabase.from('profiles').select('*').order('nome'),
+        supabase.from('escolas').select('*').order('nome')
+      ]);
 
-      if (errorEscolas) throw errorEscolas;
-      if (dataEscolas) setEscolas(dataEscolas as EscolaCadastro[]);
+      if (uRes.error) throw uRes.error;
+      if (eRes.error) throw eRes.error;
 
-      const clientConfigured = supabaseAdmin || supabase;
-      const { data: dataUsuarios, error: errorUsuarios } = await clientConfigured
-        .from('Profile')
-        .select('*')
-        .order('nome', { ascending: true });
-
-      if (errorUsuarios) {
-        console.warn('Aviso ao buscar perfis genéricos (provável bloqueio RLS na falta da Service Role Key):', errorUsuarios.message);
-        // Mesmo com erro, não jogue para o catch principal para não travar a tela
-      } else if (dataUsuarios) {
-        setUsuarios(dataUsuarios as UsuarioCadastro[]);
-      }
+      setUsuarios(uRes.data || []);
+      setEscolas(eRes.data || []);
     } catch (error) {
       console.error('Erro ao buscar dados:', error);
-      alert(t.cadastros.erroCarregar);
     } finally {
       setLoading(false);
     }
@@ -72,84 +48,72 @@ export const Usuarios: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nome || !emailEscola) return;
+    if (!formData.nome || !formData.email || (!editingId && !formData.senha)) {
+      alert(t.usuarios.preenchaTodosCampos);
+      return;
+    }
+
+    if (formData.perfil === 'Escola' && !formData.escola_id) {
+      alert(t.usuarios.selecioneEscola);
+      return;
+    }
 
     try {
       setSaving(true);
 
       if (editingId) {
-        // Atualização simples do perfil
+        // Atualizar perfil
         const { error } = await supabase
-          .from('Profile')
+          .from('profiles')
           .update({
-            nome,
-            email_escola: emailEscola,
-            role: userRole
+            nome: formData.nome,
+            perfil: formData.perfil,
+            escola_id: formData.perfil === 'Escola' ? formData.escola_id : null,
+            updated_at: new Date().toISOString()
           })
           .eq('id', editingId);
 
         if (error) throw error;
 
-        setUsuarios(prev => prev.map(u => u.id === editingId ? { ...u, nome, email_escola: emailEscola, role: userRole } : u));
-        setEditingId(null);
-        alert(t.cadastros.sucessoAtualizar);
+        // Se houver nova senha, atualizar no Auth via Service Role (Admin)
+        if (formData.senha) {
+          const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(
+            editingId,
+            { password: formData.senha }
+          );
+          if (authError) throw authError;
+        }
       } else {
-        // NOVO CADASTRO: Envolve Auth + Profile
-        if (!emailUsuario || !password) {
-          alert(t.common.preenchaCampos);
-          setSaving(false);
-          return;
-        }
-
-        if (!supabaseAdmin) {
-          throw new Error('Cliente admin não configurado corretamente.');
-        }
-
-        // 1. Criar no Authentication
+        // Criar novo usuário (Auth + Profile)
         const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-          email: emailUsuario,
-          password: password,
+          email: formData.email,
+          password: formData.senha,
           email_confirm: true,
-          user_metadata: { nome }
+          user_metadata: { nome: formData.nome }
         });
 
         if (authError) throw authError;
 
-        if (authData?.user) {
-          // 2. Criar no Profile vinculado ao ID do Auth
-          const { data: profileData, error: profileError } = await supabase
-            .from('Profile')
-            .upsert([{
-              id: authData.user.id,
-              nome,
-              email_escola: emailEscola,
-              email_usuario: emailUsuario,
-              role: userRole
-            }])
-            .select();
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert([{
+            id: authData.user.id,
+            email: formData.email,
+            nome: formData.nome,
+            perfil: formData.perfil,
+            escola_id: formData.perfil === 'Escola' ? formData.escola_id : null
+          }]);
 
-          if (profileError) {
-            // Se falhar no profile, avisamos mas a conta no auth foi criada
-            console.error('Erro ao criar perfil:', profileError.message);
-            alert(t.common.erroGeral);
-          }
-
-          if (profileData) {
-            setUsuarios(prev => [...prev, profileData[0] as UsuarioCadastro]);
-            alert(t.cadastros.sucessoAtualizar);
-          }
-        }
+        if (profileError) throw profileError;
       }
 
-      // Limpar campos
-      setNome('');
-      setEmailEscola('');
-      setEmailUsuario('');
-      setPassword('');
-      setUserRole('usuario');
+      setFormData({ nome: '', email: '', senha: '', perfil: 'Escola', escola_id: '' });
+      setEditingId(null);
+      fetchData();
+      alert(editingId ? t.usuarios.perfilAtualizado : t.usuarios.usuarioCriado);
     } catch (error: any) {
       console.error('Erro ao salvar:', error);
-      alert(error.message || t.common.erroGeral);
+      alert(error.message || t.usuarios.erroSalvar);
     } finally {
       setSaving(false);
     }
@@ -157,120 +121,51 @@ export const Usuarios: React.FC = () => {
 
   const handleEdit = (usuario: UsuarioCadastro) => {
     setEditingId(usuario.id);
-    setNome(usuario.nome);
-    setEmailEscola(usuario.email_escola);
-    setEmailUsuario(usuario.email_usuario || '');
-    setUserRole(usuario.role || 'usuario');
-    // Senha não é editável aqui, apenas via funçao específica
+    setFormData({
+      nome: usuario.nome,
+      email: usuario.email,
+      senha: '',
+      perfil: usuario.perfil,
+      escola_id: usuario.escola_id || ''
+    });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const cancelEdit = () => {
-    setEditingId(null);
-    setNome('');
-    setEmailEscola('');
-    setEmailUsuario('');
-    setPassword('');
-    setUserRole('usuario');
-  };
-
-  const handleDelete = async (id: string, email?: string) => {
-    if (window.confirm(t.usuarios.confirmExcluirUsu + ` ${email || ''}?`)) {
-      try {
-        setLoading(true);
-        // 1. Remover do Authentication
-        if (supabaseAdmin) {
-          const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(id);
-          if (authError) console.warn('Aviso: Erro ao remover do Authentication:', authError.message);
-        }
-
-        // 2. Remover do Profile
-        const { error } = await supabase.from('Profile').delete().eq('id', id);
-        if (error) throw error;
-
-        setUsuarios(prev => prev.filter(u => u.id !== id));
-        alert(t.cadastros.sucessoAtualizar);
-      } catch (error) {
-        console.error('Erro ao excluir:', error);
-        alert(t.common.erroExcluir);
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
-  const handleDeactivate = async (usuario: UsuarioCadastro) => {
-    const status = usuario.nome.includes('(DESATIVADO)') ? t.common.sim.toLowerCase() : t.common.nao.toLowerCase();
-    if (window.confirm(`${t.common.editar}?`)) {
-      try {
-        let novoNome = usuario.nome;
-        if (status === 'desativar') {
-          novoNome = `${usuario.nome} (DESATIVADO)`;
-        } else {
-          novoNome = usuario.nome.replace(' (DESATIVADO)', '');
-        }
-
-        const { error } = await supabase
-          .from('Profile')
-          .update({ nome: novoNome })
-          .eq('id', usuario.id);
-
-        if (error) throw error;
-        setUsuarios(prev => prev.map(u => u.id === usuario.id ? { ...u, nome: novoNome } : u));
-      } catch (error) {
-        console.error('Erro ao alterar status:', error);
-      }
-    }
-  };
-
-  const handleChangePassword = async (id: string, email: string) => {
-    const isAdmin = currentAdminEmail === 'cpdinfra@edu.itaguai.rj.gov.br';
-    if (!isAdmin) {
-      alert(t.common.acessoRestrito);
+  const handleDelete = async (id: string, perfil: string) => {
+    if (perfil === 'Admin') {
+      alert(t.usuarios.erroDeletarAdmin);
       return;
     }
 
-    if (!supabaseAdmin) {
-      alert('Erro: Cliente administrativo não configurado.');
-      return;
-    }
+    if (!confirm(t.usuarios.confirmarExclusao)) return;
 
-    const newPassword = window.prompt(`Digite a nova senha para ${email}:`);
-    if (newPassword && newPassword.length >= 6) {
-      try {
-        setLoading(true);
-        const { error } = await supabaseAdmin.auth.admin.updateUserById(id, { password: newPassword });
-        if (error) throw error;
-        alert(t.cadastros.sucessoAtualizar);
-      } catch (error: any) {
-        alert('Erro: ' + error.message);
-      } finally {
-        setLoading(false);
-      }
-    } else if (newPassword) {
-      alert('Mínimo de 6 caracteres.');
+    try {
+      setLoading(true);
+      // Deletar da Auth (via Service Role) e o Profile será deletado via Trigger/Cascade se houver, 
+      // ou deletamos manualmente.
+      const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(id);
+      if (authError) throw authError;
+
+      const { error: profileError } = await supabase.from('profiles').delete().eq('id', id);
+      if (profileError) throw profileError;
+
+      fetchData();
+      alert(t.usuarios.usuarioExcluido);
+    } catch (error) {
+      console.error('Erro ao deletar:', error);
+      alert(t.usuarios.erroExcluir);
+    } finally {
+      setLoading(false);
     }
   };
 
   const filteredUsuarios = usuarios.filter(u =>
     u.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    u.email_escola.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (u.email_usuario && u.email_usuario.toLowerCase().includes(searchTerm.toLowerCase()))
+    u.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fadeIn pb-12">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="bg-blue-600 p-2 rounded-lg text-white shadow-lg shadow-blue-200">
-            <Users size={24} />
-          </div>
-          <div>
-            <p className="text-gray-600">{t.usuarios.subtitulo}</p>
-          </div>
-        </div>
-      </div>
-
       {/* Formulário Expandido */}
       <div className={`bg-white rounded-2xl shadow-sm border ${editingId ? 'border-blue-200 ring-2 ring-blue-50' : 'border-gray-100'} p-8 transition-all`}>
         <div className="flex items-center justify-between mb-8">
@@ -280,209 +175,181 @@ export const Usuarios: React.FC = () => {
               {editingId ? t.usuarios.editandoPerfil : t.usuarios.novoUsuario}
             </h3>
           </div>
-          {!editingId && <span className="text-[10px] bg-slate-100 px-3 py-1 rounded-full font-bold text-slate-500">AUTH + PROFILE</span>}
+          {editingId && (
+            <button
+              onClick={() => {
+                setEditingId(null);
+                setFormData({ nome: '', email: '', senha: '', perfil: 'Escola', escola_id: '' });
+              }}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X size={20} />
+            </button>
+          )}
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-            {/* Seção Dados Pessoais */}
-            <div className="space-y-4">
-              <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">{t.usuarios.nomeCompleto} *</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-gray-500 uppercase ml-1">{t.usuarios.nomeCompleto}</label>
+              <div className="relative group">
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={18} />
                 <input
                   type="text"
-                  value={nome}
-                  onChange={(e) => setNome(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-medium"
-                  placeholder="Nome do Diretor ou Admin"
-                  required
+                  value={formData.nome}
+                  onChange={e => setFormData({ ...formData, nome: e.target.value })}
+                  className="w-full pl-11 pr-4 py-3 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all text-gray-700"
+                  placeholder={t.usuarios.placeholderNome}
                 />
-              </div>
-              <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">{t.escolas.nomeEscola} *</label>
-                <select
-                  value={emailEscola}
-                  onChange={(e) => setEmailEscola(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-medium"
-                  required
-                >
-                  <option value="">{t.lancamentos.selecione}</option>
-                  {escolas.map(escola => (
-                    <option key={escola.id} value={escola.email}>{escola.nome}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">{t.usuarios.nivelAcesso} *</label>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setUserRole('usuario')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-3 border rounded-xl font-bold text-xs transition-all ${userRole === 'usuario' ? 'bg-blue-50 border-blue-500 text-blue-600 shadow-sm' : 'bg-white border-slate-200 text-slate-400'}`}
-                  >
-                    <User size={14} /> {t.usuarios.usuarioDiretor}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setUserRole('admin')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-3 border rounded-xl font-bold text-xs transition-all ${userRole === 'admin' ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-200' : 'bg-white border-slate-200 text-slate-400'}`}
-                  >
-                    <Shield size={14} /> {t.usuarios.adminCentral}
-                  </button>
-                </div>
               </div>
             </div>
 
-            {/* Seção Dados de Login (Apenas novo ou visível) */}
-            <div className={`space-y-4 ${editingId ? 'opacity-60 pointer-events-none' : ''}`}>
-              <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">{t.usuarios.emailLogin} *</label>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-gray-500 uppercase ml-1">{t.usuarios.email}</label>
+              <div className="relative group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={18} />
                 <input
                   type="email"
-                  value={emailUsuario}
-                  onChange={(e) => setEmailUsuario(e.target.value)}
+                  value={formData.email}
                   disabled={!!editingId}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-medium"
-                  placeholder="ex: diretor@edu.itaguai.rj.gov.br"
-                  required={!editingId}
+                  onChange={e => setFormData({ ...formData, email: e.target.value })}
+                  className="w-full pl-11 pr-4 py-3 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all text-gray-700 disabled:opacity-50"
+                  placeholder="exemplo@email.com"
                 />
-              </div>
-              <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">{t.usuarios.senhaInicial} *</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={!!editingId}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-medium"
-                  placeholder="Mínimo 6 caracteres"
-                  required={!editingId}
-                />
-                {editingId && <p className="text-[9px] text-amber-600 mt-2 font-bold uppercase tracking-tight">{t.usuarios.avisoSenha}</p>}
               </div>
             </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-gray-500 uppercase ml-1">
+                {editingId ? t.usuarios.novaSenhaOpcional : t.usuarios.senha}
+              </label>
+              <div className="relative group">
+                <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={18} />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.senha}
+                  onChange={e => setFormData({ ...formData, senha: e.target.value })}
+                  className="w-full pl-11 pr-12 py-3 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all text-gray-700"
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500 transition-colors"
+                >
+                  <Search size={18} />
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-gray-500 uppercase ml-1">{t.usuarios.perfil}</label>
+              <div className="relative group">
+                <Shield className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={18} />
+                <select
+                  value={formData.perfil}
+                  onChange={e => setFormData({ ...formData, perfil: e.target.value as any, escola_id: e.target.value === 'Admin' ? '' : formData.escola_id })}
+                  className="w-full pl-11 pr-4 py-3 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all text-gray-700 appearance-none"
+                >
+                  <option value="Escola">{t.usuarios.perfilEscola}</option>
+                  <option value="Admin">{t.usuarios.perfilAdmin}</option>
+                </select>
+              </div>
+            </div>
+
+            {formData.perfil === 'Escola' && (
+              <div className="md:col-span-2 space-y-2">
+                <label className="text-xs font-bold text-gray-500 uppercase ml-1">{t.usuarios.vinculoEscola}</label>
+                <div className="relative group">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={18} />
+                  <select
+                    value={formData.escola_id}
+                    onChange={e => setFormData({ ...formData, escola_id: e.target.value })}
+                    className="w-full pl-11 pr-4 py-3 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all text-gray-700 appearance-none"
+                  >
+                    <option value="">{t.usuarios.selecioneEscola}</option>
+                    {escolas.map(e => (
+                      <option key={e.id} value={e.id}>{e.nome}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="flex justify-end gap-3 pt-6 border-t border-slate-50">
-            {editingId && (
-              <button
-                type="button"
-                onClick={cancelEdit}
-                className="flex items-center px-6 py-3.5 bg-gray-100 text-gray-600 rounded-2xl hover:bg-gray-200 transition-all font-bold"
-              >
-                <X size={18} className="mr-2" /> {t.lancamentos.cancelar}
-              </button>
-            )}
+          <div className="flex pt-4">
             <button
               type="submit"
               disabled={saving}
-              className="flex items-center px-8 py-3.5 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-all font-bold shadow-lg shadow-blue-200 disabled:opacity-50"
+              className={`flex-1 md:flex-none md:min-w-[200px] flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-sm tracking-wide transition-all shadow-lg ${editingId ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-200 text-white' : 'bg-green-600 hover:bg-green-700 shadow-green-200 text-white'} disabled:opacity-50`}
             >
-              {saving ? <Loader2 size={18} className="mr-2 animate-spin" /> : editingId ? <Check size={18} className="mr-2" /> : <Save size={18} className="mr-2" />}
-              {saving ? t.usuarios.processando : editingId ? t.transferencias.salvarAlteracoes : t.usuarios.novoUsuario}
+              {saving ? <Loader2 className="animate-spin" size={20} /> : <Check size={20} />}
+              {editingId ? t.usuarios.atualizarPerfil : t.usuarios.criarUsuario}
             </button>
           </div>
         </form>
       </div>
 
-      {/* Lista com Busca Cruzada */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="px-8 py-6 border-b border-gray-100 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2">
-            {t.usuarios.perfisSinc}
-            {loading && <Loader2 size={14} className="text-blue-500 animate-spin" />}
-          </h3>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-            <input
-              type="text"
-              placeholder={t.usuarios.buscarUsuarios}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all w-full md:w-80 shadow-sm"
-            />
-          </div>
+      {/* Lista de Usuários */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between px-2">
+          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">{t.usuarios.usuariosCadastrados}</h3>
+          <span className="text-[10px] font-black bg-gray-100 text-gray-500 px-3 py-1 rounded-full">{filteredUsuarios.length}</span>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="bg-gray-50/30 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100">
-                <th className="px-8 py-4">{t.login.entrar} / {t.login.senha}</th>
-                <th className="px-8 py-4">{t.escolas.nomeEscola}</th>
-                <th className="px-8 py-4 text-right pr-12">{t.common.acoes}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 text-sm">
-              {loading && usuarios.length === 0 ? (
-                <tr><td colSpan={3} className="px-8 py-20 text-center"><Loader2 className="animate-spin mx-auto opacity-20" size={40} /></td></tr>
-              ) : filteredUsuarios.length === 0 ? (
-                <tr><td colSpan={3} className="px-8 py-12 text-center text-gray-500 italic">{t.lancamentos.semRegistros}</td></tr>
-              ) : (
-                filteredUsuarios.map((usuario) => {
-                  const escola = escolas.find(e => e.email === usuario.email_escola);
-                  const isDesativado = usuario.nome.includes('(DESATIVADO)');
-                  const isAdmin = usuario.role === 'admin';
+        <div className="relative group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={18} />
+          <input
+            type="text"
+            placeholder={t.usuarios.pesquisarUsuario}
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            className="w-full pl-12 pr-4 py-4 bg-white border border-gray-100 rounded-2xl shadow-sm focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-gray-700"
+          />
+        </div>
 
-                  return (
-                    <tr key={usuario.id} className={`hover:bg-slate-50/50 transition-colors ${isDesativado ? 'opacity-50 grayscale bg-slate-100' : ''}`}>
-                      <td className="px-8 py-5">
-                        <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-lg ${isAdmin ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
-                            {isAdmin ? <Shield size={16} /> : <User size={16} />}
-                          </div>
-                          <div>
-                            <p className={`font-bold transition-colors ${editingId === usuario.id ? 'text-blue-600' : 'text-gray-800'}`}>
-                              {usuario.nome}
-                            </p>
-                            <p className="text-[10px] text-blue-600 font-bold uppercase tracking-tight">{usuario.email_usuario || usuario.email_escola}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-8 py-5">
-                        <div className="flex flex-col">
-                          <span className="font-medium text-gray-700">{escola?.nome || 'Escola não encontrada'}</span>
-                          <span className="text-[10px] text-gray-400 font-mono uppercase tracking-tighter opacity-70 italic">{usuario.email_escola}</span>
-                        </div>
-                      </td>
-                      <td className="px-8 py-5">
-                        <div className="flex items-center justify-end gap-1 shadow-sm rounded-xl p-1 bg-white border border-slate-100">
-                          <button
-                            onClick={() => handleEdit(usuario)}
-                            className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                            title={t.common.editar}
-                          >
-                            <Edit2 size={16} />
-                          </button>
-                          <button
-                            onClick={() => handleDeactivate(usuario)}
-                            className={`p-2 rounded-lg transition-all ${isDesativado ? 'text-green-500 hover:bg-green-50' : 'text-amber-500 hover:bg-amber-50'}`}
-                            title={isDesativado ? "Ativar" : "Desativar"}
-                          >
-                            <UserX size={16} />
-                          </button>
-                          <button
-                            onClick={() => handleChangePassword(usuario.id, (usuario.email_usuario || usuario.email_escola))}
-                            className="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all"
-                            title={t.usuarios.resetarSenha}
-                          >
-                            <Key size={16} />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(usuario.id, usuario.nome)}
-                            className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                            title={t.common.excluir}
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {filteredUsuarios.map(u => (
+            <div key={u.id} className="group bg-white p-5 rounded-2xl border border-gray-100 hover:border-blue-200 transition-all hover:shadow-md">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-4">
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${u.perfil === 'Admin' ? 'bg-amber-100 text-amber-600' : 'bg-blue-100 text-blue-600'}`}>
+                    {u.perfil === 'Admin' ? <Shield size={24} /> : <User size={24} />}
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gray-800">{u.nome}</h4>
+                    <p className="text-xs text-gray-400 font-medium">{u.email}</p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className={`text-[10px] font-black uppercase tracking-tighter px-2 py-0.5 rounded-md ${u.perfil === 'Admin' ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-blue-600'}`}>
+                        {u.perfil}
+                      </span>
+                      {u.escola_id && (
+                        <span className="text-[10px] font-bold text-gray-400 truncate max-w-[150px]">
+                          • {escolas.find(e => e.id === u.escola_id)?.nome}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => handleEdit(u)}
+                    className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                    title={t.usuarios.editar}
+                  >
+                    <Edit2 size={18} />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(u.id, u.perfil)}
+                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                    title={t.usuarios.excluir}
+                  >
+                    <UserX size={18} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

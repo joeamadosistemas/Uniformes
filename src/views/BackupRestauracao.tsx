@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Database, FileJson, FileSpreadsheet, Upload, Info } from 'lucide-react';
+import { FileJson, FileSpreadsheet, Upload, Info } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useT } from '../lib/LanguageContext';
 
@@ -33,13 +33,13 @@ export const BackupRestauracao: React.FC = () => {
                 try {
                     const { data, error } = await supabase.from(table).select('*');
                     if (error) {
-                        console.warn(`Aviso: Falha ao ler tabela ${table}:`, error.message);
+                        console.warn(`Aviso: Falha ao ler tabela ${table}: `, error.message);
                         backupData.database[table] = [];
                     } else {
                         backupData.database[table] = data;
                     }
                 } catch (e) {
-                    console.warn(`Erro na tabela ${table}:`, e);
+                    console.warn(`Erro na tabela ${table}: `, e);
                 }
             }
 
@@ -155,7 +155,7 @@ export const BackupRestauracao: React.FC = () => {
                     for (const table of tables) {
                         if (dbData[table] && dbData[table].length > 0) {
                             const { error } = await supabase.from(table).upsert(dbData[table]);
-                            if (error) console.warn(`Erro ao restaurar tabela ${table}:`, error.message);
+                            if (error) console.warn(`Erro ao restaurar tabela ${table}: `, error.message);
                         }
                     }
 
@@ -181,16 +181,6 @@ export const BackupRestauracao: React.FC = () => {
 
     return (
         <div className="max-w-6xl mx-auto p-4 animate-fadeIn">
-            {/* Header do Módulo */}
-            <div className="flex items-center gap-4 mb-8">
-                <div className="bg-[#005A9C] p-3 rounded-xl shadow-lg shadow-blue-200">
-                    <Database className="text-white" size={32} />
-                </div>
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-800">{t.backup.titulo}</h1>
-                    <p className="text-gray-500">{t.backup.subtitulo}</p>
-                </div>
-            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                 {/* Card Backup Manual */}
@@ -229,7 +219,7 @@ export const BackupRestauracao: React.FC = () => {
                     </p>
 
                     <div
-                        className={`flex-1 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center p-6 transition-colors mb-6 cursor-pointer ${dragActive ? 'border-blue-400 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`}
+                        className={`flex - 1 border - 2 border - dashed rounded - 2xl flex flex - col items - center justify - center p - 6 transition - colors mb - 6 cursor - pointer ${dragActive ? 'border-blue-400 bg-blue-50' : 'border-gray-200 hover:border-gray-300'} `}
                         onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
                         onDragLeave={() => setDragActive(false)}
                         onDrop={(e) => { e.preventDefault(); setDragActive(false); if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); }}
@@ -242,7 +232,7 @@ export const BackupRestauracao: React.FC = () => {
                             className="hidden"
                             onChange={handleFileUpload}
                         />
-                        <Upload className={`mb-3 ${file ? 'text-green-500' : 'text-gray-300'}`} size={40} />
+                        <Upload className={`mb - 3 ${file ? 'text-green-500' : 'text-gray-300'} `} size={40} />
                         <p className="text-gray-600 font-medium text-center">
                             {file ? file.name : t.backup.cliqueArquivo}
                         </p>
