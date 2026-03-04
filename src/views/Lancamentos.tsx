@@ -31,7 +31,10 @@ export const Lancamentos: React.FC = () => {
 
   // Busca a sessão e depois consulta os segmentos reais da escola no banco
   useEffect(() => {
+    let isMounted = true;
+
     supabase.auth.getSession().then(async ({ data }) => {
+      if (!isMounted) return;
       const email = data.session?.user?.email ?? '';
       setEscola(email);
 
@@ -44,6 +47,8 @@ export const Lancamentos: React.FC = () => {
         .ilike('email', email)
         .eq('ativo', true)
         .maybeSingle();
+
+      if (!isMounted) return;
 
       if (!error && escolaData && Array.isArray(escolaData.segmentos) && escolaData.segmentos.length > 0) {
         const categorias = escolaData.segmentos.map(segmentoToCategoria);
@@ -60,6 +65,10 @@ export const Lancamentos: React.FC = () => {
         }
       }
     });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {

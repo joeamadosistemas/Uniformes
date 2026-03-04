@@ -44,8 +44,10 @@ export const Transferencias: React.FC = () => {
     const [editItens, setEditItens] = useState<Partial<ItemTransferencia>[]>([]);
 
     useEffect(() => {
+        let isMounted = true;
         // Busca o e-mail e o nome da escola do usuário logado
         supabase.auth.getSession().then(async ({ data }) => {
+            if (!isMounted) return;
             const email = data.session?.user?.email ?? '';
             if (!email) return;
             setUserEmail(email);
@@ -57,6 +59,7 @@ export const Transferencias: React.FC = () => {
                 .ilike('email', email)
                 .maybeSingle();
 
+            if (!isMounted) return;
             if (escolaData?.nome) {
                 setMinhaEscola(escolaData.nome);
             }
@@ -69,6 +72,7 @@ export const Transferencias: React.FC = () => {
             .eq('ativo', true)
             .order('nome', { ascending: true })
             .then(({ data, error }) => {
+                if (!isMounted) return;
                 if (!error && data) setEscolas(data as EscolaCadastro[]);
             });
 
@@ -79,6 +83,10 @@ export const Transferencias: React.FC = () => {
             setTransferencias([]);
             localStorage.setItem('@Uniformes:transferencias', JSON.stringify([]));
         }
+
+        return () => {
+            isMounted = false;
+        };
     }, []);
 
     // ── Helpers ──────────────────────────────────────────────────

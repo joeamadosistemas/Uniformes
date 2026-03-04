@@ -25,10 +25,16 @@ export const Recebimentos: React.FC = () => {
     const [mensagem, setMensagem] = useState<{ texto: string; tipo: 'sucesso' | 'erro' } | null>(null);
 
     useEffect(() => {
+        let isMounted = true;
+
         supabase.auth.getSession().then(({ data }) => {
+            if (!isMounted) return;
             const emailUser = data.session?.user?.email ?? '';
             const userId = data.session?.user?.id;
-            setEscola(emailUser);
+
+            if (emailUser && emailUser !== escola) {
+                setEscola(emailUser);
+            }
 
             if (userId) {
                 // Get user role from Profile table
@@ -38,6 +44,7 @@ export const Recebimentos: React.FC = () => {
                     .eq('id', userId)
                     .single()
                     .then(({ data: profileData, error }) => {
+                        if (!isMounted) return;
                         if (profileData?.role) {
                             setUserRole(profileData.role);
                         } else if (error || !profileData) {
@@ -48,6 +55,7 @@ export const Recebimentos: React.FC = () => {
                                 .eq('id', userId)
                                 .single()
                                 .then(({ data: oldProfileData }) => {
+                                    if (!isMounted) return;
                                     if (oldProfileData?.role) {
                                         setUserRole(oldProfileData.role);
                                     }
@@ -63,6 +71,7 @@ export const Recebimentos: React.FC = () => {
                     .eq('email', emailUser)
                     .single()
                     .then(({ data: escolaData }) => {
+                        if (!isMounted) return;
                         if (escolaData) {
                             setEscolaNome(escolaData.nome || '');
                             setSegmentosEscola(escolaData.segmentos || []);
@@ -74,8 +83,10 @@ export const Recebimentos: React.FC = () => {
         const carregarModelosCustomizados = async () => {
             try {
                 const { data, error } = await supabase.from('modelos_recebimento').select('*').order('created_at', { ascending: false });
+                if (!isMounted) return;
+
                 if (!error && data) {
-                    const mapped: RecebimentoModelo[] = data.map(m => ({
+                    const mapped: RecebimentoModelo[] = data.map((m: any) => ({
                         id: m.id,
                         nome: m.nome,
                         descricao: m.descricao,
@@ -104,6 +115,7 @@ export const Recebimentos: React.FC = () => {
                     }
                 }
             } catch (e) {
+                if (!isMounted) return;
                 const local = localStorage.getItem('@Uniformes:modelos_customizados');
                 if (local) {
                     const parsedLocal = JSON.parse(local);
@@ -119,6 +131,10 @@ export const Recebimentos: React.FC = () => {
         }
 
         carregarModelosCustomizados();
+
+        return () => {
+            isMounted = false;
+        };
     }, []);
 
     useEffect(() => {

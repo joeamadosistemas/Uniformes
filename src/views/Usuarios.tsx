@@ -25,10 +25,18 @@ export const Usuarios: React.FC = () => {
   const [currentAdminEmail, setCurrentAdminEmail] = useState<string | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+
     fetchData();
     supabase.auth.getSession().then(({ data }) => {
-      setCurrentAdminEmail(data.session?.user?.email || null);
+      if (isMounted) {
+        setCurrentAdminEmail(data.session?.user?.email || null);
+      }
     });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const fetchData = async () => {
