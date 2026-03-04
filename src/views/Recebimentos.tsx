@@ -395,6 +395,7 @@ export const Recebimentos: React.FC = () => {
                                     // Oculta apenas se todos os tamanhos definidos para o modelo já estiverem na lista de recebimentos
                                     return !m.tamanhos.every(t => tamanhosRegistrados.includes(t));
                                 })
+                                .sort((a, b) => a.nome.localeCompare(b.nome, undefined, { numeric: true, sensitivity: 'base' }))
                                 .map(m => (
                                     <option key={m.id} value={m.id}>
                                         {m.nome} - {m.descricao}
