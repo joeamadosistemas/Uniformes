@@ -25,7 +25,7 @@ function App() {
   const { t } = useT();
   const [session, setSession] = useState<Session | null>(null);
   const [loadingSession, setLoadingSession] = useState(true);
-  const [activeView, setActiveView] = useState('lancamentos');
+  const [activeView, setActiveView] = useState('recebimentos');
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const saved = localStorage.getItem('theme');
     return saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
