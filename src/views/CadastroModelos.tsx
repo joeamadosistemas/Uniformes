@@ -1,23 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Edit2, Trash2, Layers, Filter, Check, X, Loader2 } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Check, X, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useT } from '../lib/LanguageContext';
-import { ModeloRecebimento } from '../types';
-import { exportarModelosPDF } from '../utils/exportModelosUtils';
+import { RecebimentoModelo } from '../constants/recebimentosConstants';
+import { exportarModelosPDF } from '../utils/exportUtils';
 
 export const CadastroModelos: React.FC = () => {
     const { t } = useT();
-    const [modelos, setModelos] = useState<ModeloRecebimento[]>([]);
+    const [modelos, setModelos] = useState<RecebimentoModelo[]>([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
-    const [filterSegmento, setFilterSegmento] = useState('todos');
     const [editingId, setEditingId] = useState<string | null>(null);
 
     const [formData, setFormData] = useState({
         nome: '',
         descricao: '',
-        segmento: 'Unisex',
+        segmentos: ['GERAL'],
         tamanhos: [] as string[]
     });
 
@@ -36,7 +35,17 @@ export const CadastroModelos: React.FC = () => {
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
-            setModelos(data || []);
+
+            // Map table data to RecebimentoModelo type
+            const mapped: RecebimentoModelo[] = (data || []).map((m: any) => ({
+                id: m.id,
+                nome: m.nome,
+                descricao: m.descricao,
+                tamanhos: Array.isArray(m.tamanhos) ? m.tamanhos : (m.tamanhos?.split(',') || []),
+                segmentos: Array.isArray(m.segmentos) ? m.segmentos : (m.segmentos?.split(',') || ['GERAL'])
+            }));
+
+            setModelos(mapped);
         } catch (error) {
             console.error('Erro ao buscar modelos:', error);
         } finally {
@@ -53,11 +62,18 @@ export const CadastroModelos: React.FC = () => {
 
         try {
             setSaving(true);
+            const payload = {
+                nome: formData.nome,
+                descricao: formData.descricao,
+                tamanhos: formData.tamanhos,
+                segmentos: formData.segmentos
+            };
+
             if (editingId) {
                 const { error } = await supabase
                     .from('modelos_recebimento')
                     .update({
-                        ...formData,
+                        ...payload,
                         updated_at: new Date().toISOString()
                     })
                     .eq('id', editingId);
@@ -65,11 +81,11 @@ export const CadastroModelos: React.FC = () => {
             } else {
                 const { error } = await supabase
                     .from('modelos_recebimento')
-                    .insert([formData]);
+                    .insert([payload]);
                 if (error) throw error;
             }
 
-            setFormData({ nome: '', descricao: '', segmento: 'Unisex', tamanhos: [] });
+            setFormData({ nome: '', descricao: '', segmentos: ['GERAL'], tamanhos: [] });
             setEditingId(null);
             fetchModelos();
             alert(editingId ? 'Modelo atualizado!' : 'Modelo criado!');
@@ -81,12 +97,12 @@ export const CadastroModelos: React.FC = () => {
         }
     };
 
-    const handleEdit = (modelo: ModeloRecebimento) => {
+    const handleEdit = (modelo: RecebimentoModelo) => {
         setEditingId(modelo.id);
         setFormData({
             nome: modelo.nome,
             descricao: modelo.descricao,
-            segmento: modelo.segmento,
+            segmentos: modelo.segmentos,
             tamanhos: modelo.tamanhos
         });
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -125,9 +141,9 @@ export const CadastroModelos: React.FC = () => {
     };
 
     const modelosFiltrados = modelos.filter(m => {
-        const matchesSearch = m.nome.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesSegmento = filterSegmento === 'todos' || m.segmento === filterSegmento;
-        return matchesSearch && matchesSegmento;
+        const matchesSearch = m.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            m.descricao.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesSearch;
     });
 
     const handleExportPDF = () => {
@@ -136,6 +152,12 @@ export const CadastroModelos: React.FC = () => {
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500 pb-12">
+            <div>
+                <p className="text-gray-500 dark:text-zinc-400 font-medium pb-2">
+                    Adicione ou edite modelos dinamicamente para exibição na tela de Recebimentos.
+                </p>
+            </div>
+
             {/* Form Card */}
             <div className={`bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border ${editingId ? 'border-[#005A9C] ring-4 ring-blue-50 dark:ring-[#005A9C]/20' : 'border-gray-100 dark:border-zinc-800'} p-6 transition-all`}>
                 <div className="flex items-center space-x-2 mb-6 border-b border-gray-100 dark:border-zinc-800 pb-4">
@@ -159,16 +181,14 @@ export const CadastroModelos: React.FC = () => {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-xs font-black text-gray-500 dark:text-zinc-400 uppercase tracking-widest ml-1">Segmento</label>
-                            <select
-                                value={formData.segmento}
-                                onChange={e => setFormData({ ...formData, segmento: e.target.value })}
+                            <label className="text-xs font-black text-gray-500 dark:text-zinc-400 uppercase tracking-widest ml-1">Segmentos Atendidos (Separados por vírgula)</label>
+                            <input
+                                type="text"
+                                value={formData.segmentos.join(', ')}
+                                onChange={e => setFormData({ ...formData, segmentos: e.target.value.split(',').map(s => s.trim()) })}
                                 className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl focus:ring-2 focus:ring-[#005A9C] transition-all"
-                            >
-                                <option value="Unisex">Unisex</option>
-                                <option value="Masculino">Masculino</option>
-                                <option value="Feminino">Feminino</option>
-                            </select>
+                                placeholder="Ex: GERAL, CONJUNTO UNIFORMA ESCOLAR CRECHE"
+                            />
                         </div>
 
                         <div className="md:col-span-2 space-y-2">
@@ -202,7 +222,7 @@ export const CadastroModelos: React.FC = () => {
                             </div>
 
                             <div className="flex flex-wrap gap-2 pt-2">
-                                {formData.tamanhos.map(tam => (
+                                {formData.tamanhos.map((tam: string) => (
                                     <span key={tam} className="flex items-center bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 px-3 py-1.5 rounded-lg text-sm font-bold border border-blue-100 dark:border-blue-800/50">
                                         {tam}
                                         <button type="button" onClick={() => removeTamanho(tam)} className="ml-2 hover:text-red-500">
@@ -228,7 +248,7 @@ export const CadastroModelos: React.FC = () => {
                                 type="button"
                                 onClick={() => {
                                     setEditingId(null);
-                                    setFormData({ nome: '', descricao: '', segmento: 'Unisex', tamanhos: [] });
+                                    setFormData({ nome: '', descricao: '', segmentos: ['GERAL'], tamanhos: [] });
                                 }}
                                 className="px-6 py-4 bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-400 rounded-xl font-bold hover:bg-gray-200 transition-all"
                             >
@@ -253,17 +273,6 @@ export const CadastroModelos: React.FC = () => {
                                 className="w-full pl-10 pr-4 py-2 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-sm focus:ring-2 focus:ring-[#005A9C] transition-all"
                             />
                         </div>
-                        <div className="flex items-center space-x-2 bg-white dark:bg-zinc-800 p-1 rounded-xl border border-gray-200 dark:border-zinc-700">
-                            {['todos', 'Unisex', 'Masculino', 'Feminino'].map(seg => (
-                                <button
-                                    key={seg}
-                                    onClick={() => setFilterSegmento(seg)}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${filterSegmento === seg ? 'bg-[#005A9C] text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-zinc-700'}`}
-                                >
-                                    {seg === 'todos' ? 'Todos' : seg}
-                                </button>
-                            ))}
-                        </div>
                     </div>
                     <button
                         onClick={handleExportPDF}
@@ -278,7 +287,7 @@ export const CadastroModelos: React.FC = () => {
                         <thead>
                             <tr className="bg-zinc-50/50 dark:bg-zinc-800/30">
                                 <th className="px-6 py-4 text-[10px] font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Modelo</th>
-                                <th className="px-6 py-4 text-[10px] font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Segmento</th>
+                                <th className="px-6 py-4 text-[10px] font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Segmentos</th>
                                 <th className="px-6 py-4 text-[10px] font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Grade</th>
                                 <th className="px-6 py-4 text-right text-[10px] font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Ações</th>
                             </tr>
@@ -299,9 +308,13 @@ export const CadastroModelos: React.FC = () => {
                                         <div className="text-xs text-gray-500 dark:text-zinc-500 truncate max-w-[200px]">{m.descricao}</div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className={`px-2 py-1 rounded-md text-[10px] font-black uppercase ${m.segmento === 'Unisex' ? 'bg-purple-50 text-purple-600' : m.segmento === 'Masculino' ? 'bg-blue-50 text-blue-600' : 'bg-pink-50 text-pink-600'}`}>
-                                            {m.segmento}
-                                        </span>
+                                        <div className="flex flex-wrap gap-1">
+                                            {m.segmentos.map((s: string) => (
+                                                <span key={s} className="px-2 py-1 rounded-md text-[8px] font-black uppercase bg-blue-50 text-blue-600">
+                                                    {s}
+                                                </span>
+                                            ))}
+                                        </div>
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex flex-wrap gap-1">
