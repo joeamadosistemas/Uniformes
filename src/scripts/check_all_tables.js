@@ -15,7 +15,8 @@ async function getAllTables() {
         'recebimentos_registros',
         'profiles',
         'Profile',
-        'transferencias'
+        'transferencias',
+        'modelos_recebimento'
     ];
     for (const t of tables) {
         try {

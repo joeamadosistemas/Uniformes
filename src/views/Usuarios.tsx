@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { UsuarioCadastro, EscolaCadastro } from '../types';
-import { Save, Trash2, Loader2, Search, Edit2, UserX, Key, Check, X, Shield, User } from 'lucide-react';
+import { Loader2, Search, Edit2, UserX, Key, Check, X, Shield, User, Mail, Eye, EyeOff, Building2, ChevronDown } from 'lucide-react';
 import { supabase, supabaseAdmin } from '../lib/supabaseClient';
 import { useT } from '../lib/LanguageContext';
 
@@ -8,7 +8,6 @@ export const Usuarios: React.FC = () => {
   const { t } = useT();
   const [usuarios, setUsuarios] = useState<UsuarioCadastro[]>([]);
   const [escolas, setEscolas] = useState<EscolaCadastro[]>([]);
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -28,7 +27,6 @@ export const Usuarios: React.FC = () => {
 
   const fetchData = async () => {
     try {
-      setLoading(true);
       const [uRes, eRes] = await Promise.all([
         supabase.from('profiles').select('*').order('nome'),
         supabase.from('escolas').select('*').order('nome')
@@ -41,8 +39,6 @@ export const Usuarios: React.FC = () => {
       setEscolas(eRes.data || []);
     } catch (error) {
       console.error('Erro ao buscar dados:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -76,7 +72,7 @@ export const Usuarios: React.FC = () => {
         if (error) throw error;
 
         // Se houver nova senha, atualizar no Auth via Service Role (Admin)
-        if (formData.senha) {
+        if (formData.senha && supabaseAdmin) {
           const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(
             editingId,
             { password: formData.senha }
@@ -84,6 +80,8 @@ export const Usuarios: React.FC = () => {
           if (authError) throw authError;
         }
       } else {
+        if (!supabaseAdmin) throw new Error('Serviço administrativo não configurado.');
+
         // Criar novo usuário (Auth + Profile)
         const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
           email: formData.email,
@@ -140,7 +138,8 @@ export const Usuarios: React.FC = () => {
     if (!confirm(t.usuarios.confirmarExclusao)) return;
 
     try {
-      setLoading(true);
+      if (!supabaseAdmin) throw new Error('Serviço administrativo não configurado.');
+
       // Deletar da Auth (via Service Role) e o Profile será deletado via Trigger/Cascade se houver, 
       // ou deletamos manualmente.
       const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(id);
@@ -154,8 +153,6 @@ export const Usuarios: React.FC = () => {
     } catch (error) {
       console.error('Erro ao deletar:', error);
       alert(t.usuarios.erroExcluir);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -198,7 +195,7 @@ export const Usuarios: React.FC = () => {
                   type="text"
                   value={formData.nome}
                   onChange={e => setFormData({ ...formData, nome: e.target.value })}
-                  className="w-full pl-11 pr-4 py-3 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all text-gray-700"
+                  className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all text-gray-700 outline-none"
                   placeholder={t.usuarios.placeholderNome}
                 />
               </div>
@@ -207,13 +204,13 @@ export const Usuarios: React.FC = () => {
             <div className="space-y-2">
               <label className="text-xs font-bold text-gray-500 uppercase ml-1">{t.usuarios.email}</label>
               <div className="relative group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={18} />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={18} />
                 <input
                   type="email"
                   value={formData.email}
                   disabled={!!editingId}
                   onChange={e => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full pl-11 pr-4 py-3 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all text-gray-700 disabled:opacity-50"
+                  className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all text-gray-700 outline-none disabled:opacity-50"
                   placeholder="exemplo@email.com"
                 />
               </div>
@@ -229,15 +226,15 @@ export const Usuarios: React.FC = () => {
                   type={showPassword ? 'text' : 'password'}
                   value={formData.senha}
                   onChange={e => setFormData({ ...formData, senha: e.target.value })}
-                  className="w-full pl-11 pr-12 py-3 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all text-gray-700"
+                  className="w-full pl-11 pr-12 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all text-gray-700 outline-none"
                   placeholder="••••••••"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500 transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500 transition-colors p-1"
                 >
-                  <Search size={18} />
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
@@ -249,11 +246,14 @@ export const Usuarios: React.FC = () => {
                 <select
                   value={formData.perfil}
                   onChange={e => setFormData({ ...formData, perfil: e.target.value as any, escola_id: e.target.value === 'Admin' ? '' : formData.escola_id })}
-                  className="w-full pl-11 pr-4 py-3 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all text-gray-700 appearance-none"
+                  className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all text-gray-700 outline-none appearance-none cursor-pointer"
                 >
                   <option value="Escola">{t.usuarios.perfilEscola}</option>
                   <option value="Admin">{t.usuarios.perfilAdmin}</option>
                 </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                  <ChevronDown size={16} />
+                </div>
               </div>
             </div>
 
@@ -261,17 +261,20 @@ export const Usuarios: React.FC = () => {
               <div className="md:col-span-2 space-y-2">
                 <label className="text-xs font-bold text-gray-500 uppercase ml-1">{t.usuarios.vinculoEscola}</label>
                 <div className="relative group">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={18} />
+                  <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={18} />
                   <select
                     value={formData.escola_id}
                     onChange={e => setFormData({ ...formData, escola_id: e.target.value })}
-                    className="w-full pl-11 pr-4 py-3 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all text-gray-700 appearance-none"
+                    className="w-full pl-11 pr-4 py-3 bg-white border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all text-gray-700 outline-none appearance-none cursor-pointer"
                   >
                     <option value="">{t.usuarios.selecioneEscola}</option>
                     {escolas.map(e => (
                       <option key={e.id} value={e.id}>{e.nome}</option>
                     ))}
                   </select>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                    <ChevronDown size={16} />
+                  </div>
                 </div>
               </div>
             )}

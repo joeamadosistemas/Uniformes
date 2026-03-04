@@ -11,8 +11,7 @@ import {
     Package,
     Pencil,
     X,
-    Save,
-    AlertTriangle
+    Save
 } from 'lucide-react';
 import { EscolaCadastro, Transferencia, ItemTransferencia } from '../types';
 import { CATEGORIAS_UNIFORMES } from '../constants';
@@ -30,6 +29,7 @@ export const Transferencias: React.FC = () => {
     const [minhaEscola, setMinhaEscola] = useState('');
     // E-mail do usuário logado (fallback para resolver nome de escola)
     const [userEmail, setUserEmail] = useState('');
+    const [userRole, setUserRole] = useState<string>('');
 
     // Nova Transferência State
     const [destino, setDestino] = useState('');
@@ -42,6 +42,9 @@ export const Transferencias: React.FC = () => {
     const [editando, setEditando] = useState<Transferencia | null>(null);
     const [editDestino, setEditDestino] = useState('');
     const [editItens, setEditItens] = useState<Partial<ItemTransferencia>[]>([]);
+
+    // Estado do modal de exclusão
+    const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
     useEffect(() => {
         let isMounted = true;
@@ -62,6 +65,19 @@ export const Transferencias: React.FC = () => {
             if (!isMounted) return;
             if (escolaData?.nome) {
                 setMinhaEscola(escolaData.nome);
+            }
+
+            const userId = data.session?.user?.id;
+            if (userId) {
+                const { data: profileData } = await supabase
+                    .from('profiles')
+                    .select('perfil, role')
+                    .eq('id', userId)
+                    .maybeSingle();
+
+                if (profileData) {
+                    setUserRole(profileData.perfil || profileData.role || '');
+                }
             }
         });
 
@@ -119,7 +135,7 @@ export const Transferencias: React.FC = () => {
         if (itens.length > 1) setItens(itens.filter(item => item.id !== id));
     };
 
-    const handleItemChange = (id: string, field: keyof ItemTransferencia, value: any) => {
+    const handleItemChange = <K extends keyof ItemTransferencia>(id: string, field: K, value: ItemTransferencia[K]) => {
         setItens(itens.map(item => item.id === id ? { ...item, [field]: value } : item));
     };
 
@@ -159,8 +175,13 @@ export const Transferencias: React.FC = () => {
 
     // ── Excluir Transferência ─────────────────────────────────────
     const handleDelete = (id: string) => {
-        if (!window.confirm('Deseja realmente excluir esta transferência?')) return;
-        salvarTransferencias(transferencias.filter(t => t.id !== id));
+        setDeleteConfirmId(id);
+    };
+
+    const confirmarDelete = () => {
+        if (!deleteConfirmId) return;
+        salvarTransferencias(transferencias.filter(t => t.id !== deleteConfirmId));
+        setDeleteConfirmId(null);
     };
 
     // ── Editar Transferência ──────────────────────────────────────
@@ -170,7 +191,7 @@ export const Transferencias: React.FC = () => {
         setEditItens(t.itens.map(i => ({ ...i })));
     };
 
-    const handleEditItemChange = (id: string, field: keyof ItemTransferencia, value: any) => {
+    const handleEditItemChange = <K extends keyof ItemTransferencia>(id: string, field: K, value: ItemTransferencia[K]) => {
         setEditItens(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item));
     };
 
@@ -219,7 +240,7 @@ export const Transferencias: React.FC = () => {
             // Mostra o e-mail como fallback (truncado antes do @)
             return trans.origem_email.split('@')[0] || trans.origem_email;
         }
-        return t.transferencias.origemNaoRegistrada;
+        return 'SECRETARIA DE EDUCAÇÃO';
     };
     const filteredTrans = transferencias.filter(trans => {
         const tipo = tipoParaMim(trans);
@@ -473,7 +494,7 @@ export const Transferencias: React.FC = () => {
                                                 <td className="px-5 py-4">
                                                     <div className="flex items-center justify-end gap-1">
                                                         <button onClick={() => abrirEdicao(trans)} className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors" title={t.common.editar}><Pencil size={15} /></button>
-                                                        <button onClick={() => handleDelete(trans.id)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-colors" title={t.common.excluir}><AlertTriangle size={15} /></button>
+                                                        <button onClick={() => handleDelete(trans.id)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-colors" title={t.common.excluir}><Trash2 size={15} /></button>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -502,7 +523,7 @@ export const Transferencias: React.FC = () => {
                                                 <span className="px-3 py-1 bg-green-50 text-green-600 text-[10px] font-bold rounded-lg border border-green-100 uppercase tracking-widest">{trans.status}</span>
                                                 <span className="text-xs font-bold text-gray-300">ID: {trans.id}</span>
                                             </div>
-                                            {tipo === 'enviada' && (
+                                            {(tipo === 'enviada' || userRole === 'Admin' || userRole === 'Administrador' || userRole === 'Super Administrador') && (
                                                 <div className="flex items-center gap-1">
                                                     <button onClick={() => abrirEdicao(trans)} className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors" title={t.common.editar}><Pencil size={15} /></button>
                                                     <button onClick={() => handleDelete(trans.id)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-colors" title={t.common.excluir}><Trash2 size={15} /></button>
@@ -563,6 +584,28 @@ export const Transferencias: React.FC = () => {
                     )}
                 </div>
             )}
+            {/* ── Modal de Confirmação de Exclusão ── */}
+            {deleteConfirmId && (
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 text-center space-y-5">
+                        <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-2">
+                            <Trash2 size={32} />
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-800">Confirmar Exclusão</h3>
+                        <p className="text-gray-500 text-sm">Tem certeza que deseja excluir esta transferência permanentemente? Esta ação não poderá ser desfeita.</p>
+
+                        <div className="flex gap-3 pt-4">
+                            <button onClick={() => setDeleteConfirmId(null)} className="flex-1 py-3 text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">
+                                {t.common.cancelar || 'Cancelar'}
+                            </button>
+                            <button onClick={confirmarDelete} className="flex-1 py-3 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-colors shadow-lg shadow-red-200">
+                                {t.common.excluir || 'Excluir'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 };

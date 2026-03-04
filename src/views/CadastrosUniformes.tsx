@@ -30,6 +30,9 @@ export const CadastrosUniformes: React.FC = () => {
     // Estado de Edição
     const [editingId, setEditingId] = useState<string | null>(null);
 
+    // Estado de Confirmação de Exclusão
+    const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
     // Extrair chave da categoria a partir do segmento selecionado
     const getCategoriaKey = (segmento: string) => {
         return segmento.replace('CONJUNTO UNIFORMA ESCOLAR ', '').replace('CONJUNTO UNIFORME ESCOLAR ', '').trim();
@@ -62,6 +65,7 @@ export const CadastrosUniformes: React.FC = () => {
 
             if (data) {
                 // Map snake_case to camelCase
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const mappedData: Uniforme[] = data.map((item: any) => ({
                     id: item.id,
                     segmento: item.segmento,
@@ -174,21 +178,26 @@ export const CadastrosUniformes: React.FC = () => {
         });
     };
 
-    const handleDelete = async (id: string) => {
-        if (window.confirm(t.cadastros.confirmExcluir)) {
-            try {
-                const { error } = await supabase
-                    .from('uniformes_catalogo')
-                    .delete()
-                    .eq('id', id);
+    const handleDelete = (id: string) => {
+        setDeleteConfirmId(id);
+    };
 
-                if (error) throw error;
+    const confirmarDelete = async () => {
+        if (!deleteConfirmId) return;
+        try {
+            const { error } = await supabase
+                .from('uniformes_catalogo')
+                .delete()
+                .eq('id', deleteConfirmId);
 
-                setUniformes(prev => prev.filter(u => u.id !== id));
-            } catch (error) {
-                console.error('Erro ao excluir uniforme:', error);
-                alert('Erro ao deletar o item.');
-            }
+            if (error) throw error;
+
+            setUniformes(prev => prev.filter(u => u.id !== deleteConfirmId));
+            setDeleteConfirmId(null);
+        } catch (error) {
+            console.error('Erro ao excluir uniforme:', error);
+            alert('Erro ao deletar o item.');
+            setDeleteConfirmId(null);
         }
     };
 
@@ -484,6 +493,28 @@ export const CadastrosUniformes: React.FC = () => {
                     </p>
                 </div>
             </div>
+
+            {/* ── Modal de Confirmação de Exclusão ── */}
+            {deleteConfirmId && (
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 text-center space-y-5">
+                        <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-2">
+                            <Trash2 size={32} />
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-800">Confirmar Exclusão</h3>
+                        <p className="text-gray-500 text-sm">{t.cadastros.confirmExcluir || 'Tem certeza que deseja excluir permanentemente?'}</p>
+
+                        <div className="flex gap-3 pt-4">
+                            <button onClick={() => setDeleteConfirmId(null)} className="flex-1 py-3 text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">
+                                {t.common.cancelar || 'Cancelar'}
+                            </button>
+                            <button onClick={confirmarDelete} className="flex-1 py-3 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-colors shadow-lg shadow-red-200">
+                                {t.common.excluir || 'Excluir'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

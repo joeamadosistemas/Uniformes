@@ -1,0 +1,41 @@
+# Plan: Adicionar Filtro de Ano Global
+
+Adicionar um seletor de "Ano:" nos módulos principais para permitir que os usuários filtrem dados por ano, facilitando a visualização de históricos futuros.
+
+## Mudanças Propostas
+
+### 1. Componentes Compartilhados (Opcional)
+*   Criar um componente visual consistente para o seletor de ano ou integrar diretamente nos cabeçalhos das views para manter a estética premium.
+
+### 2. Módulos de Usuário Escuela
+
+#### [MODIFY] [Recebimentos.tsx](file:///e:/2026%20SISTEMAS/2026%20Uniforme/04%20mar%C3%A7o/sistema_de_controle_de_uniformes_escolares_9d3a4t_dualiteproject/src/views/Recebimentos.tsx)
+*   Adicionar estado `selectedYear` (default: 2026).
+*   Incluir o seletor `<select>` no topo da página.
+*   Atualizar a query do Supabase para filtrar por `data_recebimento` no ano selecionado.
+*   Filtrar a lista local caso o banco esteja inacessível.
+
+#### [MODIFY] [Lancamentos.tsx](file:///e:/2026%20SISTEMAS/2026%20Uniforme/04%20mar%C3%A7o/sistema_de_controle_de_uniformes_escolares_9d3a4t_dualiteproject/src/views/Lancamentos.tsx) (Inventário)
+*   Adicionar estado `selectedYear` (default: 2026).
+*   Incluir seletor de ano próximo aos filtros existentes.
+*   Atualizar o filtro de `registros` para considerar apenas os lançamentos do ano selecionado (baseado em `data_registro`).
+
+### 3. Módulos Administrativos
+
+#### [MODIFY] [DashboardAdmin.tsx](file:///e:/2026%20SISTEMAS/2026%20Uniforme/04%20mar%C3%A7o/sistema_de_controle_de_uniformes_escolares_9d3a4t_dualiteproject/src/views/DashboardAdmin.tsx)
+*   Adicionar estado `selectedYear` (default: 2026).
+*   Incluir seletor de ano no topo do dashboard.
+*   Filtrar os `registros` carregados do LocalStorage/Supabase pelo ano selecionado antes de realizar os cálculos de "Quem informou" e "Quem falta".
+
+#### [MODIFY] [ControleRecebimento.tsx](file:///e:/2026%20SISTEMAS/2026%20Uniforme/04%20mar%C3%A7o/sistema_de_controle_de_uniformes_escolares_9d3a4t_dualiteproject/src/views/ControleRecebimento.tsx)
+*   Adicionar estado `selectedYear` (default: 2026).
+*   Incluir seletor de ano na barra de ferramentas.
+*   Atualizar [fetchStatusEscolas](file:///e:/2026%20SISTEMAS/2026%20Uniforme/04%20mar%C3%A7o/sistema_de_controle_de_uniformes_escolares_9d3a4t_dualiteproject/src/views/ControleRecebimento.tsx#31-87) para consultar apenas lançamentos do ano selecionado na tabela `recebimentos`.
+
+## Plano de Verificação
+
+### Verificação Manual
+1. Abrir cada um dos 4 módulos.
+2. Confirmar que o seletor "Ano:" aparece e está pré-selecionado como "2026".
+3. Mudar para outro ano (ex: 2025) e verificar se os dados somem/mudam conforme esperado.
+4. Voltar para 2026 e ver os dados atuais.

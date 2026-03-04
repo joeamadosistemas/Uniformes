@@ -57,9 +57,11 @@ export interface Transferencia {
 export interface UsuarioCadastro {
   id: string;
   nome: string;
-  email_escola: string;
-  email_usuario?: string;
-  role?: 'admin' | 'usuario';
+  email: string;
+  perfil: 'Admin' | 'Escola';
+  escola_id?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Uniforme {
