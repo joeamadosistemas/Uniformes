@@ -2,7 +2,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0';
 
 const GROQ_API_KEY = Deno.env.get('GROQ_API_KEY') || '';
-const OPENROUTER_API_KEY = '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';
+const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY') || '';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
