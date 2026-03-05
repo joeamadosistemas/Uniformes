@@ -39,6 +39,7 @@ export const pt = {
         usuarios: 'Usuários',
         backupRestauracao: 'Backup e Restauração',
         sobreSistema: 'Sobre o Sistema',
+        auditLogs: 'Histórico de Auditoria',
         versao: 'Versão',
     },
 
@@ -115,6 +116,7 @@ export const pt = {
         controleRecebimento: 'Controle de Recebimento de Uniformes',
         backupRestauracao: 'Backup e Restauração',
         sobre: 'Sobre o Sistema',
+        auditLogs: 'Histórico de Auditoria do Sistema',
     },
     footer: {
         info: 'Informações da Secretaria Municipal de Educação | PMI',
@@ -351,6 +353,21 @@ export const pt = {
         mostrandoUnidades: 'Mostrando {count} de {total} unidades',
         legendaRecebido: 'RECEBIDO',
         legendaPendente: 'PENDENTE',
+    },
+    audit: {
+        titulo: 'Histórico de Auditoria',
+        subtitulo: 'Rastreabilidade completa de todas as ações realizadas no banco de dados',
+        usuario: 'Usuário',
+        acao: 'Ação',
+        tabela: 'Tabela',
+        data: 'Data / Hora',
+        detalhes: 'Detalhes',
+        dadosAntigos: 'Dados Anteriores',
+        dadosNovos: 'Novos Dados',
+        semLogs: 'Nenhum log de auditoria encontrado.',
+        filtrarTabela: 'Filtrar por tabela...',
+        buscarUsuario: 'Buscar por e-mail de usuário...',
+        verAlteracoes: 'Ver Alterações',
     }
 };
 
@@ -383,6 +400,7 @@ export const en: Translations = {
         usuarios: 'Users',
         backupRestauracao: 'Backup & Restore',
         sobreSistema: 'About the System',
+        auditLogs: 'Audit History',
         versao: 'Version',
     },
     login: {
@@ -455,6 +473,7 @@ export const en: Translations = {
         controleRecebimento: 'Uniform Receipt Control',
         backupRestauracao: 'Backup & Restore',
         sobre: 'About the System',
+        auditLogs: 'System Audit History',
     },
     footer: {
         info: 'Information from the Municipal Education Secretariat | PMI',
@@ -686,6 +705,21 @@ export const en: Translations = {
         mostrandoUnidades: 'Showing {count} of {total} units',
         legendaRecebido: 'RECEIVED',
         legendaPendente: 'PENDING',
+    },
+    audit: {
+        titulo: 'Audit History',
+        subtitulo: 'Full traceability of all actions performed in the database',
+        usuario: 'User',
+        acao: 'Action',
+        tabela: 'Table',
+        data: 'Date / Time',
+        detalhes: 'Details',
+        dadosAntigos: 'Previous Data',
+        dadosNovos: 'New Data',
+        semLogs: 'No audit logs found.',
+        filtrarTabela: 'Filter by table...',
+        buscarUsuario: 'Search by user email...',
+        verAlteracoes: 'View Changes',
     }
 };
 
@@ -718,6 +752,7 @@ export const es: Translations = {
         usuarios: 'Usuarios',
         backupRestauracao: 'Copia de Seguridad',
         sobreSistema: 'Acerca del Sistema',
+        auditLogs: 'Historial de Auditoría',
         versao: 'Versión',
     },
     login: {
@@ -790,6 +825,7 @@ export const es: Translations = {
         controleRecebimento: 'Control de Recibo de Uniformes',
         backupRestauracao: 'Copia de Seguridad',
         sobre: 'Acerca del Sistema',
+        auditLogs: 'Historial de Auditoría del Sistema',
     },
     footer: {
         info: 'Información de la Secretaría Municipal de Educación | PMI',
@@ -1021,6 +1057,21 @@ export const es: Translations = {
         mostrandoUnidades: 'Mostrando {count} de {total} unidades',
         legendaRecebido: 'RECIBIDO',
         legendaPendente: 'PENDIENTE',
+    },
+    audit: {
+        titulo: 'Historial de Auditoría',
+        subtitulo: 'Trazabilidad completa de todas las acciones realizadas en la base de datos',
+        usuario: 'Usuario',
+        acao: 'Acción',
+        tabela: 'Tabla',
+        data: 'Fecha / Hora',
+        detalhes: 'Detalles',
+        dadosAntigos: 'Datos Anteriores',
+        dadosNovos: 'Nuevos Datos',
+        semLogs: 'No se encontraron registros de auditoría.',
+        filtrarTabela: 'Filtrar por tabla...',
+        buscarUsuario: 'Buscar por correo de usuario...',
+        verAlteracoes: 'Ver Cambios',
     }
 };
 

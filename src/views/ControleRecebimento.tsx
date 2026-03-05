@@ -5,6 +5,7 @@ import { useT } from '../lib/LanguageContext';
 import { EscolaCadastro } from '../types';
 import { SEGMENTOS_ENSINO } from '../constants';
 import { exportarControleRecebimentoPDF } from '../utils/exportUtils';
+import { AIInsightsCard } from '../components/AIInsightsCard';
 
 interface EscolaStatus extends EscolaCadastro {
     jaLancou: boolean;
@@ -186,6 +187,9 @@ export const ControleRecebimento: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {/* AI Insights Card */}
+            <AIInsightsCard />
 
             {/* List Table */}
             <div className="bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-gray-100 dark:border-zinc-800 shadow-xl shadow-gray-200/50 dark:shadow-none overflow-hidden">
@@ -373,27 +377,27 @@ export const ControleRecebimento: React.FC = () => {
 
             {/* Modal de Detalhes da Unidade */}
             {showModal && selectedEscola && (
-                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-300">
-                    <div className="bg-white dark:bg-zinc-900 w-full max-w-5xl max-h-[90vh] rounded-[3rem] shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-300 border border-white/10">
+                <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-300">
+                    <div className="bg-white dark:bg-zinc-900 w-full max-w-5xl max-h-[90vh] sm:rounded-[3rem] rounded-t-[2rem] shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-300 border border-white/10">
                         {/* Modal Header */}
-                        <div className="p-10 border-b border-gray-100 dark:border-zinc-800 relative bg-white dark:bg-zinc-900">
+                        <div className="p-6 md:p-10 border-b border-gray-100 dark:border-zinc-800 relative bg-white dark:bg-zinc-900">
                             <button
                                 onClick={() => setShowModal(false)}
-                                className="absolute right-10 top-10 p-3 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-2xl transition-all text-gray-400 active:scale-90"
+                                className="absolute right-4 top-4 md:right-10 md:top-10 p-3 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-2xl transition-all text-gray-400 active:scale-90"
                             >
                                 <X size={24} />
                             </button>
 
-                            <div className="flex items-center gap-8">
-                                <div className={`w-24 h-24 rounded-[2rem] flex items-center justify-center shadow-2xl ${selectedEscola.jaLancou ? 'bg-green-500 text-white shadow-green-500/20' : 'bg-amber-500 text-white shadow-amber-500/20'}`}>
-                                    <School size={48} />
+                            <div className="flex flex-col md:flex-row items-start md:items-center gap-6 md:gap-8 mt-4 md:mt-0">
+                                <div className={`w-20 h-20 md:w-24 md:h-24 shrink-0 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center shadow-2xl ${selectedEscola.jaLancou ? 'bg-green-500 text-white shadow-green-500/20' : 'bg-amber-500 text-white shadow-amber-500/20'}`}>
+                                    <School size={40} className="md:w-12 md:h-12" />
                                 </div>
-                                <div>
-                                    <h2 className="text-3xl font-black text-gray-800 dark:text-white uppercase tracking-tight leading-none mb-3">{selectedEscola.nome}</h2>
-                                    <div className="flex flex-wrap items-center gap-4">
-                                        <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-zinc-800 rounded-xl border border-gray-100 dark:border-zinc-700">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-gray-400"></div>
-                                            <span className="text-xs font-bold text-gray-500 dark:text-zinc-400">{selectedEscola.email}</span>
+                                <div className="pr-8 md:pr-0">
+                                    <h2 className="text-2xl md:text-3xl font-black text-gray-800 dark:text-white uppercase tracking-tight leading-tight mb-3 break-words hyphens-auto">{selectedEscola.nome}</h2>
+                                    <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 md:gap-4">
+                                        <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-zinc-800 rounded-xl border border-gray-100 dark:border-zinc-700 w-full sm:w-auto overflow-hidden">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-gray-400 shrink-0"></div>
+                                            <span className="text-xs font-bold text-gray-500 dark:text-zinc-400 truncate">{selectedEscola.email}</span>
                                         </div>
                                         {selectedEscola.jaLancou ? (
                                             <span className="px-4 py-1.5 bg-green-500 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-green-500/20">
@@ -410,24 +414,24 @@ export const ControleRecebimento: React.FC = () => {
                         </div>
 
                         {/* Modal Content */}
-                        <div className="flex-1 overflow-y-auto p-10 space-y-10 custom-scrollbar">
+                        <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-6 md:space-y-10 custom-scrollbar">
                             {/* Stats Summary Area */}
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                                <div className="p-8 bg-gray-50 dark:bg-zinc-800/40 rounded-[2rem] border border-gray-100 dark:border-zinc-800/50 shadow-sm flex flex-col justify-center">
-                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Total Recebido</p>
-                                    <p className="text-4xl font-black text-[#005A9C] dark:text-blue-400 tabular-nums">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                                <div className="p-5 md:p-8 bg-gray-50 dark:bg-zinc-800/40 rounded-3xl md:rounded-[2rem] border border-gray-100 dark:border-zinc-800/50 shadow-sm flex flex-col justify-center">
+                                    <p className="text-[9px] md:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 md:mb-2">Total Recebido</p>
+                                    <p className="text-3xl md:text-4xl font-black text-[#005A9C] dark:text-blue-400 tabular-nums">
                                         {detalhesRecebimento.reduce((acc, curr) => acc + (curr.quantidade || 0), 0)}
                                     </p>
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase mt-1">Peças de Uniforme</p>
+                                    <p className="text-[9px] md:text-[10px] font-bold text-gray-400 uppercase mt-1">Peças</p>
                                 </div>
-                                <div className="p-8 bg-gray-50 dark:bg-zinc-800/40 rounded-[2rem] border border-gray-100 dark:border-zinc-800/50 shadow-sm flex flex-col justify-center">
-                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Modelos Distintos</p>
-                                    <p className="text-4xl font-black text-gray-800 dark:text-white tabular-nums">
+                                <div className="p-5 md:p-8 bg-gray-50 dark:bg-zinc-800/40 rounded-3xl md:rounded-[2rem] border border-gray-100 dark:border-zinc-800/50 shadow-sm flex flex-col justify-center">
+                                    <p className="text-[9px] md:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 md:mb-2">Modelos</p>
+                                    <p className="text-3xl md:text-4xl font-black text-gray-800 dark:text-white tabular-nums">
                                         {new Set(detalhesRecebimento.map(d => d.modelo_id)).size}
                                     </p>
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase mt-1">Variedades</p>
+                                    <p className="text-[9px] md:text-[10px] font-bold text-gray-400 uppercase mt-1">Variedades</p>
                                 </div>
-                                <div className="md:col-span-2 p-8 bg-blue-600 rounded-[2rem] border border-blue-500 shadow-xl shadow-blue-600/20 flex flex-col justify-center text-white">
+                                <div className="col-span-2 md:col-span-2 p-6 md:p-8 bg-blue-600 rounded-3xl md:rounded-[2rem] border border-blue-500 shadow-xl shadow-blue-600/20 flex flex-col justify-center text-white">
                                     <p className="text-[10px] font-black text-blue-100 uppercase tracking-widest mb-2">Última Movimentação</p>
                                     <div className="flex items-center gap-3">
                                         <Clock className="text-blue-200" size={32} />
@@ -444,7 +448,7 @@ export const ControleRecebimento: React.FC = () => {
                             </div>
 
                             {/* Etapas Atendidas Info */}
-                            <div className="p-8 bg-gray-50 dark:bg-zinc-800/30 rounded-[2rem] border border-gray-100 dark:border-zinc-800 flex flex-col md:flex-row md:items-center justify-between gap-8">
+                            <div className="p-6 md:p-8 bg-gray-50 dark:bg-zinc-800/30 rounded-3xl md:rounded-[2rem] border border-gray-100 dark:border-zinc-800 flex flex-col md:flex-row md:items-center justify-between gap-6 md:gap-8">
                                 <div className="space-y-1">
                                     <h3 className="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight flex items-center gap-2">
                                         <Layers className="text-[#005A9C]" size={20} /> Etapas de Ensino Atendidas
@@ -461,91 +465,96 @@ export const ControleRecebimento: React.FC = () => {
                             </div>
 
                             {/* Details Table Area */}
-                            <div className="space-y-6">
-                                <div className="flex items-center justify-between">
+                            <div className="space-y-4 md:space-y-6">
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                                     <div className="space-y-1">
-                                        <h3 className="text-xl font-black text-gray-800 dark:text-white uppercase tracking-tight flex items-center gap-3">
-                                            <BarChart3 className="text-[#005A9C]" size={24} /> Relatório de Recebimento
+                                        <h3 className="text-lg md:text-xl font-black text-gray-800 dark:text-white uppercase tracking-tight flex items-center gap-2 md:gap-3">
+                                            <BarChart3 className="text-[#005A9C] shrink-0" size={20} /> Relatório de Recebimento
                                         </h3>
-                                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Lista detalhada de peças e grades</p>
+                                        <p className="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-widest">Lista detalhada de peças e grades</p>
                                     </div>
-                                    <div className="px-6 py-2 bg-gray-100 dark:bg-zinc-800 rounded-full text-[10px] font-black text-gray-500 uppercase tracking-widest">
-                                        {detalhesRecebimento.length} Lançamentos registrados
+                                    <div className="px-4 py-1.5 md:px-6 md:py-2 bg-gray-100 dark:bg-zinc-800 rounded-full text-[9px] md:text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                        {detalhesRecebimento.length} Lançamentos
                                     </div>
                                 </div>
 
-                                <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-[2.5rem] overflow-hidden shadow-sm">
-                                    <table className="w-full text-left border-collapse">
-                                        <thead>
-                                            <tr className="bg-gray-50/50 dark:bg-zinc-800/30 border-b border-gray-100 dark:border-zinc-800">
-                                                <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Modelo do Uniforme</th>
-                                                <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Tamanho</th>
-                                                <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Quantidade</th>
-                                                <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Data Lançamento</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-gray-50 dark:divide-zinc-800">
-                                            {loadingDetalhes ? (
-                                                <tr>
-                                                    <td colSpan={4} className="px-8 py-20 text-center">
-                                                        <div className="flex flex-col items-center gap-4">
-                                                            <Loader2 className="animate-spin text-blue-500" size={32} />
-                                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest animate-pulse">Buscando dados no servidor...</p>
-                                                        </div>
-                                                    </td>
+                                <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-2xl md:rounded-[2.5rem] overflow-hidden shadow-sm">
+                                    <div className="overflow-x-auto custom-scrollbar">
+                                        <table className="w-full text-left border-collapse min-w-[500px]">
+                                            <thead>
+                                                <tr className="bg-gray-50/50 dark:bg-zinc-800/30 border-b border-gray-100 dark:border-zinc-800">
+                                                    <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Modelo do Uniforme</th>
+                                                    <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Tamanho</th>
+                                                    <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Quantidade</th>
+                                                    <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Data Lançamento</th>
                                                 </tr>
-                                            ) : detalhesRecebimento.length === 0 ? (
-                                                <tr>
-                                                    <td colSpan={4} className="px-8 py-24 text-center">
-                                                        <div className="flex flex-col items-center gap-4 opacity-20">
-                                                            <AlertCircle size={64} />
-                                                            <p className="text-sm font-black uppercase tracking-widest">Nenhum registro encontrado para esta unidade.</p>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ) : detalhesRecebimento.map((item, idx) => (
-                                                <tr key={idx} className="hover:bg-blue-50/20 dark:hover:bg-blue-900/10 transition-colors">
-                                                    <td className="px-8 py-6">
-                                                        <p className="font-black text-gray-800 dark:text-zinc-100 text-sm">{item.modelo_nome}</p>
-                                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tight line-clamp-1">{item.descricao}</p>
-                                                    </td>
-                                                    <td className="px-8 py-6 text-center">
-                                                        <span className="inline-block px-3 py-1 bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-400 rounded-lg text-[10px] font-black uppercase tracking-widest border border-gray-100 dark:border-zinc-700">
-                                                            {item.tamanho}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-8 py-6 text-right font-black text-gray-800 dark:text-white tabular-nums">
-                                                        {item.quantidade}
-                                                    </td>
-                                                    <td className="px-8 py-6 text-right">
-                                                        <p className="text-xs font-black text-gray-700 dark:text-zinc-300 tabular-nums">
-                                                            {new Date(item.data_recebimento).toLocaleDateString('pt-BR')}
-                                                        </p>
-                                                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
-                                                            {new Date(item.data_recebimento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                                                        </p>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-50 dark:divide-zinc-800">
+                                                {loadingDetalhes ? (
+                                                    <tr>
+                                                        <td colSpan={4} className="px-8 py-20 text-center">
+                                                            <div className="flex flex-col items-center gap-4">
+                                                                <Loader2 className="animate-spin text-blue-500" size={32} />
+                                                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest animate-pulse">Buscando dados no servidor...</p>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ) : detalhesRecebimento.length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan={4} className="px-8 py-24 text-center">
+                                                            <div className="flex flex-col items-center gap-4 opacity-20">
+                                                                <AlertCircle size={64} />
+                                                                <p className="text-sm font-black uppercase tracking-widest">Nenhum registro encontrado para esta unidade.</p>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ) : detalhesRecebimento.map((item, idx) => (
+                                                    <tr key={idx} className="hover:bg-blue-50/20 dark:hover:bg-blue-900/10 transition-colors">
+                                                        <td className="px-8 py-6">
+                                                            <p className="font-black text-gray-800 dark:text-zinc-100 text-sm">{item.modelo_nome}</p>
+                                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tight line-clamp-1">{item.descricao}</p>
+                                                        </td>
+                                                        <td className="px-8 py-6 text-center">
+                                                            <span className="inline-block px-3 py-1 bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-400 rounded-lg text-[10px] font-black uppercase tracking-widest border border-gray-100 dark:border-zinc-700">
+                                                                {item.tamanho}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-8 py-6 text-right font-black text-gray-800 dark:text-white tabular-nums">
+                                                            {item.quantidade}
+                                                        </td>
+                                                        <td className="px-8 py-6 text-right">
+                                                            <p className="text-xs font-black text-gray-700 dark:text-zinc-300 tabular-nums">
+                                                                {new Date(item.data_recebimento).toLocaleDateString('pt-BR')}
+                                                            </p>
+                                                            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+                                                                {new Date(item.data_recebimento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                                            </p>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         {/* Modal Footer */}
-                        <div className="p-10 border-t border-gray-100 dark:border-zinc-800 flex items-center justify-between bg-white dark:bg-zinc-900">
-                            <div className="flex items-center gap-2 text-gray-400">
-                                <AlertCircle size={16} />
-                                <span className="text-[10px] font-bold uppercase tracking-widest">Visualização somente leitura para administradores</span>
+                        <div className="p-6 md:p-10 border-t border-gray-100 dark:border-zinc-800 flex flex-col md:flex-row items-center justify-between gap-6 bg-white dark:bg-zinc-900">
+                            <div className="flex items-center gap-2 text-gray-400 text-center md:text-left">
+                                <AlertCircle size={16} className="shrink-0" />
+                                <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest leading-relaxed">Visualização somente leitura<br className="md:hidden" /> para administradores</span>
                             </div>
                             <button
                                 onClick={() => setShowModal(false)}
-                                className="px-12 py-4 bg-gray-900 dark:bg-white text-white dark:text-black rounded-[1.5rem] font-black text-xs uppercase tracking-[0.2em] shadow-2xl hover:bg-black dark:hover:bg-zinc-200 hover:scale-[1.05] active:scale-95 transition-all"
+                                className="w-full md:w-auto px-8 md:px-12 py-3 md:py-4 bg-gray-900 dark:bg-white text-white dark:text-black rounded-xl md:rounded-[1.5rem] font-black text-[10px] md:text-xs uppercase tracking-[0.2em] shadow-xl hover:bg-black dark:hover:bg-zinc-200 hover:scale-[1.05] active:scale-95 transition-all"
                             >
                                 Fechar Painel
                             </button>
                         </div>
+
+                        {/* Mobile bottom padding spacer for safe-area */}
+                        <div className="pb-4 sm:pb-0 bg-white dark:bg-zinc-900"></div>
                     </div>
                 </div>
             )}

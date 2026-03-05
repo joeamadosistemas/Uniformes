@@ -1,16 +1,18 @@
 import React from 'react';
-import { Package, ClipboardList, ArrowLeftRight } from 'lucide-react';
+import { Package, ClipboardList, ArrowLeftRight, FileText } from 'lucide-react';
 
 interface Props {
     activeView: string;
     setActiveView: (view: string) => void;
+    isAdmin?: boolean;
 }
 
-export const BottomNav: React.FC<Props> = ({ activeView, setActiveView }) => {
+export const BottomNav: React.FC<Props> = ({ activeView, setActiveView, isAdmin = false }) => {
     const navItems = [
         { id: 'recebimentos', label: 'Recebimentos', icon: Package },
-        { id: 'lancamentos', label: 'Inventário', icon: ClipboardList },
-        { id: 'transferencias', label: 'Transferências', icon: ArrowLeftRight },
+        { id: 'lancamentos', label: 'Invent\u00e1rio', icon: ClipboardList },
+        { id: 'transferencias', label: 'Transfer\u00eancias', icon: ArrowLeftRight },
+        ...(isAdmin ? [{ id: 'admin-dashboard', label: 'Dashboard', icon: FileText }] : []),
     ];
 
     return (

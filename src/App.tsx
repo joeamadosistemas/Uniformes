@@ -19,6 +19,7 @@ import { GovFooter } from './components/GovFooter';
 import { CadastroModelos } from './views/CadastroModelos';
 import { InstallPrompt } from './components/InstallPrompt';
 import { BottomNav } from './components/BottomNav';
+import { AuditLogs } from './views/AuditLogs';
 
 
 function App() {
@@ -27,6 +28,10 @@ function App() {
   const [loadingSession, setLoadingSession] = useState(true);
   const [activeView, setActiveView] = useState('recebimentos');
   const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      localStorage.setItem('theme', 'light');
+      return false;
+    }
     const saved = localStorage.getItem('theme');
     return saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
   });
@@ -98,7 +103,12 @@ function App() {
         .maybeSingle();
 
       if (!error && profile) {
-        if (profile.role) setUserRole(profile.role);
+        if (profile.role) {
+          setUserRole(profile.role);
+          if (profile.role === 'Super Administrador' || profile.role === 'admin' || profile.role === 'Diretor') {
+            setActiveView('controle-recebimento');
+          }
+        }
         if (profile.nome) setUserName(profile.nome);
 
         if (profile.email_escola) {
@@ -122,7 +132,12 @@ function App() {
           .maybeSingle();
 
         if (!oldError && profileOld) {
-          if (profileOld.role) setUserRole(profileOld.role);
+          if (profileOld.role) {
+            setUserRole(profileOld.role);
+            if (profileOld.role === 'Super Administrador' || profileOld.role === 'admin' || profileOld.role === 'Diretor') {
+              setActiveView('controle-recebimento');
+            }
+          }
           if (profileOld.nome) setUserName(profileOld.nome);
         }
       }
@@ -188,7 +203,7 @@ function App() {
   const isAdmin = userRole === 'Super Administrador' || userRole === 'admin';
 
   const renderView = () => {
-    const adminViews = ['admin-dashboard', 'controle-recebimento', 'config-escola', 'config-usuarios', 'config-uniformes', 'config-modelos', 'config-backup', 'config-sobre'];
+    const adminViews = ['admin-dashboard', 'controle-recebimento', 'config-escola', 'config-usuarios', 'config-uniformes', 'config-modelos', 'config-backup', 'config-sobre', 'config-audit'];
     if (!isAdmin && adminViews.includes(activeView)) {
       return (
         <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-3 py-24">
@@ -213,6 +228,7 @@ function App() {
       case 'config-uniformes': return <CadastrosUniformes />;
       case 'config-modelos': return <CadastroModelos />;
       case 'config-backup': return <BackupRestauracao />;
+      case 'config-audit': return <AuditLogs />;
       case 'config-sobre': return <Sobre />;
       default: return <Lancamentos />;
     }
@@ -271,7 +287,7 @@ function App() {
               </div>
             </div>
           </div>
-          <BottomNav activeView={activeView} setActiveView={setActiveView} />
+          <BottomNav activeView={activeView} setActiveView={setActiveView} isAdmin={isAdmin} />
           <InstallPrompt />
         </div>
       </div>
@@ -280,4 +296,3 @@ function App() {
 }
 
 export default App;
-

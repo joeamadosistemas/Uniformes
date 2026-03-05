@@ -1,0 +1,66 @@
+# Inovação e Controle Logístico: Dashboard, IA, Auditoria e PWA
+
+Este plano detalha a implementação de quatro grandes funcionalidades para elevar o sistema a um novo patamar de controle e tecnologia.
+
+## User Review Required
+
+> [!IMPORTANT]
+> A implementação do modo **PWA (Offline)** requer que o usuário configure o suporte a Service Workers no ambiente de deploy (Netlify).
+> A chave da API do Groq será armazenada com segurança em uma **Edge Function** do Supabase para evitar exposição no frontend.
+
+## Proposed Changes
+
+### 1. Sistema de Auditoria (Audit Logs)
+Para garantir a rastreabilidade, implementaremos logs nativos no banco de dados.
+
+#### [NEW] [audit_logs.sql](file:///h:/2026%20SISTEMAS/2026%20Uniforme/04%20mar%C3%A7o/sistema_de_controle_de_uniformes_escolares_9d3a4t_dualiteproject/supabase/migrations/audit_logs.sql)
+*   Criação da tabela `audit_logs`.
+*   Criação da função de trigger principal.
+*   Ativação de triggers em `recebimentos`, `transferencias`, `escolas`, `uniformes` e `profiles`.
+
+#### [NEW] [AuditLogs.tsx](file:///h:/2026%20SISTEMAS/2026%20Uniforme/04%20mar%C3%A7o/sistema_de_controle_de_uniformes_escolares_9d3a4t_dualiteproject/src/views/AuditLogs.tsx)
+*   Nova visão administrativa para visualizar o histórico de ações.
+
+---
+
+### 2. Dashboard Logístico Avançado
+Visualização de dados críticos para a tomada de decisão.
+
+#### [MODIFY] [DashboardAdmin.tsx](file:///h:/2026%20SISTEMAS/2026%20Uniforme/04%20mar%C3%A7o/sistema_de_controle_de_uniformes_escolares_9d3a4t_dualiteproject/src/views/DashboardAdmin.tsx)
+*   **Cards**: Adição de indicadores de Taxa de Distribuição, Estoque Total e Escolas Pendentes.
+*   **Gráficos**: Integração com `recharts` para visualização de Distribuição por Segmento, Tipo de Uniforme e Evolução Temporal.
+
+---
+
+### 3. Assistente "UniControl AI"
+Integração de IA para consultas em linguagem natural.
+
+#### [NEW] [unicontrol-ai/index.ts](file:///h:/2026%20SISTEMAS/2026%20Uniforme/04%20mar%C3%A7o/sistema_de_controle_de_uniformes_escolares_9d3a4t_dualiteproject/supabase/functions/unicontrol-ai/index.ts)
+*   Edge Function que recebe perguntas, consulta o schema do banco e retorna respostas contextualizadas usando Groq/OpenRouter.
+
+#### [NEW] [UniControlAI.tsx](file:///h:/2026%20SISTEMAS/2026%20Uniforme/04%20mar%C3%A7o/sistema_de_controle_de_uniformes_escolares_9d3a4t_dualiteproject/src/components/UniControlAI.tsx)
+*   Interface de chat flutuante no canto inferior direito do sistema.
+
+---
+
+### 4. Modo Offline (PWA)
+Registro de dados sem dependência de conexão estável.
+
+#### [MODIFY] [vite.config.ts](file:///h:/2026%20SISTEMAS/2026%20Uniforme/04%20mar%C3%A7o/sistema_de_controle_de_uniformes_escolares_9d3a4t_dualiteproject/vite.config.ts)
+*   Configuração do plugin `vite-plugin-pwa`.
+
+#### [MODIFY] [Recebimentos.tsx](file:///h:/2026%20SISTEMAS/2026%20Uniforme/04%20mar%C3%A7o/sistema_de_controle_de_uniformes_escolares_9d3a4t_dualiteproject/src/views/Recebimentos.tsx)
+*   Lógica de detecção de conexão e salvamento em `indexedDB` (via biblioteca simples ou nativa).
+*   Indicador visual de "Sync Pendente".
+
+## Verification Plan
+
+### Automated Tests
+*   Execução de `npm run build` para validar PWA.
+*   Simulação de chamadas para a Edge Function de IA.
+
+### Manual Verification
+1.  **Auditoria**: Criar um registro e verificar se aparece no painel de auditoria.
+2.  **Dashboard**: Validar se os cálculos de taxa de distribuição batem com os dados da tabela.
+3.  **AI**: Perguntar "Quantos uniformes tamanho P existem?" e validar o resultado.
+4.  **Offline**: Desativar a rede no navegador, registrar um uniforme, ativar a rede e verificar a sincronização.

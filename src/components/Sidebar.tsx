@@ -13,7 +13,8 @@ import {
   Shirt,
   ClipboardList,
   Info,
-  Layers
+  Layers,
+  History
 } from 'lucide-react';
 import { useT } from '../lib/LanguageContext';
 
@@ -31,13 +32,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, isA
   const menuItems = [
     { id: 'recebimentos', label: t.sidebar.recebimentos, icon: ClipboardList },
     ...(isAdmin ? [
-      { id: 'controle-recebimento', label: t.sidebar.controleRecebimento, icon: ClipboardList }
+      { id: 'controle-recebimento', label: t.sidebar.controleRecebimento, icon: ClipboardList },
+      { id: 'admin-dashboard', label: 'Dashboard', icon: FileText },
     ] : []),
     { id: 'lancamentos', label: t.sidebar.lancamentos, icon: LayoutDashboard },
     { id: 'transferencias', label: t.sidebar.transferencias, icon: ArrowLeftRight },
-    ...(isAdmin ? [
-      { id: 'admin-dashboard', label: t.sidebar.administrador, icon: FileText },
-    ] : []),
   ];
 
   const configItems = [
@@ -45,6 +44,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, isA
     { id: 'config-modelos', label: t.sidebar.cadastroModelos, icon: Layers },
     { id: 'config-escola', label: t.sidebar.unidadeEscolar, icon: School },
     { id: 'config-usuarios', label: t.sidebar.usuarios, icon: Users },
+    { id: 'config-audit', label: t.sidebar.auditLogs, icon: History },
     { id: 'config-backup', label: t.sidebar.backupRestauracao, icon: Database },
     { id: 'config-sobre', label: t.sidebar.sobreSistema, icon: Info },
   ];
@@ -93,7 +93,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, isA
           })}
 
           {/* Mobile Only: Flattened Config Items for the 3x4 Grid */}
-          {configItems.map((item) => {
+          {isAdmin && configItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeView === item.id;
             return (
@@ -117,41 +117,43 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, isA
           })}
 
           {/* Configurações Dropdown (Desktop Only) */}
-          <li className="hidden md:block mt-4 px-3 border-t border-gray-100 dark:border-zinc-900 pt-4">
-            <button
-              onClick={() => setIsConfigOpen(!isConfigOpen)}
-              className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all hover:bg-gray-50 dark:hover:bg-zinc-900 group"
-            >
-              <div className="flex items-center space-x-4">
-                <Settings size={20} className="text-gray-400 group-hover:text-[#d94e4e] transition-colors" />
-                <span className="text-sm font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-widest">{t.sidebar.configuracoes}</span>
-              </div>
-              <ChevronDown size={16} className={`text-gray-300 transition-transform duration-300 ${isConfigOpen ? '' : '-rotate-90'}`} />
-            </button>
+          {isAdmin && (
+            <li className="hidden md:block mt-4 px-3 border-t border-gray-100 dark:border-zinc-900 pt-4">
+              <button
+                onClick={() => setIsConfigOpen(!isConfigOpen)}
+                className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all hover:bg-gray-50 dark:hover:bg-zinc-900 group"
+              >
+                <div className="flex items-center space-x-4">
+                  <Settings size={20} className="text-gray-400 group-hover:text-[#d94e4e] transition-colors" />
+                  <span className="text-sm font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-widest">{t.sidebar.configuracoes}</span>
+                </div>
+                <ChevronDown size={16} className={`text-gray-300 transition-transform duration-300 ${isConfigOpen ? '' : '-rotate-90'}`} />
+              </button>
 
-            {isConfigOpen && (
-              <ul className="bg-white/50 dark:bg-black/5">
-                {configItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = activeView === item.id;
-                  return (
-                    <li key={item.id} className="border-b border-gray-50 dark:border-[#252525] last:border-0 pl-4">
-                      <button
-                        onClick={() => setActiveView(item.id)}
-                        className={`w-full flex items-center space-x-4 px-6 py-3.5 text-sm transition-colors ${isActive
-                          ? 'text-[#005A9C] dark:text-[#66b3ff] font-bold'
-                          : 'text-gray-500 hover:bg-gray-50 hover:text-[#005A9C]'
-                          }`}
-                      >
-                        <Icon size={18} className={isActive ? 'text-[#005A9C]' : 'text-[#005A9C]/60'} />
-                        <span>{item.label}</span>
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </li>
+              {isConfigOpen && (
+                <ul className="bg-white/50 dark:bg-black/5">
+                  {configItems.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = activeView === item.id;
+                    return (
+                      <li key={item.id} className="border-b border-gray-50 dark:border-[#252525] last:border-0 pl-4">
+                        <button
+                          onClick={() => setActiveView(item.id)}
+                          className={`w-full flex items-center space-x-4 px-6 py-3.5 text-sm transition-colors ${isActive
+                            ? 'text-[#005A9C] dark:text-[#66b3ff] font-bold'
+                            : 'text-gray-500 hover:bg-gray-50 hover:text-[#005A9C]'
+                            }`}
+                        >
+                          <Icon size={18} className={isActive ? 'text-[#005A9C]' : 'text-[#005A9C]/60'} />
+                          <span>{item.label}</span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </li>
+          )}
         </ul>
       </nav>
 
