@@ -68,8 +68,11 @@ Regras estritas:
             let aiResponse = '';
 
             // 2. Fetch from Google Gemini directly
-            const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyCliJ6RT4kLEJ9PquOcC8q9wsEpSs0IqE4';
+            const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
+            if (!GEMINI_API_KEY) {
+                throw new Error("Chave da API Gemini não configurada no ambiente (VITE_GEMINI_API_KEY).");
+            }
             try {
                 const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
                     method: 'POST',
