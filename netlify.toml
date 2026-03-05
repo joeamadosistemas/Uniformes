@@ -9,6 +9,7 @@
   NODE_VERSION = "20"
   CI = "true"
   NETLIFY_BUILD_SKIP = "false"
+  SECRETS_SCAN_SMART_DETECTION_ENABLED = "false"
 
 [build.processing]
   skip_processing = false
