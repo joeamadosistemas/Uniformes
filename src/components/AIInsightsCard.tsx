@@ -65,62 +65,24 @@ Regras estritas:
                 { role: 'user', content: prompt }
             ];
 
-            let aiResponse = '';
 
-            // 2. Fetch from Google Gemini directly
-            const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-
-            if (!GEMINI_API_KEY) {
-                throw new Error("Chave da API Gemini não configurada no ambiente (VITE_GEMINI_API_KEY).");
-            }
-            try {
-                const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        contents: [
-                            {
-                                role: "user",
-                                parts: [
-                                    { text: `${messagesForAI[0].content}\n\nINSTRU\u00c7\u00c3O:\n${messagesForAI[1].content}` }
-                                ]
-                            }
-                        ],
-                        generationConfig: {
-                            temperature: 0.2,
-                        }
-                    })
-                });
-
-                if (geminiRes.ok) {
-                    const data = await geminiRes.json();
-                    if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
-                        aiResponse = data.candidates[0].content.parts[0].text;
-                    } else {
-                        throw new Error('Formato n\u00e3o reconhecido da API do Google');
-                    }
-                } else {
-                    const errText = await geminiRes.text();
-                    throw new Error(`Gemini HTTP ${geminiRes.status}: ${errText.substring(0, 100)}`);
+            // 2. Fetch from Supabase Edge Function directly
+            const { data, error } = await supabase.functions.invoke('generate-insights', {
+                body: {
+                    databaseContext: messagesForAI[0].content,
+                    prompt: messagesForAI[1].content
                 }
-            } catch (aiError: any) {
-                console.error('Gemini falhou:', aiError);
-                throw new Error(`Falha no Gemini: ${aiError.message}`);
+            });
+
+            if (error) {
+                console.error('Edge function falhou:', error);
+                throw new Error(`Falha na IA Logística: ${error.message || 'Erro desconhecido ao chamar Edge Function'}`);
             }
 
-            // Parse response: Split by newlines and keep only lines starting with '-'
-            const parsedInsights = aiResponse
-                .split('\n')
-                .map((line: string) => line.trim())
-                .filter((line: string) => line.startsWith('-'))
-                .map((line: string) => line.replace(/^- /, ''));
-
-            if (parsedInsights.length === 0) {
-                setInsights(['A IA não conseguiu gerar insights no formato correto.']);
+            if (!data || !data.insights || data.insights.length === 0) {
+                setInsights(['A IA não conseguiu gerar insights no formato esperado.']);
             } else {
-                setInsights(parsedInsights);
+                setInsights(data.insights);
             }
 
         } catch (err: any) {
