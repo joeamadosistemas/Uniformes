@@ -72,7 +72,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                         className="text-white font-bold tracking-wide"
                         style={{ fontSize: '1.3rem', letterSpacing: '0.04em' }}
                     >
-                        SMEDU | CPD
+                        SMEDU | INFRASTRUTURA
                     </h1>
                     <p className="text-blue-100 text-sm mt-1" style={{ opacity: 0.9 }}>
                         {t.login.subtitulo}

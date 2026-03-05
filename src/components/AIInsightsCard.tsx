@@ -132,7 +132,7 @@ Regras estritas:
     };
 
     return (
-        <div className="bg-gradient-to-br from-[#0F3D63] to-[#123E67] rounded-2xl shadow-xl overflow-hidden mb-6 relative border border-[#123E67]/50">
+        <div className="bg-gradient-to-br from-[#0F3D63] to-[#123E67] dark:from-zinc-900/80 dark:to-blue-900/20 dark:backdrop-blur-xl rounded-2xl shadow-xl overflow-hidden mb-6 relative border border-[#123E67]/50 dark:border-white/5">
             {/* Background Decoration */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
 

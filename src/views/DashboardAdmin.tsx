@@ -286,70 +286,54 @@ export const DashboardAdmin: React.FC = () => {
             </div>
 
             {/* KPI Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
                 {/* Entregas Realizadas */}
-                <div className="bg-[#005A9C] dark:bg-[#1452b5] p-5 rounded-3xl shadow-lg shadow-blue-500/20 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-bl-full -z-10"></div>
-                    <div className="flex items-center space-x-3 mb-2">
-                        <div className="p-2 bg-white/20 text-white rounded-xl shadow-inner relative z-10">
-                            <ClipboardList className="w-5 h-5" />
-                        </div>
-                        <p className="text-xs font-bold text-white/80 uppercase tracking-widest relative z-10">Entregas Feitas</p>
+                <div className="bg-[#005A9C] dark:bg-blue-600/20 dark:backdrop-blur-xl p-4 md:p-5 rounded-[2rem] shadow-lg shadow-blue-500/10 border border-transparent dark:border-white/5 relative overflow-hidden flex flex-col items-center text-center">
+                    <div className="absolute top-0 right-0 w-16 h-16 bg-white/10 rounded-bl-full -z-10"></div>
+                    <div className="p-2.5 bg-white/20 dark:bg-blue-500/20 text-white dark:text-blue-400 rounded-2xl mb-2 relative z-10">
+                        <ClipboardList size={20} className="md:w-5 md:h-5" />
                     </div>
-                    <h4 className="text-3xl font-black text-white relative z-10">{stats.totalEntregas.toLocaleString('pt-BR')}</h4>
+                    <p className="text-[9px] md:text-xs font-black text-white/80 dark:text-zinc-500 uppercase tracking-widest mb-1 relative z-10">Entregas</p>
+                    <h4 className="text-xl md:text-3xl font-black text-white relative z-10">{stats.totalEntregas.toLocaleString('pt-BR')}</h4>
                 </div>
 
                 {/* Modelos de Uniformes */}
-                <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 p-5 rounded-3xl shadow-sm relative overflow-hidden">
-                    <div className="flex items-center space-x-3 mb-2">
-                        <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl relative z-10">
-                            <Shirt className="w-5 h-5" />
-                        </div>
-                        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest relative z-10">Und. de Modelos</p>
+                <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-xl p-4 md:p-5 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-2xl dark:shadow-black/20 flex flex-col items-center text-center transition-all hover:scale-[1.02] cursor-default">
+                    <div className="p-2.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-2xl mb-2">
+                        <Shirt size={20} className="md:w-5 md:h-5" />
                     </div>
-                    <h4 className="text-3xl font-black text-gray-800 dark:text-white relative z-10">{stats.totalModelos.toLocaleString('pt-BR')}</h4>
+                    <p className="text-[9px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Modelos</p>
+                    <h4 className="text-xl md:text-3xl font-black text-gray-800 dark:text-white">{stats.totalModelos.toLocaleString('pt-BR')}</h4>
                 </div>
 
                 {/* Taxa Distribuição */}
-                <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 p-5 rounded-3xl shadow-sm relative overflow-hidden">
-                    <div className="flex items-center space-x-3 mb-2">
-                        <div className="p-2 bg-purple-50 text-purple-600 rounded-xl relative z-10">
-                            <Activity className="w-5 h-5" />
-                        </div>
-                        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest relative z-10">Taxa na Rede</p>
+                <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-xl p-4 md:p-5 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-2xl dark:shadow-black/20 flex flex-col items-center text-center transition-all hover:scale-[1.02] cursor-default">
+                    <div className="p-2.5 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-2xl mb-2">
+                        <Activity size={20} className="md:w-5 md:h-5" />
                     </div>
-                    <div className="flex items-end gap-2 relative z-10">
-                        <h4 className="text-3xl font-black text-gray-800 dark:text-white">{stats.taxaAdesao.toFixed(1)}%</h4>
-                        <span className="text-xs text-gray-400 mb-1">Adesão</span>
+                    <p className="text-[9px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Adesão</p>
+                    <div className="flex items-baseline gap-1">
+                        <h4 className="text-xl md:text-3xl font-black text-gray-800 dark:text-white">{stats.taxaAdesao.toFixed(1)}</h4>
+                        <span className="text-[10px] font-bold text-gray-400 dark:text-zinc-500">%</span>
                     </div>
                 </div>
 
                 {/* Escolas Informaram */}
-                <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/30 p-5 rounded-3xl shadow-sm relative overflow-hidden">
-                    <div className="flex items-center space-x-3 mb-2">
-                        <div className="p-2 bg-white text-emerald-600 rounded-xl shadow-sm relative z-10">
-                            <CheckCircle2 className="w-5 h-5" />
-                        </div>
-                        <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest relative z-10">Informaram</p>
+                <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-xl p-4 md:p-5 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-2xl dark:shadow-black/20 flex flex-col items-center text-center transition-all hover:scale-[1.02] cursor-default">
+                    <div className="p-2.5 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-2xl mb-2">
+                        <CheckCircle2 size={20} className="md:w-5 md:h-5" />
                     </div>
-                    <h4 className="text-3xl font-black text-emerald-800 dark:text-emerald-300 relative z-10">{stats.informaram}</h4>
-                    <p className="text-[10px] text-emerald-600 mt-1 relative z-10 flex items-center gap-1">
-                        de {stats.totalEscolas} unidades
-                    </p>
+                    <p className="text-[9px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Concluído</p>
+                    <h4 className="text-xl md:text-3xl font-black text-green-600 dark:text-green-400">{stats.informaram}</h4>
                 </div>
 
                 {/* Escolas Pendentes */}
-                <div className="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800/30 p-5 rounded-3xl shadow-sm relative overflow-hidden">
-                    <div className="flex items-center space-x-3 mb-2">
-                        <div className="p-2 bg-white text-red-600 rounded-xl shadow-sm relative z-10">
-                            <AlertCircle className="w-5 h-5" />
-                        </div>
-                        <p className="text-xs font-bold text-red-700 dark:text-red-400 uppercase tracking-widest relative z-10">Pendentes</p>
+                <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-xl p-4 md:p-5 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-2xl dark:shadow-black/20 flex flex-col items-center text-center transition-all hover:scale-[1.02] cursor-default col-span-2 md:col-span-1">
+                    <div className="p-2.5 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-2xl mb-2">
+                        <AlertCircle size={20} className="md:w-5 md:h-5" />
                     </div>
-                    <h4 className="text-3xl font-black text-red-800 dark:text-red-300 relative z-10">{stats.pendentes}</h4>
-                    <p className="text-[10px] text-red-600 mt-1 relative z-10 flex items-center gap-1">
-                        Requer atenção
-                    </p>
+                    <p className="text-[9px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Pendente</p>
+                    <h4 className="text-xl md:text-3xl font-black text-red-600 dark:text-red-400">{stats.pendentes}</h4>
                 </div>
             </div>
 

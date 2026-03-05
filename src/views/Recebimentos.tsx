@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Plus, Trash2, FileSpreadsheet, FileText, Edit2, Check, X, Loader2, ClipboardList, Layers, RefreshCw, AlertCircle } from 'lucide-react';
+import { Package, Plus, Trash2, FileSpreadsheet, FileText, Edit2, Check, X, Loader2, ClipboardList, Layers, RefreshCw } from 'lucide-react';
 import { useT } from '../lib/LanguageContext';
 import { RECEBIMENTOS_MODELOS, RecebimentoModelo } from '../constants/recebimentosConstants';
 import { Recebimento } from '../types';
@@ -80,13 +80,18 @@ export const Recebimentos: React.FC = () => {
                     .then(({ data: dbData, error: dbError }) => {
                         if (!isMounted) return;
 
-                        if (!dbError && dbData && dbData.length > 0) {
-                            setRecebimentos(dbData);
+                        const storageKey = `@Uniformes:recebimentos:${normalizedEmail}:${selectedYear}`;
+
+                        if (!dbError) {
+                            // Se não houver erro, o banco é a fonte da verdade (mesmo que vazio)
+                            const finalData = dbData || [];
+                            setRecebimentos(finalData);
                             setIsInitialLoadDone(true);
                             setIsSynced(true);
+                            // Atualiza o cache local para refletir o estado real do banco
+                            localStorage.setItem(storageKey, JSON.stringify(finalData));
                         } else {
-                            // Fallback para LocalStorage se o banco falhar, estiver offline ou vazio
-                            const storageKey = `@Uniformes:recebimentos:${normalizedEmail}:${selectedYear}`;
+                            // Houve erro (offline ou falha no banco) -> Fallback para LocalStorage
                             const dadosSalvos = localStorage.getItem(storageKey);
                             if (dadosSalvos) {
                                 setRecebimentos(JSON.parse(dadosSalvos));
@@ -94,13 +99,7 @@ export const Recebimentos: React.FC = () => {
                                 setRecebimentos([]);
                             }
                             setIsInitialLoadDone(true);
-                            if (dbError) {
-                                setIsSynced(false);
-                            } else if (dadosSalvos && JSON.parse(dadosSalvos).length > 0) {
-                                setIsSynced(false);
-                            } else {
-                                setIsSynced(true);
-                            }
+                            setIsSynced(false);
                         }
                     });
 
@@ -408,9 +407,9 @@ export const Recebimentos: React.FC = () => {
             {/* Metric Cards - Exact UI match */}
             <div className="grid grid-cols-3 gap-3 md:gap-6 mb-4 md:mb-8 mt-2">
                 {/* Card 1: Registros */}
-                <div className="bg-white dark:bg-zinc-900 py-5 px-2 md:p-6 rounded-3xl shadow-[0_4px_12px_rgba(0,0,0,0.06)] flex flex-col items-center justify-center text-center">
-                    <div className="p-3 bg-[#eef4fc] dark:bg-blue-900/20 text-[#5193EB] rounded-2xl mb-2">
-                        <ClipboardList className="w-6 h-6 md:w-8 md:h-8" strokeWidth={2} />
+                <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-xl py-5 px-2 md:p-6 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-2xl dark:shadow-black/20 flex flex-col items-center justify-center text-center">
+                    <div className="p-3 bg-blue-50 dark:bg-blue-900/30 text-[#5193EB] dark:text-blue-400 rounded-2xl mb-2">
+                        <ClipboardList className="w-5 h-5 md:w-8 md:h-8" strokeWidth={2} />
                     </div>
                     <p className="text-[9px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-[0.15em] mb-1">
                         Registros
@@ -421,9 +420,9 @@ export const Recebimentos: React.FC = () => {
                 </div>
 
                 {/* Card 2: Peças */}
-                <div className="bg-white dark:bg-zinc-900 py-5 px-2 md:p-6 rounded-3xl shadow-[0_4px_12px_rgba(0,0,0,0.06)] flex flex-col items-center justify-center text-center">
-                    <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500 rounded-2xl mb-2">
-                        <Package className="w-6 h-6 md:w-8 md:h-8" strokeWidth={2} />
+                <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-xl py-5 px-2 md:p-6 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-2xl dark:shadow-black/20 flex flex-col items-center justify-center text-center">
+                    <div className="p-3 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-500 rounded-2xl mb-2">
+                        <Package className="w-5 h-5 md:w-8 md:h-8" strokeWidth={2} />
                     </div>
                     <p className="text-[9px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-[0.15em] mb-1">
                         Peças
@@ -434,9 +433,9 @@ export const Recebimentos: React.FC = () => {
                 </div>
 
                 {/* Card 3: Modelos */}
-                <div className="bg-white dark:bg-zinc-900 py-5 px-2 md:p-6 rounded-3xl shadow-[0_4px_12px_rgba(0,0,0,0.06)] flex flex-col items-center justify-center text-center relative overflow-hidden">
-                    <div className="p-3 bg-purple-50 dark:bg-purple-900/20 text-purple-500 rounded-2xl mb-2">
-                        <Layers className="w-6 h-6 md:w-8 md:h-8" strokeWidth={2} />
+                <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-xl py-5 px-2 md:p-6 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-2xl dark:shadow-black/20 flex flex-col items-center justify-center text-center relative overflow-hidden">
+                    <div className="p-3 bg-purple-50 dark:bg-purple-900/30 text-purple-500 rounded-2xl mb-2">
+                        <Layers className="w-5 h-5 md:w-8 md:h-8" strokeWidth={2} />
                     </div>
                     <p className="text-[9px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-[0.15em] mb-1">
                         Modelos
@@ -445,33 +444,24 @@ export const Recebimentos: React.FC = () => {
                         {new Set(recebimentos.map(r => r.modelo_id)).size}
                     </p>
                     {/* Status de Sincronização */}
-                    <div className="absolute top-3 right-3 flex items-center gap-2">
+                    <div className="absolute top-3 right-3 flex items-center gap-1">
                         {isSynced === true ? (
-                            <div className="flex items-center gap-1.5 bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-full border border-green-100 dark:border-green-900/30" title="Sincronizado com a nuvem">
-                                <Check className="text-green-500 w-3.5 h-3.5" />
-                                <span className="text-[10px] font-bold text-green-600 dark:text-green-400 uppercase tracking-tight">Sincronizado</span>
+                            <div className="flex items-center gap-1.5 bg-green-50/50 dark:bg-green-900/30 px-2 py-1 rounded-full border border-green-100/50 dark:border-green-800/20" title="Sincronizado com a nuvem">
+                                <Check className="text-green-500 w-3 h-3" />
+                                <span className="text-[8px] font-bold text-green-600 dark:text-green-400 uppercase">Sinc</span>
                             </div>
                         ) : isSynced === false ? (
-                            <div className="flex items-center gap-2 bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 rounded-full border border-amber-100 dark:border-amber-900/30 animate-pulse">
-                                <div className="flex items-center gap-1">
-                                    <AlertCircle className="text-amber-500 w-3.5 h-3.5" />
-                                    <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-tight">Pendente</span>
-                                </div>
-                                <div className="w-[1px] h-3 bg-amber-200 dark:bg-amber-800" />
-                                <button
-                                    onClick={sincronizarTudo}
-                                    disabled={saving}
-                                    className="flex items-center gap-1 text-amber-600 hover:text-amber-700 transition-colors"
-                                    title="Sincronizar dados locais agora"
-                                >
-                                    <RefreshCw className={`w-3.5 h-3.5 ${saving ? 'animate-spin' : ''}`} />
-                                    <span className="text-[10px] font-black uppercase">Sincronizar</span>
-                                </button>
-                            </div>
+                            <button
+                                onClick={sincronizarTudo}
+                                disabled={saving}
+                                className="flex items-center gap-1.5 bg-amber-50/50 dark:bg-amber-900/30 px-2 py-1 rounded-full border border-amber-100/50 dark:border-amber-800/20 animate-pulse hover:bg-amber-100 dark:hover:bg-amber-800/50 transition-colors"
+                            >
+                                <RefreshCw className={`text-amber-500 w-3 h-3 ${saving ? 'animate-spin' : ''}`} />
+                                <span className="text-[8px] font-bold text-amber-600 dark:text-amber-400 uppercase">Pend</span>
+                            </button>
                         ) : (
-                            <div className="flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-full border border-blue-100 dark:border-blue-900/30" title="Verificando sincronização...">
-                                <Loader2 className="text-blue-500 w-3.5 h-3.5 animate-spin" />
-                                <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-tight">Verificando...</span>
+                            <div className="flex items-center gap-1.5 bg-blue-50/50 dark:bg-blue-900/30 px-2 py-1 rounded-full border border-blue-100/50 dark:border-blue-800/20">
+                                <Loader2 className="text-blue-500 w-3 h-3 animate-spin" />
                             </div>
                         )}
                     </div>

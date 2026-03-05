@@ -8,12 +8,17 @@ interface Props {
 }
 
 export const BottomNav: React.FC<Props> = ({ activeView, setActiveView, isAdmin = false }) => {
-    const navItems = [
-        { id: 'recebimentos', label: 'Recebimentos', icon: Package },
-        { id: 'lancamentos', label: 'Invent\u00e1rio', icon: ClipboardList },
-        { id: 'transferencias', label: 'Transfer\u00eancias', icon: ArrowLeftRight },
-        ...(isAdmin ? [{ id: 'admin-dashboard', label: 'Dashboard', icon: FileText }] : []),
-    ];
+    const navItems = isAdmin
+        ? [
+            { id: 'controle-recebimento', label: 'Controle', icon: FileText },
+            { id: 'recebimentos', label: 'Recebimentos', icon: Package },
+            { id: 'admin-dashboard', label: 'Dashboard', icon: FileText }
+        ]
+        : [
+            { id: 'recebimentos', label: 'Recebimentos', icon: Package },
+            { id: 'lancamentos', label: 'Inventário', icon: ClipboardList },
+            { id: 'transferencias', label: 'Transferências', icon: ArrowLeftRight },
+        ];
 
     return (
         <div className="md:hidden fixed bottom-0 left-0 right-0 z-[100] bg-[#5193EB] dark:bg-[#1452b5] shadow-[0_-4px_20px_rgba(0,0,0,0.15)] rounded-t-3xl border-t border-white/20">

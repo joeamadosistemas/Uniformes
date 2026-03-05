@@ -1,12 +1,23 @@
-// Este é um Service Worker genérico e leve necessário apnes para habilitar a instalação PWA (Add to Homescreen).
-self.addEventListener('install', (e) => {
+const CACHE_NAME = 'unifsmedu-cache-v1';
+
+// Instalação do Service Worker
+self.addEventListener('install', (event) => {
     self.skipWaiting();
+    console.log('[SW] Instalado');
 });
 
-self.addEventListener('activate', (e) => {
-    return self.clients.claim();
+// Ativação do Service Worker
+self.addEventListener('activate', (event) => {
+    event.waitUntil(self.clients.claim());
+    console.log('[SW] Ativado');
 });
 
-self.addEventListener('fetch', (e) => {
-    // Ignora o fetch para não interferir na navegação padrão, apenas para enganar o Chrome e aceitar PWA
+// Evento de fetch - Obrigatório para PWA (Add to Home Screen)
+self.addEventListener('fetch', (event) => {
+    // Responde com o recurso da rede ou do cache (estratégia simples)
+    event.respondWith(
+        fetch(event.request).catch(() => {
+            return caches.match(event.request);
+        })
+    );
 });

@@ -54,8 +54,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, isA
       {/* Header */}
       <div className="p-6 flex items-center justify-between bg-gradient-to-br from-[#005A9C] to-[#004a80] text-white shadow-lg">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-            <Shirt size={20} className="text-white" />
+          <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-inner p-1.5">
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/6/63/Bras%C3%A3o_de_Armas_de_Itagua%C3%AD.jpg"
+              alt="Logo"
+              className="w-full h-full object-contain"
+            />
           </div>
           <h1 className="text-lg font-extrabold tracking-tight">Uniforme Escolar</h1>
         </div>

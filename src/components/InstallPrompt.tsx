@@ -8,7 +8,9 @@ export const InstallPrompt: React.FC = () => {
 
     useEffect(() => {
         // Detect se já está instalado (Standalone)
-        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
+        console.log('[PWA] Is Standalone:', isStandalone);
+
         if (isStandalone) {
             return; // Já está instalado, não exibe banner
         }
@@ -19,13 +21,15 @@ export const InstallPrompt: React.FC = () => {
         setIsIOS(isIOSDevice);
 
         if (isIOSDevice) {
-            // Exibe banner do iOS após 2 segundos
-            setTimeout(() => setShowPrompt(true), 2000);
-            return;
+            // Exibe banner do iOS após 4 segundos para garantir que o usuário viu a página
+            console.log('[PWA] Detectado iOS');
+            const timer = setTimeout(() => setShowPrompt(true), 4000);
+            return () => clearTimeout(timer);
         }
 
         // Listener para o Android (Chrome/Edge)
-        const handleBeforeInstallPrompt = (e: Event) => {
+        const handleBeforeInstallPrompt = (e: any) => {
+            console.log('[PWA] beforeinstallprompt disparado!');
             e.preventDefault(); // Impede o chrome de mostrar a barra feia padrão na parte de baixo
             setDeferredPrompt(e); // Guarda o evento para disparar ao clicar no botão
             setShowPrompt(true); // Exibe o nosso banner customizado bonitão

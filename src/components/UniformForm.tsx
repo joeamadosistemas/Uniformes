@@ -239,96 +239,116 @@ export const UniformForm: React.FC<Props> = ({ onSave, registroEmEdicao, onCance
                   )}
                 </div>
 
-                {/* Tabela de itens */}
-                <div className="overflow-x-auto p-3">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="border-b border-gray-200">
-                        <th className="py-2 px-2 text-xs font-semibold text-gray-600 uppercase tracking-wider">{t.lancamentos.tipoUniforme} *</th>
-                        <th className="py-2 px-2 text-xs font-semibold text-green-700 uppercase tracking-wider bg-green-50/50">{t.lancamentos.qtdSobrando}</th>
-                        <th className="py-2 px-2 text-xs font-semibold text-green-700 uppercase tracking-wider bg-green-50/50">{t.lancamentos.tamanhoSobrando}</th>
-                        <th className="py-2 px-2 text-xs font-semibold text-red-700 uppercase tracking-wider bg-red-50/50">{t.lancamentos.qtdFaltando}</th>
-                        <th className="py-2 px-2 text-xs font-semibold text-red-700 uppercase tracking-wider bg-red-50/50">{t.lancamentos.tamanhoFaltando}</th>
-                        <th className="py-2 px-2 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">{t.common.acoes}</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {bloco.items.map((item) => (
-                        <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
-                          <td className="py-3 px-2 min-w-[200px]">
-                            <select
-                              value={item.tipo_uniforme}
-                              onChange={(e) => handleItemChange(bloco.id, item.id, 'tipo_uniforme', e.target.value)}
-                              disabled={!bloco.categoria || qtdAlunos === 0}
-                              className="w-full px-3 py-2 border border-gray-300 dark:border-zinc-800 rounded-lg focus:ring-1 focus:ring-blue-500 outline-none text-sm bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white disabled:bg-gray-50 dark:disabled:bg-zinc-900 disabled:cursor-not-allowed disabled:text-zinc-400"
-                              required
-                            >
-                              <option value="">Selecione...</option>
-                              {tiposDisponiveis.map(t => <option key={t} value={t}>{t}</option>)}
-                            </select>
-                          </td>
-                          <td className="py-3 px-2 bg-green-50/30">
+                {/* Tabela/Grid de itens - Redesenhado para Mobile Premium */}
+                <div className="p-4 space-y-4">
+                  {/* Header Desktop (oculto no mobile) */}
+                  <div className="hidden md:grid md:grid-cols-5 gap-4 px-4 py-2 bg-gray-50 dark:bg-zinc-800/50 rounded-xl text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                    <div>{t.lancamentos.tipoUniforme} *</div>
+                    <div className="text-center bg-emerald-500/5 py-1 rounded-lg text-emerald-600 dark:text-emerald-400">{t.lancamentos.qtdSobrando}</div>
+                    <div className="text-center bg-emerald-500/5 py-1 rounded-lg text-emerald-600 dark:text-emerald-400">{t.lancamentos.tamanhoSobrando}</div>
+                    <div className="text-center bg-red-500/5 py-1 rounded-lg text-red-600 dark:text-red-400">{t.lancamentos.qtdFaltando}</div>
+                    <div className="text-center bg-red-500/5 py-1 rounded-lg text-red-600 dark:text-red-400">{t.lancamentos.tamanhoFaltando}</div>
+                  </div>
+
+                  <div className="space-y-4">
+                    {bloco.items.map((item) => (
+                      <div key={item.id} className="relative bg-white dark:bg-zinc-900/60 border border-gray-100 dark:border-white/5 p-4 md:p-0 md:bg-transparent md:border-none rounded-2xl md:grid md:grid-cols-5 md:gap-4 md:items-center group">
+                        {/* Botão remover item (Mobile) */}
+                        {bloco.items.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveItem(bloco.id, item.id)}
+                            className="md:hidden absolute -top-2 -right-2 w-8 h-8 flex items-center justify-center bg-red-500 text-white rounded-full shadow-lg active:scale-90 z-10"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        )}
+
+                        {/* Tipo de Uniforme */}
+                        <div className="space-y-1.5 mb-4 md:mb-0">
+                          <label className="md:hidden text-[9px] font-black text-gray-400 uppercase tracking-widest">{t.lancamentos.tipoUniforme}</label>
+                          <select
+                            value={item.tipo_uniforme}
+                            onChange={(e) => handleItemChange(bloco.id, item.id, 'tipo_uniforme', e.target.value)}
+                            disabled={!bloco.categoria || qtdAlunos === 0}
+                            className="w-full px-4 py-3 md:py-2.5 bg-gray-50 dark:bg-zinc-800/50 border border-gray-100 dark:border-white/5 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm font-bold text-zinc-800 dark:text-white transition-all disabled:opacity-30"
+                            required
+                          >
+                            <option value="">Selecione...</option>
+                            {tiposDisponiveis.map(t => <option key={t} value={t}>{t}</option>)}
+                          </select>
+                        </div>
+
+                        {/* Mobile Grid Layout for Values */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 md:col-span-4 gap-3">
+                          <div className="space-y-1.5">
+                            <label className="md:hidden text-[9px] font-black text-emerald-600/60 dark:text-emerald-400/60 uppercase tracking-widest">Qtd Sobrando</label>
                             <input
-                              type="number" min="0"
-                              value={item.qtd_sobrando}
+                              type="number" min="0" placeholder="0"
+                              value={item.qtd_sobrando || ''}
                               onChange={(e) => handleItemChange(bloco.id, item.id, 'qtd_sobrando', Number(e.target.value))}
-                              className="w-24 px-3 py-2 border border-green-200 rounded-lg focus:ring-1 focus:ring-green-500 outline-none text-sm"
+                              className="w-full px-4 py-3 md:py-2.5 bg-emerald-50/50 dark:bg-emerald-900/20 border border-emerald-100/50 dark:border-emerald-500/20 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-black text-emerald-700 dark:text-emerald-400 text-center"
                             />
-                          </td>
-                          <td className="py-3 px-2 bg-green-50/30">
+                          </div>
+                          <div className="space-y-1.5">
+                            <label className="md:hidden text-[9px] font-black text-emerald-600/60 dark:text-emerald-400/60 uppercase tracking-widest">Tam. Sobr.</label>
                             <select
                               value={item.tamanho_sobrando}
                               onChange={(e) => handleItemChange(bloco.id, item.id, 'tamanho_sobrando', e.target.value)}
-                              className="w-32 px-3 py-2 border border-green-200 rounded-lg focus:ring-1 focus:ring-green-500 outline-none text-sm bg-white"
+                              className="w-full px-4 py-3 md:py-2.5 bg-emerald-50/50 dark:bg-emerald-900/20 border border-emerald-100/50 dark:border-emerald-500/20 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-black text-emerald-700 dark:text-emerald-400 transition-all"
                             >
-                              <option value="">Selecione...</option>
+                              <option value="">---</option>
                               {TAMANHOS_DISPONIVEIS.map(t => <option key={t} value={t}>{t}</option>)}
                             </select>
-                          </td>
-                          <td className="py-3 px-2 bg-red-50/30">
+                          </div>
+                          <div className="space-y-1.5">
+                            <label className="md:hidden text-[9px] font-black text-red-600/60 dark:text-red-400/60 uppercase tracking-widest">Qtd Faltando</label>
                             <input
-                              type="number" min="0"
-                              value={item.qtd_faltando}
+                              type="number" min="0" placeholder="0"
+                              value={item.qtd_faltando || ''}
                               onChange={(e) => handleItemChange(bloco.id, item.id, 'qtd_faltando', Number(e.target.value))}
-                              className="w-24 px-3 py-2 border border-red-200 rounded-lg focus:ring-1 focus:ring-red-500 outline-none text-sm"
+                              className="w-full px-4 py-3 md:py-2.5 bg-red-50/50 dark:bg-red-900/20 border border-red-100/50 dark:border-red-500/20 rounded-xl focus:ring-2 focus:ring-red-500 outline-none text-sm font-black text-red-700 dark:text-red-400 text-center"
                             />
-                          </td>
-                          <td className="py-3 px-2 bg-red-50/30">
+                          </div>
+                          <div className="space-y-1.5">
+                            <label className="md:hidden text-[9px] font-black text-red-600/60 dark:text-red-400/60 uppercase tracking-widest">Tam. Falt.</label>
                             <select
                               value={item.tamanho_faltando}
                               onChange={(e) => handleItemChange(bloco.id, item.id, 'tamanho_faltando', e.target.value)}
-                              className="w-32 px-3 py-2 border border-red-200 rounded-lg focus:ring-1 focus:ring-red-500 outline-none text-sm bg-white"
+                              className="w-full px-4 py-3 md:py-2.5 bg-red-50/50 dark:bg-red-900/20 border border-red-100/50 dark:border-red-500/20 rounded-xl focus:ring-2 focus:ring-red-500 outline-none text-sm font-black text-red-700 dark:text-red-400 transition-all"
                             >
-                              <option value="">Selecione...</option>
+                              <option value="">---</option>
                               {TAMANHOS_DISPONIVEIS.map(t => <option key={t} value={t}>{t}</option>)}
                             </select>
-                          </td>
-                          <td className="py-3 px-2 text-center">
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveItem(bloco.id, item.id)}
-                              disabled={bloco.items.length === 1}
-                              className="p-2 text-gray-400 hover:text-red-500 disabled:opacity-30 transition-colors"
-                              title="Remover linha"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                          </div>
+                        </div>
+
+                        {/* Botão remover desktop */}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveItem(bloco.id, item.id)}
+                          disabled={bloco.items.length === 1}
+                          className="hidden md:flex absolute -right-12 p-2 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                          title="Remover linha"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
 
                   {/* Botão adicionar tipo dentro do bloco */}
                   {!registroEmEdicao && (
-                    <button
-                      type="button"
-                      onClick={() => handleAddItem(bloco.id)}
-                      className="mt-2 ml-2 flex items-center text-xs font-medium text-blue-500 hover:text-blue-700 transition-colors"
-                    >
-                      <Plus size={14} className="mr-1" />
-                      {t.lancamentos.adicionarTipo}
-                    </button>
+                    <div className="flex justify-center pt-2">
+                      <button
+                        type="button"
+                        onClick={() => handleAddItem(bloco.id)}
+                        className="flex items-center gap-2 px-6 py-3 bg-blue-600/10 dark:bg-blue-600/20 text-[#005A9C] dark:text-blue-400 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all active:scale-95 border border-blue-600/20"
+                      >
+                        <Plus size={16} />
+                        {t.lancamentos.adicionarTipo}
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>

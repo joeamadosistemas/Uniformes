@@ -1,21 +1,24 @@
 {
     "short_name": "UnifSMEDU",
     "name": "Controle de Uniformes Escolares - Itaguaí",
+    "description": "Sistema de Controle de Recebimento de Uniformes",
     "icons": [
         {
-            "src": "/unifsmedu-icon.png",
+            "src": "unifsmedu-icon.png",
             "type": "image/png",
             "sizes": "512x512",
             "purpose": "any maskable"
         },
         {
-            "src": "/unifsmedu-icon.png",
+            "src": "unifsmedu-icon.png",
             "type": "image/png",
             "sizes": "192x192"
         }
     ],
-    "start_url": ".",
+    "start_url": "/",
+    "scope": "/",
     "display": "standalone",
+    "orientation": "portrait",
     "theme_color": "#005A9C",
     "background_color": "#ffffff"
 }

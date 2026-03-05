@@ -25,7 +25,7 @@ export const GovFooter: React.FC = () => {
                             <p className="text-sm opacity-90">{t.footer.tel}</p>
                             <p className="text-sm opacity-90">{t.footer.horario}</p>
                             <p className="text-sm opacity-90">E-mail: cpdinfra@edu.itaguai.rj.gov.br</p>
-                            <p className="text-sm opacity-90">E-mail: smedu@itaguai.rj.gov.br ou secretaria@edu.itaguai.rj.gov.br</p>
+                            <p className="text-sm opacity-90">E-mail: infraestrutura@itaguai.rj.gov.br</p>
                         </div>
 
                         <div className="flex flex-col items-end text-right">

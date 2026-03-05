@@ -32,9 +32,9 @@ export const GovHeader: React.FC<GovHeaderProps> = ({
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
                         <img
-                            className="h-7 md:h-8 object-contain"
-                            src="https://novoportal.itaguai.rj.gov.br/@@obter_logo_portal/logo25.png"
-                            alt="Prefeitura de Itaguaí"
+                            className="h-10 md:h-12 object-contain"
+                            src="https://upload.wikimedia.org/wikipedia/commons/6/63/Bras%C3%A3o_de_Armas_de_Itagua%C3%AD.jpg"
+                            alt="Brasão de Itaguaí"
                         />
                     </div>
                 </div>
@@ -129,7 +129,7 @@ export const GovHeader: React.FC<GovHeaderProps> = ({
 
                 {/* School Unit Display */}
                 <div className="pl-11 md:pl-0 mt-1 md:mt-0 flex justify-start md:justify-end w-full md:w-auto">
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-3">
                         <span className="text-[11px] md:text-xs text-gray-500 dark:text-gray-400">Unidade Escolar:</span>
                         <span className="text-[12px] md:text-sm font-bold text-[#005A9C] dark:text-[#66b3ff] cursor-pointer" contentEditable suppressContentEditableWarning>
                             {schoolName || 'CPD'}

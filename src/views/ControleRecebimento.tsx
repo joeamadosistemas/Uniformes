@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { School, CheckCircle2, Clock, Search, Filter, BarChart3, ArrowUpRight, AlertCircle, Loader2, FileText, RefreshCw, X, Layers } from 'lucide-react';
+import { School, CheckCircle2, Clock, Search, BarChart3, Loader2, FileText, RefreshCw, X, Layers, AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useT } from '../lib/LanguageContext';
 import { EscolaCadastro } from '../types';
 import { SEGMENTOS_ENSINO } from '../constants';
-import { exportarControleRecebimentoPDF } from '../utils/exportUtils';
+import { exportarControleRecebimentoPDF, exportarRecebimentosPDF } from '../utils/exportUtils';
 import { AIInsightsCard } from '../components/AIInsightsCard';
 
 interface EscolaStatus extends EscolaCadastro {
@@ -111,6 +111,11 @@ export const ControleRecebimento: React.FC = () => {
         }
     };
 
+    const handleExportUnidadePDF = () => {
+        if (!selectedEscola || detalhesRecebimento.length === 0) return;
+        exportarRecebimentosPDF(detalhesRecebimento, selectedEscola.nome);
+    };
+
     const escolasFiltradas = escolas.filter(esc => {
         const matchesSearch = esc.nome.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesStatus = filterStatus === 'todos' ||
@@ -137,49 +142,45 @@ export const ControleRecebimento: React.FC = () => {
     return (
         <div className="space-y-8 pb-20">
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-sm transition-all hover:scale-[1.02] cursor-default">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-2xl text-blue-600 dark:text-blue-400">
-                            <School size={24} />
-                        </div>
-                        <BarChart3 className="text-gray-300 dark:text-zinc-700" size={20} />
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+                {/* Total Unidades */}
+                <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-xl p-4 md:p-6 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-2xl dark:shadow-black/20 transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center">
+                    <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-2xl text-blue-600 dark:text-blue-400 mb-2">
+                        <School size={20} className="md:w-6 md:h-6" />
                     </div>
-                    <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">{t.dashboardControle.totalUnidades}</p>
-                    <h3 className="text-3xl font-black text-gray-800 dark:text-white">{totalEscolas}</h3>
+                    <p className="text-[9px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1">{t.dashboardControle.totalUnidades}</p>
+                    <h3 className="text-xl md:text-3xl font-black text-gray-800 dark:text-white">{totalEscolas}</h3>
                 </div>
 
-                <div className="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-sm transition-all hover:scale-[1.02] cursor-default">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-2xl text-green-600 dark:text-green-400">
-                            <CheckCircle2 size={24} />
-                        </div>
-                        <ArrowUpRight className="text-gray-300 dark:text-zinc-700" size={20} />
+                {/* Informaram Recebimento */}
+                <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-xl p-4 md:p-6 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-2xl dark:shadow-black/20 transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center">
+                    <div className="p-3 bg-green-50 dark:bg-green-900/30 rounded-2xl text-green-600 dark:text-green-400 mb-2">
+                        <CheckCircle2 size={20} className="md:w-6 md:h-6" />
                     </div>
-                    <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">{t.dashboardControle.informaram}</p>
-                    <h3 className="text-3xl font-black text-green-600 dark:text-green-400">{totalLancaram}</h3>
+                    <p className="text-[9px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1">{t.dashboardControle.informaram}</p>
+                    <h3 className="text-xl md:text-3xl font-black text-green-600 dark:text-green-400">{totalLancaram}</h3>
                 </div>
 
-                <div className="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-sm transition-all hover:scale-[1.02] cursor-default">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-2xl text-amber-600 dark:text-amber-400">
-                            <Clock size={24} />
-                        </div>
-                        <AlertCircle className="text-gray-300 dark:text-zinc-700" size={20} />
+                {/* Aguardando Lançamento */}
+                <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-xl p-4 md:p-6 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-2xl dark:shadow-black/20 transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center">
+                    <div className="p-3 bg-amber-50 dark:bg-amber-900/30 rounded-2xl text-amber-600 dark:text-amber-400 mb-2">
+                        <Clock size={20} className="md:w-6 md:h-6" />
                     </div>
-                    <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">{t.dashboardControle.aguardando}</p>
-                    <h3 className="text-3xl font-black text-amber-600 dark:text-amber-400">{totalPendentes}</h3>
+                    <p className="text-[9px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Pendente</p>
+                    <h3 className="text-xl md:text-3xl font-black text-amber-600 dark:text-amber-400">{totalPendentes}</h3>
                 </div>
 
-                <div className="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-sm transition-all hover:scale-[1.02] cursor-default">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl text-indigo-600 dark:text-indigo-400">
-                            <BarChart3 size={24} />
-                        </div>
-                        <div className="text-xs font-black text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full">{percentualConcluido.toFixed(1)}%</div>
+                {/* Taxa de Adesão */}
+                <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-xl p-4 md:p-6 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-2xl dark:shadow-black/20 transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center relative overflow-hidden">
+                    <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl text-indigo-600 dark:text-indigo-400 mb-2">
+                        <BarChart3 size={20} className="md:w-6 md:h-6" />
                     </div>
-                    <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">{t.dashboardControle.taxaAdesao}</p>
-                    <div className="w-full bg-gray-100 dark:bg-zinc-800 h-2 rounded-full mt-4 overflow-hidden">
+                    <p className="text-[9px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Adesão</p>
+                    <div className="flex items-baseline gap-1">
+                        <h3 className="text-xl md:text-3xl font-black text-indigo-600 dark:text-indigo-400">{percentualConcluido.toFixed(1)}</h3>
+                        <span className="text-[10px] font-bold text-indigo-400">%</span>
+                    </div>
+                    <div className="w-12 bg-gray-100 dark:bg-zinc-800 h-1.5 rounded-full mt-2 overflow-hidden">
                         <div
                             className="bg-indigo-600 h-full transition-all duration-1000"
                             style={{ width: `${percentualConcluido}%` }}
@@ -193,10 +194,13 @@ export const ControleRecebimento: React.FC = () => {
 
             {/* List Table */}
             <div className="bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-gray-100 dark:border-zinc-800 shadow-xl shadow-gray-200/50 dark:shadow-none overflow-hidden">
-                <div className="p-8 border-b border-gray-50 dark:border-zinc-800 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white dark:bg-zinc-900">
-                    <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2 bg-gray-50 dark:bg-zinc-800 px-4 py-2 rounded-xl border border-transparent focus-within:border-blue-500/30 transition-all">
-                            <span className="text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Ano:</span>
+                <div className="p-6 md:p-8 border-b border-gray-50 dark:border-zinc-800 flex flex-col gap-4 bg-white dark:bg-zinc-900">
+
+                    {/* Linha 1: Ano + Busca + Status */}
+                    <div className="flex flex-wrap items-center gap-3">
+                        {/* Seletor de Ano */}
+                        <div className="flex items-center gap-2 bg-gray-50 dark:bg-zinc-800 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 focus-within:border-blue-500/40 transition-all shrink-0">
+                            <span className="text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest">ANO:</span>
                             <select
                                 value={selectedYear}
                                 onChange={(e) => setSelectedYear(Number(e.target.value))}
@@ -208,29 +212,23 @@ export const ControleRecebimento: React.FC = () => {
                             </select>
                         </div>
 
-                        <div className="relative flex-1 max-w-md group">
-                            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={20} />
+                        {/* Campo de busca */}
+                        <div className="relative flex-1 min-w-[200px] max-w-sm group">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={18} />
                             <input
                                 type="text"
                                 placeholder={t.dashboardControle.buscarEscola}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-14 pr-6 py-4 bg-gray-50 dark:bg-zinc-800/50 border border-transparent focus:border-blue-500/30 rounded-[1.25rem] focus:ring-4 focus:ring-blue-500/5 outline-none transition-all text-sm font-bold dark:text-white"
+                                className="w-full pl-11 pr-10 py-2.5 bg-gray-50 dark:bg-zinc-800/50 border border-gray-200 dark:border-zinc-700 focus:border-blue-500/40 rounded-xl focus:ring-4 focus:ring-blue-500/5 outline-none transition-all text-sm font-bold dark:text-white"
                             />
-                        </div>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-4">
-                        <div className="flex items-center gap-3">
-                            <div className="hidden lg:flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                                <Filter size={14} /> Filtrar
-                            </div>
                             <select
                                 value={filterSegmento}
                                 onChange={(e) => setFilterSegmento(e.target.value)}
-                                className="bg-gray-50 dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 rounded-2xl px-5 py-3.5 text-[10px] font-black text-gray-700 dark:text-zinc-300 outline-none cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-700 transition-all uppercase tracking-widest"
+                                className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none text-gray-400 focus:ring-0 cursor-pointer text-xs"
+                                title="Filtrar por segmento"
                             >
-                                <option value="todos">SEGMENTOS: TODOS</option>
+                                <option value="todos">▾</option>
                                 {SEGMENTOS_ENSINO.map(seg => (
                                     <option key={seg} value={seg}>
                                         {seg.replace('CONJUNTO UNIFORMA ESCOLAR ', '')}
@@ -239,40 +237,45 @@ export const ControleRecebimento: React.FC = () => {
                             </select>
                         </div>
 
-                        <div className="flex items-center gap-2 bg-gray-50 dark:bg-zinc-800 p-1.5 rounded-2xl border border-gray-100 dark:border-zinc-700">
+                        {/* Botões de Status */}
+                        <div className="flex items-center gap-1 bg-gray-50 dark:bg-zinc-800 p-1 rounded-xl border border-gray-200 dark:border-zinc-700 shrink-0">
                             {[
-                                { id: 'todos', label: t.dashboardControle.todos, color: 'bg-[#005A9C]' },
-                                { id: 'concluido', label: t.dashboardControle.concluido, color: 'bg-green-600' },
-                                { id: 'pendente', label: t.dashboardControle.pendente, color: 'bg-amber-600' }
+                                { id: 'todos', label: t.dashboardControle.todos },
+                                { id: 'concluido', label: t.dashboardControle.concluido },
+                                { id: 'pendente', label: t.dashboardControle.pendente }
                             ].map(status => (
                                 <button
                                     key={status.id}
                                     onClick={() => setFilterStatus(status.id as any)}
-                                    className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filterStatus === status.id ? `${status.color} text-white shadow-lg` : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+                                    className={`px-5 py-2 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all ${filterStatus === status.id
+                                        ? 'bg-[#005A9C] text-white shadow-md'
+                                        : 'text-gray-500 dark:text-zinc-400 hover:text-gray-800 dark:hover:text-white'
+                                        }`}
                                 >
                                     {status.label}
                                 </button>
                             ))}
                         </div>
+                    </div>
 
-                        <div className="flex items-center gap-3">
-                            <button
-                                onClick={fetchStatusEscolas}
-                                disabled={refreshing}
-                                className="p-3.5 bg-gray-50 dark:bg-zinc-800 text-gray-600 dark:text-zinc-300 rounded-2xl hover:bg-gray-100 dark:hover:bg-zinc-700 transition-all active:scale-90"
-                                title="Atualizar dados"
-                            >
-                                <RefreshCw size={20} className={refreshing ? 'animate-spin' : ''} />
-                            </button>
+                    {/* Linha 2: Ações */}
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={fetchStatusEscolas}
+                            disabled={refreshing}
+                            className="p-2.5 bg-gray-50 dark:bg-zinc-800 text-gray-600 dark:text-zinc-300 rounded-xl border border-gray-200 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-700 transition-all active:scale-90"
+                            title="Atualizar dados"
+                        >
+                            <RefreshCw size={18} className={refreshing ? 'animate-spin' : ''} />
+                        </button>
 
-                            <button
-                                onClick={handleExportPDF}
-                                disabled={loading || escolasFiltradas.length === 0}
-                                className="flex items-center gap-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed text-white px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-red-600/20 active:scale-95"
-                            >
-                                <FileText size={18} /> Exportar PDF
-                            </button>
-                        </div>
+                        <button
+                            onClick={handleExportPDF}
+                            disabled={loading || escolasFiltradas.length === 0}
+                            className="flex items-center gap-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all shadow-lg shadow-red-600/20 active:scale-95"
+                        >
+                            <FileText size={16} /> Exportar PDF
+                        </button>
                     </div>
                 </div>
 
@@ -314,7 +317,7 @@ export const ControleRecebimento: React.FC = () => {
                                     >
                                         <td className="px-10 py-8">
                                             <div className="flex items-center gap-5">
-                                                <div className={`w-1.5 h-12 rounded-full transition-all group-hover:h-14 ${esc.jaLancou ? 'bg-green-500 shadow-lg shadow-green-500/30' : 'bg-amber-500 shadow-lg shadow-amber-500/30'}`}></div>
+                                                <div className={`w - 1.5 h - 12 rounded - full transition - all group - hover: h - 14 ${esc.jaLancou ? 'bg-green-500 shadow-lg shadow-green-500/30' : 'bg-amber-500 shadow-lg shadow-amber-500/30'} `}></div>
                                                 <div>
                                                     <p className="font-black text-gray-800 dark:text-zinc-100 text-base group-hover:text-[#005A9C] transition-colors uppercase tracking-tight">{esc.nome}</p>
                                                     <p className="text-xs text-gray-400 font-bold tracking-tight">{esc.email}</p>
@@ -378,33 +381,33 @@ export const ControleRecebimento: React.FC = () => {
             {/* Modal de Detalhes da Unidade */}
             {showModal && selectedEscola && (
                 <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-300">
-                    <div className="bg-white dark:bg-zinc-900 w-full max-w-5xl max-h-[90vh] sm:rounded-[3rem] rounded-t-[2rem] shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-300 border border-white/10">
-                        {/* Modal Header */}
-                        <div className="p-6 md:p-10 border-b border-gray-100 dark:border-zinc-800 relative bg-white dark:bg-zinc-900">
+                    <div className="bg-white dark:bg-zinc-900 w-full max-w-3xl max-h-[90vh] sm:rounded-[3rem] rounded-t-[2rem] shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-300 border border-white/10">
+                        {/* Modal Header - Compact & Premium */}
+                        <div className="p-6 md:p-8 border-b border-gray-100 dark:border-white/5 relative bg-white dark:bg-zinc-900/90 backdrop-blur-xl">
                             <button
                                 onClick={() => setShowModal(false)}
-                                className="absolute right-4 top-4 md:right-10 md:top-10 p-3 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-2xl transition-all text-gray-400 active:scale-90"
+                                className="absolute right-4 top-4 p-2.5 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-xl transition-all text-gray-400 active:scale-90 z-10"
                             >
-                                <X size={24} />
+                                <X size={20} />
                             </button>
 
-                            <div className="flex flex-col md:flex-row items-start md:items-center gap-6 md:gap-8 mt-4 md:mt-0">
-                                <div className={`w-20 h-20 md:w-24 md:h-24 shrink-0 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center shadow-2xl ${selectedEscola.jaLancou ? 'bg-green-500 text-white shadow-green-500/20' : 'bg-amber-500 text-white shadow-amber-500/20'}`}>
-                                    <School size={40} className="md:w-12 md:h-12" />
+                            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
+                                <div className={`w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-2xl flex items-center justify-center shadow-2xl ${selectedEscola.jaLancou ? 'bg-emerald-500 text-white shadow-emerald-500/20' : 'bg-amber-500 text-white shadow-amber-500/20'}`}>
+                                    <School size={32} className="sm:w-10 sm:h-10" />
                                 </div>
-                                <div className="pr-8 md:pr-0">
-                                    <h2 className="text-2xl md:text-3xl font-black text-gray-800 dark:text-white uppercase tracking-tight leading-tight mb-3 break-words hyphens-auto">{selectedEscola.nome}</h2>
-                                    <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 md:gap-4">
-                                        <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-zinc-800 rounded-xl border border-gray-100 dark:border-zinc-700 w-full sm:w-auto overflow-hidden">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-gray-400 shrink-0"></div>
-                                            <span className="text-xs font-bold text-gray-500 dark:text-zinc-400 truncate">{selectedEscola.email}</span>
+                                <div className="text-center sm:text-left flex-1 min-w-0">
+                                    <h2 className="text-xl sm:text-2xl font-black text-gray-800 dark:text-white uppercase tracking-tight leading-tight mb-2 truncate px-4 sm:px-0">{selectedEscola.nome}</h2>
+                                    <div className="flex flex-wrap justify-center sm:justify-start items-center gap-2">
+                                        <div className="flex items-center gap-2 px-3 py-1 bg-gray-50 dark:bg-zinc-800/50 rounded-lg border border-gray-100 dark:border-white/5">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-gray-400"></div>
+                                            <span className="text-[10px] font-bold text-gray-500 dark:text-zinc-400 truncate max-w-[150px] sm:max-w-none">{selectedEscola.email}</span>
                                         </div>
                                         {selectedEscola.jaLancou ? (
-                                            <span className="px-4 py-1.5 bg-green-500 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-green-500/20">
+                                            <span className="px-3 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[9px] font-black uppercase tracking-widest rounded-lg border border-emerald-500/20">
                                                 {t.dashboardControle.concluido}
                                             </span>
                                         ) : (
-                                            <span className="px-4 py-1.5 bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-amber-500/20">
+                                            <span className="px-3 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[9px] font-black uppercase tracking-widest rounded-lg border border-amber-500/20">
                                                 {t.dashboardControle.pendente}
                                             </span>
                                         )}
@@ -414,35 +417,35 @@ export const ControleRecebimento: React.FC = () => {
                         </div>
 
                         {/* Modal Content */}
-                        <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-6 md:space-y-10 custom-scrollbar">
-                            {/* Stats Summary Area */}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                                <div className="p-5 md:p-8 bg-gray-50 dark:bg-zinc-800/40 rounded-3xl md:rounded-[2rem] border border-gray-100 dark:border-zinc-800/50 shadow-sm flex flex-col justify-center">
-                                    <p className="text-[9px] md:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 md:mb-2">Total Recebido</p>
-                                    <p className="text-3xl md:text-4xl font-black text-[#005A9C] dark:text-blue-400 tabular-nums">
+                        <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 md:space-y-8 custom-scrollbar bg-gray-50/30 dark:bg-zinc-950/20">
+                            {/* Stats Summary - Glassmorphism */}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+                                <div className="p-4 md:p-6 bg-white dark:bg-zinc-900/40 dark:backdrop-blur-md rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm flex flex-col justify-center text-center sm:text-left transition-all hover:scale-[1.02]">
+                                    <p className="text-[8px] md:text-[9px] font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Total</p>
+                                    <p className="text-2xl md:text-3xl font-black text-blue-600 dark:text-blue-400 tabular-nums leading-none">
                                         {detalhesRecebimento.reduce((acc, curr) => acc + (curr.quantidade || 0), 0)}
                                     </p>
-                                    <p className="text-[9px] md:text-[10px] font-bold text-gray-400 uppercase mt-1">Peças</p>
+                                    <p className="text-[8px] md:text-[9px] font-bold text-gray-400 dark:text-zinc-600 uppercase mt-1">Peças</p>
                                 </div>
-                                <div className="p-5 md:p-8 bg-gray-50 dark:bg-zinc-800/40 rounded-3xl md:rounded-[2rem] border border-gray-100 dark:border-zinc-800/50 shadow-sm flex flex-col justify-center">
-                                    <p className="text-[9px] md:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 md:mb-2">Modelos</p>
-                                    <p className="text-3xl md:text-4xl font-black text-gray-800 dark:text-white tabular-nums">
+                                <div className="p-4 md:p-6 bg-white dark:bg-zinc-900/40 dark:backdrop-blur-md rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm flex flex-col justify-center text-center sm:text-left transition-all hover:scale-[1.02]">
+                                    <p className="text-[8px] md:text-[9px] font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Modelos</p>
+                                    <p className="text-2xl md:text-3xl font-black text-gray-800 dark:text-white tabular-nums leading-none">
                                         {new Set(detalhesRecebimento.map(d => d.modelo_id)).size}
                                     </p>
-                                    <p className="text-[9px] md:text-[10px] font-bold text-gray-400 uppercase mt-1">Variedades</p>
+                                    <p className="text-[8px] md:text-[9px] font-bold text-gray-400 dark:text-zinc-600 uppercase mt-1">Variedades</p>
                                 </div>
-                                <div className="col-span-2 md:col-span-2 p-6 md:p-8 bg-blue-600 rounded-3xl md:rounded-[2rem] border border-blue-500 shadow-xl shadow-blue-600/20 flex flex-col justify-center text-white">
-                                    <p className="text-[10px] font-black text-blue-100 uppercase tracking-widest mb-2">Última Movimentação</p>
-                                    <div className="flex items-center gap-3">
-                                        <Clock className="text-blue-200" size={32} />
-                                        <div className="space-y-0.5">
-                                            <p className="text-2xl font-black">
-                                                {selectedEscola.dataUltimoLancamento ? new Date(selectedEscola.dataUltimoLancamento).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '---'}
-                                            </p>
-                                            <p className="text-xs font-bold text-blue-100 uppercase tracking-widest opacity-80">
-                                                {selectedEscola.dataUltimoLancamento ? new Date(selectedEscola.dataUltimoLancamento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : 'Sem lançamentos'}
-                                            </p>
-                                        </div>
+                                <div className="col-span-2 md:col-span-2 p-4 md:p-6 bg-blue-600 dark:bg-blue-600/90 rounded-2xl border border-blue-500 shadow-lg shadow-blue-600/20 flex items-center justify-between text-white transition-all hover:scale-[1.01]">
+                                    <div className="space-y-1">
+                                        <p className="text-[9px] font-black text-blue-100 uppercase tracking-widest leading-none">Última Movimentação</p>
+                                        <p className="text-xl md:text-2xl font-black tabular-nums leading-none">
+                                            {selectedEscola.dataUltimoLancamento ? new Date(selectedEscola.dataUltimoLancamento).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '---'}
+                                        </p>
+                                        <p className="text-[10px] font-bold text-blue-100/70 uppercase tracking-widest leading-none">
+                                            {selectedEscola.dataUltimoLancamento ? new Date(selectedEscola.dataUltimoLancamento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : 'Sem lançamentos'}
+                                        </p>
+                                    </div>
+                                    <div className="p-2.5 bg-white/10 rounded-xl backdrop-blur-sm">
+                                        <Clock size={24} className="text-blue-100" />
                                     </div>
                                 </div>
                             </div>
@@ -540,17 +543,26 @@ export const ControleRecebimento: React.FC = () => {
                         </div>
 
                         {/* Modal Footer */}
-                        <div className="p-6 md:p-10 border-t border-gray-100 dark:border-zinc-800 flex flex-col md:flex-row items-center justify-between gap-6 bg-white dark:bg-zinc-900">
+                        <div className="p-5 md:p-8 border-t border-gray-100 dark:border-white/5 flex flex-col md:flex-row items-center justify-between gap-4 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md">
                             <div className="flex items-center gap-2 text-gray-400 text-center md:text-left">
-                                <AlertCircle size={16} className="shrink-0" />
-                                <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest leading-relaxed">Visualização somente leitura<br className="md:hidden" /> para administradores</span>
+                                <AlertCircle size={14} className="shrink-0" />
+                                <span className="text-[8px] md:text-[9px] font-bold uppercase tracking-widest leading-relaxed">Painel de Visualização Administrativa</span>
                             </div>
-                            <button
-                                onClick={() => setShowModal(false)}
-                                className="w-full md:w-auto px-8 md:px-12 py-3 md:py-4 bg-gray-900 dark:bg-white text-white dark:text-black rounded-xl md:rounded-[1.5rem] font-black text-[10px] md:text-xs uppercase tracking-[0.2em] shadow-xl hover:bg-black dark:hover:bg-zinc-200 hover:scale-[1.05] active:scale-95 transition-all"
-                            >
-                                Fechar Painel
-                            </button>
+                            <div className="flex items-center gap-3 w-full md:w-auto">
+                                <button
+                                    onClick={handleExportUnidadePDF}
+                                    disabled={loadingDetalhes || detalhesRecebimento.length === 0}
+                                    className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3.5 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-red-600/20 active:scale-95"
+                                >
+                                    <FileText size={16} /> Gerar PDF
+                                </button>
+                                <button
+                                    onClick={() => setShowModal(false)}
+                                    className="flex-1 md:flex-none px-6 py-3.5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-black dark:hover:bg-zinc-200 active:scale-95 transition-all shadow-xl"
+                                >
+                                    Fechar Painel
+                                </button>
+                            </div>
                         </div>
 
                         {/* Mobile bottom padding spacer for safe-area */}
