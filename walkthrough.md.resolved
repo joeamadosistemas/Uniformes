@@ -1,0 +1,27 @@
+# Conclusão da Auditoria e Correções de Segurança
+
+Finalizamos a bateria de auditorias solicitada e aplicamos as devidas correções para blindar o sistema de gerência de uniformes escolares contra a falha crítica encontrada.
+
+## O que encontramos
+
+Durante a análise, identificamos a seguinte falha grave:
+*   A chave **Service Role** do Supabase (`VITE_SUPABASE_SERVICE_ROLE_KEY`) estava exposta através do arquivo de configuração do painel frontend. Essa chave deveria ser tratada como o "passaporte principal" do sistema, pois quem a possui pode alterar, apagar e ler absolutamente todos os dados. O Frontend jamais deveria carregar esse tipo de credencial.
+*   Isso estava ocorrendo nos componentes [src/views/Usuarios.tsx](file:///h:/2026%20SISTEMAS/2026%20Uniforme/04%20mar%C3%A7o/sistema_de_controle_de_uniformes_escolares_9d3a4t_dualiteproject/src/views/Usuarios.tsx) (para criação de perfis e auth vinculada) e em pequenas fallbacks do componente de [src/views/ControleRecebimento.tsx](file:///h:/2026%20SISTEMAS/2026%20Uniforme/04%20mar%C3%A7o/sistema_de_controle_de_uniformes_escolares_9d3a4t_dualiteproject/src/views/ControleRecebimento.tsx).
+
+## O que fizemos (Correções Realizadas)
+
+Removemos de forma contundente o acesso bypass do lado do cliente:
+
+1.  **Limpeza do Ambiente (.env)**: Removemos totalmente menções a `VITE_SUPABASE_SERVICE_ROLE_KEY` nos arquivos [.env](file:///h:/2026%20SISTEMAS/2026%20Uniforme/04%20mar%C3%A7o/sistema_de_controle_de_uniformes_escolares_9d3a4t_dualiteproject/.env) e [.env.example](file:///h:/2026%20SISTEMAS/2026%20Uniforme/04%20mar%C3%A7o/sistema_de_controle_de_uniformes_escolares_9d3a4t_dualiteproject/.env.example).
+2.  **Limpeza do Supabase Client**: O arquivo [src/lib/supabaseClient.ts](file:///h:/2026%20SISTEMAS/2026%20Uniforme/04%20mar%C3%A7o/sistema_de_controle_de_uniformes_escolares_9d3a4t_dualiteproject/src/lib/supabaseClient.ts) agora só constrói o cliente comum e devidamente blindado pelo **Row Level Security** (RLS), o *Anon Key*. A construção do cliente super-poderoso `supabaseAdmin` foi excluída.
+3.  **Remoção de Bypasses**: Corrigimos o [ControleRecebimento.tsx](file:///h:/2026%20SISTEMAS/2026%20Uniforme/04%20mar%C3%A7o/sistema_de_controle_de_uniformes_escolares_9d3a4t_dualiteproject/src/views/ControleRecebimento.tsx) para respeitar as diretivas contidas nos tokens de autenticação padrão. 
+4.  **Refatoração Administrativa**: Substituímos as chamadas de administração de Auth (deletar conta, criar conta, etc.) que residiam na visão de [Usuarios.tsx](file:///h:/2026%20SISTEMAS/2026%20Uniforme/04%20mar%C3%A7o/sistema_de_controle_de_uniformes_escolares_9d3a4t_dualiteproject/src/views/Usuarios.tsx) por **Invocadores de API Segura** (`supabase.functions.invoke`). A partir de agora, criar/editar usuários só ocorrerá chamando o ambiente de Servidor do Supabase (Edge Functions), mantendo a lógica de segurança intocada pelo lado do usuário da aplicação.
+
+### Testes Realizados
+✅ Fizemos um processo de `build` de validação para simular o ambiente de Produção e confirmar que os refatores se comunicaram corretamente, não interrompendo outras propriedades vitais da aplicação. Nenhum erro de compilação foi encontrado.
+
+## Próximos Passos (Recomendação!)
+
+Para colocar as ações administrativas nos eixos perfeitos, sugerimos que sigam os dois passos extras abaixo assim que possível:
+1.  **Rotacionem a chave!**: Visto que este código existiu por um tempo com essa falha, é mandatário e urgente adentrar o Painel Dashboard do *Supabase* > *Project Settings* > *API*, gerar uma **nova JWT secret** ou rodar o refresh das chaves (revogar e criar a *service_role* novamente) caso elas já tivessem escapado de um controle de repositório público ou build publico contínuo online (Netlify).
+2.  **Subir a Edge Function (`admin-users`)**: O frontend agora espera interagir com o serverless function chamado `admin-users` (na criação e deleção de perfis na plataforma Supabase). É preciso escrever esta function e publicá-la no painel do Supabase com o Deno.

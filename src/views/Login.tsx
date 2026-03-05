@@ -107,6 +107,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                                 </span>
                                 <input
                                     id="email"
+                                    data-testid="login-email"
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
@@ -139,6 +140,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                                 </span>
                                 <input
                                     id="password"
+                                    data-testid="login-password"
                                     type={showPassword ? 'text' : 'password'}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
@@ -179,6 +181,8 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
                         {/* Botão Entrar */}
                         <button
+                            id="login-button"
+                            data-testid="login-submit"
                             type="submit"
                             disabled={loading}
                             className="w-full py-3 rounded-md text-white font-semibold text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-1"

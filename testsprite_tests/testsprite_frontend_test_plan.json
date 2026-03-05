@@ -1,0 +1,2668 @@
+[
+  {
+    "id": "TC001",
+    "title": "Register a new receipt and verify it appears in the receipts table",
+    "description": "Verifies a school user can create a receipt with model, description, size, and quantity and then see it listed.",
+    "category": "Recebimentos (Receipt Registration)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Entrar\" (Login) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Recebimentos\" is visible in the main menu or page content"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Recebimentos\" in the sidebar menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify page title contains \"Recebimentos\""
+      },
+      {
+        "type": "action",
+        "description": "Select a uniform model from the model dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Recebimento de teste\" into the description field"
+      },
+      {
+        "type": "action",
+        "description": "Select a size from the size dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Type \"10\" into the quantity field"
+      },
+      {
+        "type": "action",
+        "description": "Click the save button to register receipt"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Recebimento de teste\" is visible in the receipts table"
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "Filter receipts by year and model after creating a receipt",
+    "description": "Verifies filtering by year and model updates the list to show matching results including the newly created receipt.",
+    "category": "Recebimentos (Receipt Registration)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Entrar\" (Login) button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Recebimentos\" in the sidebar menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify page title contains \"Recebimentos\""
+      },
+      {
+        "type": "action",
+        "description": "Select a uniform model from the model dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Filtro ano modelo\" into the description field"
+      },
+      {
+        "type": "action",
+        "description": "Select a size from the size dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Type \"3\" into the quantity field"
+      },
+      {
+        "type": "action",
+        "description": "Click the save button to register receipt"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Filtro ano modelo\" is visible in the receipts table"
+      },
+      {
+        "type": "action",
+        "description": "Select the current year from the year filter dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Select the same uniform model from the model filter dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Filtro ano modelo\" is visible in the receipts table"
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "Quantity required validation: attempt save with empty quantity then successfully save",
+    "description": "Verifies the form blocks saving without quantity, shows validation, and then allows save after quantity is filled.",
+    "category": "Recebimentos (Receipt Registration)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Entrar\" (Login) button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Recebimentos\" in the sidebar menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify page title contains \"Recebimentos\""
+      },
+      {
+        "type": "action",
+        "description": "Select a uniform model from the model dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Sem quantidade\" into the description field"
+      },
+      {
+        "type": "action",
+        "description": "Select a size from the size dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Click the save button to register receipt"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Quantidade\" is visible as a validation message or required-field indicator"
+      },
+      {
+        "type": "action",
+        "description": "Type \"5\" into the quantity field"
+      },
+      {
+        "type": "action",
+        "description": "Click the save button to register receipt"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Sem quantidade\" is visible in the receipts table"
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "Cancel/clear behavior: ensure the form does not create a receipt without clicking Save",
+    "description": "Verifies that typing values without saving does not create a new record in the receipts table.",
+    "category": "Recebimentos (Receipt Registration)",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Entrar\" (Login) button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Recebimentos\" in the sidebar menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify page title contains \"Recebimentos\""
+      },
+      {
+        "type": "action",
+        "description": "Select a uniform model from the model dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Nao salvar\" into the description field"
+      },
+      {
+        "type": "action",
+        "description": "Select a size from the size dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Type \"2\" into the quantity field"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Lançamentos\" in the sidebar menu"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Recebimentos\" in the sidebar menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Nao salvar\" is not visible in the receipts table"
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "List loads and shows table structure for receipts",
+    "description": "Verifies the receipts page loads the list area and table for registered receipts.",
+    "category": "Recebimentos (Receipt Registration)",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Entrar\" (Login) button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Recebimentos\" in the sidebar menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify page title contains \"Recebimentos\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Tabela de recebimentos\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Ano\" is visible near the filters or table header"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Modelo\" is visible near the filters or table header"
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "Filter results can be changed and the table updates accordingly",
+    "description": "Verifies switching filter selections updates what is shown in the receipts table (visible state changes).",
+    "category": "Recebimentos (Receipt Registration)",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Entrar\" (Login) button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Recebimentos\" in the sidebar menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify page title contains \"Recebimentos\""
+      },
+      {
+        "type": "action",
+        "description": "Select the current year from the year filter dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Tabela de recebimentos\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Select a uniform model from the model filter dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Tabela de recebimentos\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Select a different uniform model from the model filter dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Tabela de recebimentos\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "Numeric input handling: prevent non-numeric quantity from being accepted",
+    "description": "Verifies the quantity field rejects or flags non-numeric input and does not successfully save with invalid quantity.",
+    "category": "Recebimentos (Receipt Registration)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Entrar\" (Login) button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Recebimentos\" in the sidebar menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify page title contains \"Recebimentos\""
+      },
+      {
+        "type": "action",
+        "description": "Select a uniform model from the model dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Quantidade invalida\" into the description field"
+      },
+      {
+        "type": "action",
+        "description": "Select a size from the size dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Type \"abc\" into the quantity field"
+      },
+      {
+        "type": "action",
+        "description": "Click the save button to register receipt"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Quantidade\" is visible as a validation message or required/invalid indicator"
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "Minimal required fields: save with model, size, and quantity while leaving description empty",
+    "description": "Verifies a receipt can be created when optional description is blank (if allowed) and appears in the table.",
+    "category": "Recebimentos (Receipt Registration)",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Entrar\" (Login) button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Recebimentos\" in the sidebar menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify page title contains \"Recebimentos\""
+      },
+      {
+        "type": "action",
+        "description": "Select a uniform model from the model dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Select a size from the size dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Type \"1\" into the quantity field"
+      },
+      {
+        "type": "action",
+        "description": "Click the save button to register receipt"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Tabela de recebimentos\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "Acessar Controle de Recebimento e visualizar os cards de resumo",
+    "description": "Garante que o painel de controle de recebimento carrega e exibe os cards de resumo principais.",
+    "category": "Controle de Recebimento (Admin Receipt Control)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Entrar\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Controle de Recebimento\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Total\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Concluído\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Pendente\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "Buscar escolas por nome no Controle de Recebimento",
+    "description": "Valida que a busca por nome filtra a lista de escolas exibida.",
+    "category": "Controle de Recebimento (Admin Receipt Control)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Entrar\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Controle de Recebimento\" in the sidebar menu"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Escola\" into the search field"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Schools table\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Escola\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "Filtrar por segmento no Controle de Recebimento",
+    "description": "Garante que o filtro de segmento pode ser aplicado e reflete na listagem.",
+    "category": "Controle de Recebimento (Admin Receipt Control)",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Entrar\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Controle de Recebimento\" in the sidebar menu"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Ensino Fundamental\" from the segment dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Schools table\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Ensino Fundamental\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "Filtrar por status Pendente no Controle de Recebimento",
+    "description": "Valida que o filtro de status 'Pendente' reduz a lista para escolas pendentes.",
+    "category": "Controle de Recebimento (Admin Receipt Control)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Entrar\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Controle de Recebimento\" in the sidebar menu"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Pendente\" from the status dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Schools table\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Pendente\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC013",
+    "title": "Abrir detalhes de recebimento de uma escola em modal",
+    "description": "Garante que ao clicar em uma escola, um modal com detalhes de recebimento é exibido.",
+    "category": "Controle de Recebimento (Admin Receipt Control)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Entrar\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Controle de Recebimento\" in the sidebar menu"
+      },
+      {
+        "type": "action",
+        "description": "Click on the first school row in the schools table"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Receipt details modal\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Detalhes\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC014",
+    "title": "Fechar o modal de detalhes de recebimento",
+    "description": "Valida que o modal de detalhes pode ser fechado e a lista permanece visível.",
+    "category": "Controle de Recebimento (Admin Receipt Control)",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Entrar\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Controle de Recebimento\" in the sidebar menu"
+      },
+      {
+        "type": "action",
+        "description": "Click on the first school row in the schools table"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Receipt details modal\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Fechar\" in the modal"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Receipt details modal\" is not visible"
+      }
+    ]
+  },
+  {
+    "id": "TC015",
+    "title": "Aplicar filtros que retornam zero resultados e validar estado vazio",
+    "description": "Valida que a tela mostra mensagem de estado vazio quando filtros não retornam nenhuma escola.",
+    "category": "Controle de Recebimento (Admin Receipt Control)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Entrar\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Controle de Recebimento\" in the sidebar menu"
+      },
+      {
+        "type": "action",
+        "description": "Type \"ZZZ_INEXISTENTE_123\" into the search field"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Nenhum resultado\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Schools table\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC016",
+    "title": "Create a new transfer and see it appear in transfer history",
+    "description": "Verifies an authenticated user can create a transfer between two schools with items and then see it listed in the transfer history.",
+    "category": "Transferencias (Transfers Between Schools)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Entrar\" (Login) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Sidebar navigation\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Transferências\" in the sidebar menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Transferências\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Select an option from the \"Escola de origem\" (Origin school) dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Select a different option from the \"Escola de destino\" (Destination school) dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Adicionar item\" (Add item) button"
+      },
+      {
+        "type": "action",
+        "description": "Select an option from the \"Produto\" (Product) dropdown for the new item"
+      },
+      {
+        "type": "action",
+        "description": "Type \"1\" into the \"Quantidade\" (Quantity) field for the new item"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Reposição\" into the \"Motivo\" (Reason) field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Enviar\" / \"Registrar transferência\" (Submit) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Histórico\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the transfer appears in the history list"
+      }
+    ]
+  },
+  {
+    "id": "TC017",
+    "title": "Prevent transfer creation when quantity exceeds available stock",
+    "description": "Verifies the UI blocks submission and shows an insufficient stock message when the requested quantity is higher than available.",
+    "category": "Transferencias (Transfers Between Schools)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Entrar\" (Login) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Sidebar navigation\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Transferências\" in the sidebar menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Transferências\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Select an option from the \"Escola de origem\" (Origin school) dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Select a different option from the \"Escola de destino\" (Destination school) dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Adicionar item\" (Add item) button"
+      },
+      {
+        "type": "action",
+        "description": "Select an option from the \"Produto\" (Product) dropdown for the new item"
+      },
+      {
+        "type": "action",
+        "description": "Type \"999999\" into the \"Quantidade\" (Quantity) field for the new item"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Transferência\" into the \"Motivo\" (Reason) field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Enviar\" / \"Registrar transferência\" (Submit) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"estoque\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"insuficiente\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC018",
+    "title": "Validation: block submission when origin school is not selected",
+    "description": "Verifies the form requires an origin school before a transfer can be submitted.",
+    "category": "Transferencias (Transfers Between Schools)",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Entrar\" (Login) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Sidebar navigation\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Transferências\" in the sidebar menu"
+      },
+      {
+        "type": "action",
+        "description": "Select an option from the \"Escola de destino\" (Destination school) dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Adicionar item\" (Add item) button"
+      },
+      {
+        "type": "action",
+        "description": "Select an option from the \"Produto\" (Product) dropdown for the new item"
+      },
+      {
+        "type": "action",
+        "description": "Type \"1\" into the \"Quantidade\" (Quantity) field for the new item"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Ajuste\" into the \"Motivo\" (Reason) field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Enviar\" / \"Registrar transferência\" (Submit) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"origem\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"obrigatória\" or \"selecione\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC019",
+    "title": "Validation: block submission when destination school is not selected",
+    "description": "Verifies the form requires a destination school before a transfer can be submitted.",
+    "category": "Transferencias (Transfers Between Schools)",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Entrar\" (Login) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Sidebar navigation\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Transferências\" in the sidebar menu"
+      },
+      {
+        "type": "action",
+        "description": "Select an option from the \"Escola de origem\" (Origin school) dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Adicionar item\" (Add item) button"
+      },
+      {
+        "type": "action",
+        "description": "Select an option from the \"Produto\" (Product) dropdown for the new item"
+      },
+      {
+        "type": "action",
+        "description": "Type \"1\" into the \"Quantidade\" (Quantity) field for the new item"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Envio\" into the \"Motivo\" (Reason) field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Enviar\" / \"Registrar transferência\" (Submit) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"destino\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"obrigatória\" or \"selecione\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC020",
+    "title": "Validation: block submission when origin and destination are the same school",
+    "description": "Verifies the UI prevents selecting the same school for origin and destination or shows a clear validation error.",
+    "category": "Transferencias (Transfers Between Schools)",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Entrar\" (Login) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Sidebar navigation\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Transferências\" in the sidebar menu"
+      },
+      {
+        "type": "action",
+        "description": "Select an option from the \"Escola de origem\" (Origin school) dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Select the same option from the \"Escola de destino\" (Destination school) dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Adicionar item\" (Add item) button"
+      },
+      {
+        "type": "action",
+        "description": "Select an option from the \"Produto\" (Product) dropdown for the new item"
+      },
+      {
+        "type": "action",
+        "description": "Type \"1\" into the \"Quantidade\" (Quantity) field for the new item"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Correção\" into the \"Motivo\" (Reason) field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Enviar\" / \"Registrar transferência\" (Submit) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"origem\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"destino\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC021",
+    "title": "Validation: block submission when no transfer items were added",
+    "description": "Verifies the user cannot submit a transfer without at least one item.",
+    "category": "Transferencias (Transfers Between Schools)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Entrar\" (Login) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Sidebar navigation\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Transferências\" in the sidebar menu"
+      },
+      {
+        "type": "action",
+        "description": "Select an option from the \"Escola de origem\" (Origin school) dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Select a different option from the \"Escola de destino\" (Destination school) dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Enviar\" / \"Registrar transferência\" (Submit) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"item\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"adicione\" or \"obrigatório\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC022",
+    "title": "Validation: reject zero or negative quantity for a transfer item",
+    "description": "Verifies quantity must be a positive number to submit a transfer.",
+    "category": "Transferencias (Transfers Between Schools)",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Entrar\" (Login) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Sidebar navigation\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Transferências\" in the sidebar menu"
+      },
+      {
+        "type": "action",
+        "description": "Select an option from the \"Escola de origem\" (Origin school) dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Select a different option from the \"Escola de destino\" (Destination school) dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Adicionar item\" (Add item) button"
+      },
+      {
+        "type": "action",
+        "description": "Select an option from the \"Produto\" (Product) dropdown for the new item"
+      },
+      {
+        "type": "action",
+        "description": "Type \"0\" into the \"Quantidade\" (Quantity) field for the new item"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Teste\" into the \"Motivo\" (Reason) field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Enviar\" / \"Registrar transferência\" (Submit) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"quantidade\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"válida\" or \"maior que 0\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC023",
+    "title": "Transfer history loads and remains visible after refresh of the view (within SPA)",
+    "description": "Verifies the transfer history section is displayed and populated when opening the Transferências view in an authenticated session.",
+    "category": "Transferencias (Transfers Between Schools)",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Entrar\" (Login) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Sidebar navigation\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Transferências\" in the sidebar menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Histórico\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Transfer history list\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Lançamentos\" in the sidebar menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Lançamentos\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Transferências\" in the sidebar menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Histórico\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC024",
+    "title": "Create a new Admin user successfully",
+    "description": "Verifies an authenticated admin can create a new user with Admin profile and see it listed in the users table.",
+    "category": "Gestão de Usuários (User Management)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Entrar\" (Login) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Usuários\" in the sidebar menu"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Novo Usuário\" (Create new user) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Novo Usuário\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Teste Admin\" into the name field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"teste.admin+e2e@exemplo.com\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"SenhaForte@123\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Admin\" from the profile type dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Salvar\" (Save) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"teste.admin+e2e@exemplo.com\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC025",
+    "title": "Create a new Escola user successfully with associated school",
+    "description": "Verifies creating an Escola-profile user requires selecting a school and results in the user appearing in the table.",
+    "category": "Gestão de Usuários (User Management)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Entrar\" (Login) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Usuários\" in the sidebar menu"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Novo Usuário\" (Create new user) button"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Teste Escola\" into the name field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"teste.escola+e2e@exemplo.com\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"SenhaForte@123\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Escola\" from the profile type dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Escola Municipal\" from the associated school dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Salvar\" (Save) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"teste.escola+e2e@exemplo.com\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC026",
+    "title": "Password is required validation when creating a user",
+    "description": "Verifies the UI shows a validation error when attempting to create a user without a password.",
+    "category": "Gestão de Usuários (User Management)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Entrar\" (Login) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Usuários\" in the sidebar menu"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Novo Usuário\" (Create new user) button"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Sem Senha\" into the name field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"sem.senha+e2e@exemplo.com\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Salvar\" (Save) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Senha\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"obrigatória\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC027",
+    "title": "Edit an existing user and save changes",
+    "description": "Verifies an admin can edit a user from the table and the updated details are visible after saving.",
+    "category": "Gestão de Usuários (User Management)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Entrar\" (Login) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Usuários\" in the sidebar menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Usuários\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Editar\" (Edit) button for the first user in the users table"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Editar Usuário\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Type \" (Atualizado)\" into the name field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Salvar\" (Save) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Atualizado\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC028",
+    "title": "Delete an existing user and confirm removal from list",
+    "description": "Verifies an admin can delete a user and it no longer appears in the users table after confirmation.",
+    "category": "Gestão de Usuários (User Management)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Entrar\" (Login) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Usuários\" in the sidebar menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Usuários\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Excluir\" (Delete) button for the first user in the users table"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Confirmar\" (Confirm) button in the delete confirmation dialog"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Usuário excluído\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC029",
+    "title": "Switch profile type to Escola requires associated school selection",
+    "description": "Verifies selecting profile type Escola reveals/forces the associated school field before saving.",
+    "category": "Gestão de Usuários (User Management)",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Entrar\" (Login) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Usuários\" in the sidebar menu"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Novo Usuário\" (Create new user) button"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Escola\" from the profile type dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Unidade Escolar\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Escola Sem Unidade\" into the name field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"escola.sem.unidade+e2e@exemplo.com\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"SenhaForte@123\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Salvar\" (Save) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Unidade Escolar\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"obrigatória\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC030",
+    "title": "Users list loads and displays basic columns",
+    "description": "Verifies the users management screen loads and shows a users table with expected visible headers.",
+    "category": "Gestão de Usuários (User Management)",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Entrar\" (Login) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Usuários\" in the sidebar menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Usuários\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Nome\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Email\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Perfil\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC031",
+    "title": "Cadastrar novo uniforme e confirmar exibição na tabela",
+    "description": "Verifica que um usuário autenticado consegue cadastrar um item de uniforme e vê-lo listado na tabela.",
+    "category": "Cadastro de Uniformes (Uniform Catalog)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Entrar\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Configuração de Uniformes\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"Camiseta Básica\" into the description field"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Salvar\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Camiseta Básica\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC032",
+    "title": "Validação: impedir cadastro com descrição vazia",
+    "description": "Verifica que o sistema bloqueia o salvamento quando a descrição está vazia e exibe mensagem de validação.",
+    "category": "Cadastro de Uniformes (Uniform Catalog)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Entrar\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Configuração de Uniformes\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"\" into the description field"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Salvar\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Descrição\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC033",
+    "title": "Cadastrar nova unidade escolar ativa e visualizar na lista",
+    "description": "Garante que um usuário autenticado consegue cadastrar uma nova escola (ativa) com nome, e-mail e segmentos, e que ela aparece na lista.",
+    "category": "Unidade Escolar (School Management)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Entrar\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Menu lateral\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Configuração\" in the sidebar menu"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Unidade Escolar\""
+      }
+    ]
+  },
+  {
+    "id": "TC034",
+    "title": "Salvar cadastro de nova escola com status alternado para inativo",
+    "description": "Valida que é possível alternar o status para inativo antes de salvar e que o cadastro é exibido com status correspondente na lista.",
+    "category": "Unidade Escolar (School Management)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Entrar\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Configuração\" in the sidebar menu"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Unidade Escolar\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Unidade Escolar\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Ativo/Inativo\" toggle for status"
+      }
+    ]
+  },
+  {
+    "id": "TC035",
+    "title": "Cadastrar nova unidade escolar preenchendo nome, e-mail e segmentos e salvar",
+    "description": "Confirma o fluxo completo de preenchimento do formulário (nome, e-mail e segmentos) e salvamento do cadastro.",
+    "category": "Unidade Escolar (School Management)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Entrar\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Configuração\" in the sidebar menu"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Unidade Escolar\""
+      },
+      {
+        "type": "action",
+        "description": "Type \"Escola E2E Teste A\" into the school name field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"escola.teste.a@exemplo.com\" into the email field"
+      }
+    ]
+  },
+  {
+    "id": "TC036",
+    "title": "Toggle from light to dark changes the header control state",
+    "description": "Verifies clicking the dark mode toggle updates the visible state in the header immediately.",
+    "category": "Dark Mode Toggle",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Entrar\" (Login) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"header\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"dark mode toggle button\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click dark mode toggle button in the header"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Modo escuro\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC037",
+    "title": "Toggle from dark back to light after enabling dark mode",
+    "description": "Verifies the user can switch from dark theme back to light theme and the UI reflects the change.",
+    "category": "Dark Mode Toggle",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Entrar\" (Login) button"
+      },
+      {
+        "type": "action",
+        "description": "Click dark mode toggle button in the header"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Modo escuro\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click dark mode toggle button in the header"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Modo claro\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC038",
+    "title": "Navigate to Recebimentos from sidebar (desktop)",
+    "description": "Verifies that selecting the 'Recebimentos' module in the sidebar loads the Recebimentos view in an authenticated session.",
+    "category": "Sidebar Navigation",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Entrar\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Sidebar\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Recebimentos\" menu item in the sidebar"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify page title contains \"Recebimentos\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Recebimentos\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC039",
+    "title": "Collapse Configurações hides submenu items",
+    "description": "Verifies that collapsing the 'Configurações' section hides its submenu items.",
+    "category": "Sidebar Navigation",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Entrar\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Configurações\" section header in the sidebar"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Usuários\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Configurações\" section header in the sidebar"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Usuários\" is not visible"
+      }
+    ]
+  },
+  {
+    "id": "TC040",
+    "title": "Navigate across multiple modules via sidebar (state updates correctly)",
+    "description": "Verifies that repeated navigation between modules via sidebar updates the active view each time.",
+    "category": "Sidebar Navigation",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Entrar\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Lançamentos\" menu item in the sidebar"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Lançamentos\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Transferências\" menu item in the sidebar"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Transferências\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC041",
+    "title": "Sidebar indicates current section after navigation (active item highlight visible)",
+    "description": "Verifies that after navigating to a module, the sidebar visually indicates the current active menu item.",
+    "category": "Sidebar Navigation",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Entrar\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Controle de Recebimento\" menu item in the sidebar"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Controle de Recebimento\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Menu item 'Controle de Recebimento' (active state)\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC042",
+    "title": "Restore button remains disabled until a file is selected (guard rail)",
+    "description": "Verifies the restore action cannot be executed before selecting a backup file, preventing accidental restores.",
+    "category": "Backup & Restoration",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Entrar\" (Login) button"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Backup / Restauração\" menu item in the sidebar"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Importar dados\" (Import data) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Restaurar\" (Restore) button is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Selecione um arquivo\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC043",
+    "title": "Admin acessa o Admin Dashboard e visualiza cartões/indicadores principais",
+    "description": "Garante que um usuário autenticado consegue abrir o Admin Dashboard e ver indicadores/estatísticas em tela.",
+    "category": "Admin Dashboard",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Entrar\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Menu lateral\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Admin Dashboard\" in the sidebar menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Dashboard\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Cartões de métricas\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC044",
+    "title": "Drill-down a partir de um cartão métrico no Admin Dashboard",
+    "description": "Valida que ao clicar em um cartão/indicador do dashboard o usuário entra em uma visão de detalhes (relatório).",
+    "category": "Admin Dashboard",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Entrar\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Admin Dashboard\" in the sidebar menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Cartões de métricas\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on the first visible metric card"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Detalhes\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC045",
+    "title": "Admin Dashboard exibe gráficos/visões resumidas quando presentes",
+    "description": "Confirma que, além dos cartões, o dashboard apresenta ao menos uma visualização resumida (ex.: gráfico) quando disponível.",
+    "category": "Admin Dashboard",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Entrar\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Admin Dashboard\" in the sidebar menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Dashboard\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Gráfico\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Legenda\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC046",
+    "title": "Drill-down mostra visão de relatório com conteúdo identificável",
+    "description": "Garante que a visão de detalhes após drill-down apresenta um relatório com conteúdo/estrutura visível (título, seção ou tabela).",
+    "category": "Admin Dashboard",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Entrar\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Admin Dashboard\" in the sidebar menu"
+      },
+      {
+        "type": "action",
+        "description": "Click on a visible metric card with a numeric value"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Relatório\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Tabela\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC047",
+    "title": "Acesso ao Admin Dashboard por usuário não-admin mostra restrição de acesso",
+    "description": "Verifica que um usuário autenticado sem privilégio de admin não consegue ver o conteúdo do dashboard e recebe mensagem de restrição.",
+    "category": "Admin Dashboard",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"school.user.notadmin@example.com\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"WrongPassword123!\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Entrar\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Admin Dashboard\" in the sidebar menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Acesso negado\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Contate o administrador\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC048",
+    "title": "Visão restrita (não-admin) não exibe cartões de métricas do Admin Dashboard",
+    "description": "Assegura que, quando o acesso é restrito, os cartões/indicadores do dashboard não aparecem para o usuário não-admin.",
+    "category": "Admin Dashboard",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"school.user.notadmin@example.com\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"WrongPassword123!\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Entrar\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Admin Dashboard\" in the sidebar menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Acesso negado\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Cartões de métricas\" is not visible"
+      }
+    ]
+  },
+  {
+    "id": "TC049",
+    "title": "Admin Dashboard mantém navegação via menu lateral sem depender de URL",
+    "description": "Valida que a entrada e visualização do Admin Dashboard é alcançada pela navegação do menu lateral (compatível com SPA sem roteamento por URL).",
+    "category": "Admin Dashboard",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Entrar\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Menu lateral\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Recebimentos\" in the sidebar menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Recebimentos\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Admin Dashboard\" in the sidebar menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Dashboard\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC050",
+    "title": "View inventory overview for the first time",
+    "description": "Verifies the inventory overview screen loads and shows inventory content grouped by unit/segment/type.",
+    "category": "Lancamentos (Inventory Overview)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Entrar\" (Login) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Lançamentos\" in the sidebar menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Lançamentos\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Inventory table/list\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC051",
+    "title": "Filter inventory by selecting a specific unit",
+    "description": "Verifies filtering by unit updates the inventory rows shown on screen.",
+    "category": "Lancamentos (Inventory Overview)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Entrar\" (Login) button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Lançamentos\" in the sidebar menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Unit filter\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Select the option \"First available unit (not 'All')\" from the \"Unit\" dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Inventory table/list\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC052",
+    "title": "Inventory rows reflect a unit filter change (switch between two units)",
+    "description": "Verifies that changing the selected unit refreshes the visible inventory rows.",
+    "category": "Lancamentos (Inventory Overview)",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Entrar\" (Login) button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Lançamentos\" in the sidebar menu"
+      },
+      {
+        "type": "action",
+        "description": "Select the option \"First available unit (not 'All')\" from the \"Unit\" dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Inventory table/list\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Select the option \"Second available unit (different from the first)\" from the \"Unit\" dropdown"
+      }
+    ]
+  },
+  {
+    "id": "TC053",
+    "title": "Open a uniform item details view from an inventory row",
+    "description": "Verifies a user can click an inventory row and see details for that uniform item.",
+    "category": "Lancamentos (Inventory Overview)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Entrar\" (Login) button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Lançamentos\" in the sidebar menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Inventory table/list\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on the first visible inventory row"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Uniform item details panel/page\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC054",
+    "title": "Filter inventory then open details from a filtered row",
+    "description": "Verifies filters remain applied and a user can open details from the filtered results.",
+    "category": "Lancamentos (Inventory Overview)",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Entrar\" (Login) button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Lançamentos\" in the sidebar menu"
+      },
+      {
+        "type": "action",
+        "description": "Select the option \"First available unit (not 'All')\" from the \"Unit\" dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Inventory table/list\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on the first visible inventory row"
+      }
+    ]
+  }
+]

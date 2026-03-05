@@ -1,7 +1,20 @@
 {
-  "status": "init",
-  "scope": "codebase",
+  "status": "commited",
   "type": "frontend",
-  "localEndpoint": "http://localhost:5173/",
-  "serverPort": 62430
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:4173",
+  "loginUser": "cpdinfra@edu.itaguai.rj.gov.br",
+  "loginPassword": "T3c4n3x0",
+  "executionArgs": {
+    "projectName": "sistema_de_controle_de_uniformes_escolares_9d3a4t_dualiteproject",
+    "projectPath": "h:\\2026 SISTEMAS\\2026 Uniforme\\04 março\\sistema_de_controle_de_uniformes_escolares_9d3a4t_dualiteproject",
+    "testIds": [],
+    "additionalInstruction": "The app is a SPA running in PRODUCTION mode on port 4173. Login credentials: email=cpdinfra@edu.itaguai.rj.gov.br password=T3c4n3x0. IMPORTANT: Use stable CSS selectors for login: Email field is '#email', Password field is '#password', and Submit button is '#login-button'. Do not use brittle XPaths. Wait for these selectors to be visible. After login, navigation is via the sidebar/hamburger menu. All views are switched via state, not URL paths. Verify that the user successfully reaches the dashboard after login by checking for the 'Recebimentos' text.",
+    "serverMode": "production",
+    "envs": {
+      "API_KEY": "sk-user--BEEkq22_e6j92znpoSkLOHTibnimCvXhlD01rYSPtk3Jqx1SzksX7s8mmEqh3x_O4D3xJXvuOcEHey4zVwQ7Od3wYZLGEua9sMMPe9DWm9dJwMIbwWyKa7jZpTP_ckz1pI"
+    }
+  },
+  "serverPort": 63863,
+  "proxy": "http://8ed7cf3a-f0fc-4201-9beb-60b245484c69:ZJU4uB1nlK2gScm20WTQXkCwt868ppYR@tun.testsprite.com:8080"
 }

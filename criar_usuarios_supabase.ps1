@@ -78,7 +78,7 @@ $users = @(
     @{ email = "cm.joaquiminoue@edu.itaguai.rj.gov.br";                               password = "smedunif" },
     @{ email = "cm.renatobarbosaladislau@edu.itaguai.rj.gov.br";                      password = "smedunif" },
     @{ email = "cm.elianelopesbarbosa@edu.itaguai.rj.gov.br";                         password = "smedunif" },
-    @{ email = "cm.mariacristinapadelacabraldasilva@edu.itaguai.rj.gov.br";            password = "smedunif" },
+    @{ email = "cm.mariacristinapadelacabraldasilva@edu.itaguai.rj.gov.br";           password = "smedunif" },
     @{ email = "cm.mariadelurdessgarcia@edu.itaguai.rj.gov.br";                       password = "smedunif" },
     @{ email = "cm.taniamaramottademenezes@edu.itaguai.rj.gov.br";                    password = "smedunif" },
     @{ email = "cm.ritaferreirafeijo@edu.itaguai.rj.gov.br";                          password = "smedunif" },

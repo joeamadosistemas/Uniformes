@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { School, CheckCircle2, Clock, Search, Filter, BarChart3, ArrowUpRight, AlertCircle, Loader2, FileText, RefreshCw, X, Layers } from 'lucide-react';
-import { supabase, supabaseAdmin } from '../lib/supabaseClient';
+import { supabase } from '../lib/supabaseClient';
 import { useT } from '../lib/LanguageContext';
 import { EscolaCadastro } from '../types';
 import { SEGMENTOS_ENSINO } from '../constants';
@@ -43,12 +43,10 @@ export const ControleRecebimento: React.FC = () => {
 
             if (errorEscolas) throw errorEscolas;
 
-            // 2. Buscar e-mails únicos de escolas que já lançaram recebimentos no ano selecionado
-            const client = supabaseAdmin || supabase;
             const startDate = `${selectedYear}-01-01T00:00:00Z`;
             const endDate = `${selectedYear}-12-31T23:59:59Z`;
 
-            const { data: lancamentos, error: errorLancamentos } = await client
+            const { data: lancamentos, error: errorLancamentos } = await supabase
                 .from('recebimentos')
                 .select('escola, data_recebimento')
                 .gte('data_recebimento', startDate)
@@ -97,8 +95,7 @@ export const ControleRecebimento: React.FC = () => {
             setSelectedEscola(escola);
             setShowModal(true);
 
-            const client = supabaseAdmin || supabase;
-            const { data, error } = await client
+            const { data, error } = await supabase
                 .from('recebimentos')
                 .select('*')
                 .eq('escola', escola.email)

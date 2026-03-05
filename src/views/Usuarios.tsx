@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { UsuarioCadastro, EscolaCadastro } from '../types';
 import { Loader2, Search, Edit2, UserX, Key, Check, X, Shield, User, Mail, Eye, EyeOff, Building2, ChevronDown } from 'lucide-react';
-import { supabase, supabaseAdmin } from '../lib/supabaseClient';
+import { supabase } from '../lib/supabaseClient';
 import { useT } from '../lib/LanguageContext';
 
 export const Usuarios: React.FC = () => {
@@ -71,26 +71,20 @@ export const Usuarios: React.FC = () => {
 
         if (error) throw error;
 
-        // Se houver nova senha, atualizar no Auth via Service Role (Admin)
-        if (formData.senha && supabaseAdmin) {
-          const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(
-            editingId,
-            { password: formData.senha }
-          );
-          if (authError) throw authError;
+        // Se houver nova senha, atualizar no Auth via Edge Function
+        if (formData.senha) {
+          const { error: authError } = await supabase.functions.invoke('admin-users', {
+            body: { action: 'update_password', userId: editingId, password: formData.senha }
+          });
+          if (authError) throw new Error('Erro ao atualizar senha via servidor. Verifique se você tem permissão Administrador.');
         }
       } else {
-        if (!supabaseAdmin) throw new Error('Serviço administrativo não configurado.');
-
-        // Criar novo usuário (Auth + Profile)
-        const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-          email: formData.email,
-          password: formData.senha,
-          email_confirm: true,
-          user_metadata: { nome: formData.nome }
+        // Criar novo usuário via Edge Function (Auth)
+        const { data: authData, error: authError } = await supabase.functions.invoke('admin-users', {
+          body: { action: 'create_user', email: formData.email, password: formData.senha, nome: formData.nome }
         });
 
-        if (authError) throw authError;
+        if (authError || !authData?.user?.id) throw new Error('Erro ao criar usuário Auth via servidor: ' + (authError?.message || 'Erro desconhecido.'));
 
         const { error: profileError } = await supabase
           .from('profiles')
@@ -138,12 +132,11 @@ export const Usuarios: React.FC = () => {
     if (!confirm(t.usuarios.confirmarExclusao)) return;
 
     try {
-      if (!supabaseAdmin) throw new Error('Serviço administrativo não configurado.');
-
-      // Deletar da Auth (via Service Role) e o Profile será deletado via Trigger/Cascade se houver, 
-      // ou deletamos manualmente.
-      const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(id);
-      if (authError) throw authError;
+      // Deletar da Auth via Edge Function
+      const { error: authError } = await supabase.functions.invoke('admin-users', {
+        body: { action: 'delete_user', userId: id }
+      });
+      if (authError) throw new Error('Erro ao deletar usuário no servidor. AuthAdmin requerido.');
 
       const { error: profileError } = await supabase.from('profiles').delete().eq('id', id);
       if (profileError) throw profileError;

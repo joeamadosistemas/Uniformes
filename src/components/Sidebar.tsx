@@ -25,16 +25,18 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, isAdmin = false, onClose }) => {
-  const [isConfigOpen, setIsConfigOpen] = useState(true);
+  const [isConfigOpen, setIsConfigOpen] = useState(false);
   const { t } = useT();
 
   const menuItems = [
     { id: 'recebimentos', label: t.sidebar.recebimentos, icon: ClipboardList },
+    ...(isAdmin ? [
+      { id: 'controle-recebimento', label: t.sidebar.controleRecebimento, icon: ClipboardList }
+    ] : []),
     { id: 'lancamentos', label: t.sidebar.lancamentos, icon: LayoutDashboard },
     { id: 'transferencias', label: t.sidebar.transferencias, icon: ArrowLeftRight },
     ...(isAdmin ? [
       { id: 'admin-dashboard', label: t.sidebar.administrador, icon: FileText },
-      { id: 'controle-recebimento', label: t.sidebar.controleRecebimento, icon: ClipboardList }
     ] : []),
   ];
 
