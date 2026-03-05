@@ -76,7 +76,12 @@ Regras estritas:
 
             if (error) {
                 console.error('Edge function falhou:', error);
-                throw new Error(`Falha na IA Logística: ${error.message || 'Erro desconhecido ao chamar Edge Function'}`);
+                throw new Error(`Falha na IA Logística (Rede): ${error.message || 'Erro desconhecido ao chamar Edge Function'}`);
+            }
+
+            if (data?.error) {
+                console.error('Edge Function retornou erro interno:', data.error);
+                throw new Error(`Falha na IA Logística: ${data.error}`);
             }
 
             if (!data || !data.insights || data.insights.length === 0) {

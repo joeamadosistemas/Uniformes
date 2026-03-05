@@ -48,7 +48,7 @@ serve(async (req) => {
     if (!response.ok) {
       const errorText = await response.text()
       console.error('Gemini error:', errorText)
-      throw new Error(`Google API respondido com status ${response.status}`)
+      throw new Error(`Google API falhou (${response.status}): ${errorText}`)
     }
 
     const data = await response.json()
@@ -77,10 +77,12 @@ serve(async (req) => {
     })
 
   } catch (error) {
-    console.error('Edge function erro:', error)
-    return new Response(JSON.stringify({ error: error.message }), {
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    console.error('Edge function erro:', errorMessage)
+    // Retornamos 200 com { error: ... } para que o frontend do Supabase possa ler o JSON sem explodir um erro opaco 400
+    return new Response(JSON.stringify({ error: errorMessage }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 400,
+      status: 200,
     })
   }
 })
