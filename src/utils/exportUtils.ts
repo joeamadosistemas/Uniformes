@@ -408,7 +408,7 @@ export const exportarRecebimentosExcel = (
 
   let currentRow = 0;
 
-  Array.from(porModelo.entries()).forEach(([modeloId, itens], modIdx) => {
+  Array.from(porModelo.entries()).forEach(([modeloId, itens]) => {
     const modelo = modelosInfo.find(m => m.id === modeloId);
     if (!modelo) return;
 
@@ -652,4 +652,119 @@ export const exportarModelosPDF = (
   });
 
   doc.save(`gestao_modelos_${format(new Date(), 'yyyyMMdd')}.pdf`);
+};
+
+export const exportarDashboardPDF = (
+  recebimentos: Recebimento[],
+  escolasInfo: { nome: string; email?: string }[],
+  modelosInfo: { id: string, nome: string, descricao: string, tamanhos: string[] }[],
+  tituloFiltro: string
+) => {
+  const doc = new jsPDF('landscape');
+  let currentY = drawGovHeader(doc, 'Relatório Analítico de Solicitações', [tituloFiltro]);
+
+  const porModelo = new Map<string, Recebimento[]>();
+  recebimentos.forEach(r => {
+    if (!porModelo.has(r.modelo_id)) porModelo.set(r.modelo_id, []);
+    porModelo.get(r.modelo_id)!.push(r);
+  });
+
+  // Função auxiliar para abreviar os nomes das escolas se forem muito grandes
+  const formatarNomeEscola = (nome: string) => {
+    return nome.replace('ESCOLA MUNICIPAL', 'E.M.')
+      .replace('CENTRO DE EDUCAÇÃO INFANTIL', 'C.E.I.')
+      .replace('CIEP', 'CIEP')
+      .toUpperCase();
+  };
+
+  Array.from(porModelo.entries()).forEach(([modeloId, itens], modIdx) => {
+    const modelo = modelosInfo.find(m => m.id === modeloId);
+    if (!modelo) return;
+
+    if (modIdx > 0 && currentY > doc.internal.pageSize.getHeight() - 60) {
+      doc.addPage();
+      currentY = 20;
+    }
+
+    // Título do Modelo
+    doc.setFontSize(10);
+    doc.setTextColor(0, 51, 102);
+    doc.setFont("helvetica", "bold");
+    const modeloTitle = `${modelo.nome.toUpperCase()} - ${modelo.descricao}`;
+    doc.text(modeloTitle, doc.internal.pageSize.getWidth() / 2, currentY, { align: 'center' });
+    currentY += 4;
+
+    // Obter todas as escolas que têm registros para ESTE modelo especificamente?
+    // Ou listar todas as escolas filtradas? A imagem mostra escolas listadas e aquelas sem pedido com '0'.
+    // Vamos listar apenas as escolas que têm pelo menos um registro neste relatório para otimizar, 
+    // ou se 'escolasInfo' foi passado, listamos todas as do 'escolasInfo'.
+    const escolasDoFiltro = [...escolasInfo].sort((a, b) => a.nome.localeCompare(b.nome));
+
+    const tableColumn = ["UNIDADE ESCOLAR", ...modelo.tamanhos.map(t => isNaN(Number(t)) ? t : `N.º ${t}`), "TOTAL", "VISTO"];
+
+    // Matriz de dados
+    const tableRows: string[][] = [];
+    const totaisColuna = new Array(modelo.tamanhos.length).fill(0);
+    let totalGeralModelo = 0;
+
+    escolasDoFiltro.forEach((escola, idx) => {
+      const row: string[] = [`${String(idx + 1).padStart(2, '0')} - ${formatarNomeEscola(escola.nome)}`];
+      let totalEscola = 0;
+
+      modelo.tamanhos.forEach((tamanho, tIdx) => {
+        const item = itens.find(i =>
+          (i.escola?.toLowerCase().trim() === escola.nome?.toLowerCase().trim() ||
+            (escola.email && i.escola?.toLowerCase().trim() === escola.email?.toLowerCase().trim()))
+          && i.tamanho === tamanho
+        );
+        const qtd = item ? item.quantidade : 0;
+        row.push(qtd.toString());
+        totalEscola += qtd;
+        totaisColuna[tIdx] += qtd;
+      });
+
+      row.push(totalEscola.toString());
+      row.push(""); // Espaço em branco para "Visto"
+
+      // Só adiciona a linha se a escola pediu algo desse modelo (Ou podemos adicionar todas com '0')
+      // Na imagem todas as escolas aparecem, mesmo com 0. Vamos adicionar todas.
+      tableRows.push(row);
+      totalGeralModelo += totalEscola;
+    });
+
+    // Linha de Totais
+    const rowTotais = ["TOTAL GERAL"];
+    totaisColuna.forEach(t => rowTotais.push(t.toString()));
+    rowTotais.push(totalGeralModelo.toString());
+    rowTotais.push("");
+    tableRows.push(rowTotais);
+
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: currentY,
+      styles: { fontSize: 7, cellPadding: 1, lineColor: [200, 200, 200], lineWidth: 0.1 },
+      headStyles: { fillColor: [0, 90, 156], textColor: [255, 255, 255], halign: 'center', valign: 'middle' },
+      columnStyles: {
+        0: { halign: 'left', cellWidth: 70 }, // Coluna da Escola mais larga
+        [tableColumn.length - 2]: { halign: 'center', fontStyle: 'bold', textColor: [0, 51, 102] }, // TOTAL
+        [tableColumn.length - 1]: { halign: 'center', cellWidth: 20 } // VISTO
+      },
+      didParseCell: (hookData) => {
+        // Centraliza as colunas de tamanhos
+        if (hookData.column.index > 0 && hookData.column.index < tableColumn.length - 1) {
+          hookData.cell.styles.halign = 'center';
+        }
+        // Destaca a última linha (TOTAL GERAL)
+        if (hookData.section === 'body' && hookData.row.index === tableRows.length - 1) {
+          hookData.cell.styles.fillColor = [220, 220, 220];
+          hookData.cell.styles.fontStyle = 'bold';
+        }
+      }
+    });
+
+    currentY = (doc as any).lastAutoTable.finalY + 10;
+  });
+
+  doc.save(`relatorio_solicitacoes_${format(new Date(), 'yyyyMMdd_HHmm')}.pdf`);
 };

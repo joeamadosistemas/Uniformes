@@ -9,10 +9,15 @@ import {
     BarChart3,
     Activity,
     PieChart as PieChartIcon,
-    LineChart as LineChartIcon
+    LineChart as LineChartIcon,
+    Filter,
+    RefreshCw,
+    FileText
 } from 'lucide-react';
 import { useT } from '../lib/LanguageContext';
 import { supabase } from '../lib/supabaseClient';
+import { exportarDashboardPDF } from '../utils/exportUtils';
+import { RECEBIMENTOS_MODELOS } from '../constants/recebimentosConstants';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
     PieChart, Pie, Cell, LabelList, AreaChart, Area
@@ -61,8 +66,18 @@ export const DashboardAdmin: React.FC = () => {
     const { t } = useT();
     const [stats, setStats] = useState<DashboardStats | null>(null);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<'informaram' | 'faltam'>('informaram');
+    const [activeTab, setActiveTab] = useState<'todos' | 'informaram' | 'faltam'>('todos');
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedYear, setSelectedYear] = useState<number>(2026);
+    const [selectedSegmento, setSelectedSegmento] = useState<string>('todos');
+
+    // Modal de Exportação
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+    const [exportFiltro, setExportFiltro] = useState<'todas' | 'unidade' | 'etapa'>('todas');
+    const [exportEscolaSelecionada, setExportEscolaSelecionada] = useState('');
+    const [exportEtapaSelecionada, setExportEtapaSelecionada] = useState('');
+    const [exportando, setExportando] = useState(false);
+    const [todasEscolasExport, setTodasEscolasExport] = useState<any[]>([]);
 
     useEffect(() => {
         fetchDashboardData();
@@ -77,12 +92,13 @@ export const DashboardAdmin: React.FC = () => {
                 { data: recebimentosData },
                 { data: estoqueData }
             ] = await Promise.all([
-                supabase.from('escolas').select('*').eq('ativo', true),
+                supabase.from('escolas').select('*').eq('ativo', true).order('nome'),
                 supabase.from('recebimentos').select('*'),
                 supabase.from('uniformes_catalogo').select('quantidade')
             ]);
 
             const escolas = escolasData || [];
+            setTodasEscolasExport(escolas);
             const recebimentos = recebimentosData || [];
 
             // 1. Basic KPIs
@@ -91,19 +107,27 @@ export const DashboardAdmin: React.FC = () => {
             const totalModelos = (estoqueData || []).length;
 
             // Escolas informaram
-            const escolasInformaramNomes = new Set(recebimentos.map(r => r.escola));
-            const informaram = escolasInformaramNomes.size;
+            const escolasInformaramValores = new Set(recebimentos.map(r => r.escola?.toLowerCase().trim()));
+
+            const escolasInformaramList = escolas.filter(e =>
+                escolasInformaramValores.has(e.nome?.toLowerCase().trim()) ||
+                (e.email && escolasInformaramValores.has(e.email?.toLowerCase().trim()))
+            );
+
+            const informaram = escolasInformaramList.length;
             const pendentes = totalEscolas - informaram;
             const taxaAdesao = totalEscolas > 0 ? (informaram / totalEscolas) * 100 : 0;
 
-            const escolasInformaramList = escolas.filter(e => escolasInformaramNomes.has(e.nome));
-            const escolasPendentesList = escolas.filter(e => !escolasInformaramNomes.has(e.nome));
+            const escolasPendentesList = escolas.filter(e => !escolasInformaramList.some(inf => inf.id === e.id));
 
             // 2. Charts Data Processing
             // A) Segment Distribution
             const distSegmentoMap: Record<string, number> = {};
             recebimentos.forEach(r => {
-                const escola = escolas.find(e => e.nome === r.escola);
+                const escola = escolas.find(e =>
+                    e.nome?.toLowerCase().trim() === r.escola?.toLowerCase().trim() ||
+                    (e.email && e.email?.toLowerCase().trim() === r.escola?.toLowerCase().trim())
+                );
                 let seg = 'Outros';
                 if (escola && escola.segmentos && escola.segmentos.length > 0) {
                     seg = escola.segmentos[0].replace('CONJUNTO UNIFORMA ESCOLAR ', '').replace('CONJUNTO UNIFORME ESCOLAR ', '');
@@ -128,7 +152,12 @@ export const DashboardAdmin: React.FC = () => {
             // C) By School (Top 10)
             const distEscolaMap: Record<string, number> = {};
             recebimentos.forEach(r => {
-                distEscolaMap[r.escola] = (distEscolaMap[r.escola] || 0) + (r.quantidade || 0);
+                const escola = escolas.find(e =>
+                    e.nome?.toLowerCase().trim() === r.escola?.toLowerCase().trim() ||
+                    (e.email && e.email?.toLowerCase().trim() === r.escola?.toLowerCase().trim())
+                );
+                const nomeDisplay = escola ? escola.nome : r.escola;
+                distEscolaMap[nomeDisplay] = (distEscolaMap[nomeDisplay] || 0) + (r.quantidade || 0);
             });
             const dataEscola = Object.entries(distEscolaMap)
                 .map(([name, value]) => ({ name: name.substring(0, 15) + '...', fullName: name, value }))
@@ -175,15 +204,85 @@ export const DashboardAdmin: React.FC = () => {
         );
     }
 
+    const handleExportPDF = async () => {
+        setExportando(true);
+        try {
+            const { data: recebimentosData } = await supabase.from('recebimentos').select('*');
+            const recebimentos = recebimentosData || [];
+
+            const escolas = todasEscolasExport;
+
+            const { data: modelosData } = await supabase.from('modelos_recebimento').select('*');
+            const customModelos = modelosData || [];
+
+            const mappedModelos = customModelos.map((m: any) => ({
+                id: m.id,
+                nome: m.nome,
+                descricao: m.descricao,
+                tamanhos: Array.isArray(m.tamanhos) ? m.tamanhos : m.tamanhos.split(',').map((t: string) => t.trim()),
+                segmentos: Array.isArray(m.segmentos) ? m.segmentos : m.segmentos.split(',').map((s: string) => s.trim())
+            }));
+
+            const todosModelos = [...mappedModelos];
+            RECEBIMENTOS_MODELOS.forEach(rm => {
+                if (!mappedModelos.some(m => m.id === rm.id)) {
+                    todosModelos.push(rm);
+                }
+            });
+
+            let escolasFiltradas = escolas;
+            let tituloPDF = 'Todas as Unidades Escolares';
+
+            if (exportFiltro === 'unidade' && exportEscolaSelecionada) {
+                escolasFiltradas = escolas.filter(e => e.nome === exportEscolaSelecionada);
+                tituloPDF = `Unidade: ${exportEscolaSelecionada}`;
+            } else if (exportFiltro === 'etapa' && exportEtapaSelecionada) {
+                // Filtramos se a etapa estritamente estiver nos segmentos dessa escola
+                escolasFiltradas = escolas.filter(e => e.segmentos && e.segmentos.includes(exportEtapaSelecionada));
+                const eName = exportEtapaSelecionada.replace('CONJUNTO UNIFORMA ESCOLAR ', '').replace('CONJUNTO UNIFORME ESCOLAR ', '');
+                tituloPDF = `Etapa Atendida: ${eName}`;
+            }
+
+            const escolasTarget = escolasFiltradas.map(e => ({ nome: e.nome, email: e.email }));
+            const recTarget = recebimentos.filter(r => escolasFiltradas.some(e =>
+                e.nome?.toLowerCase().trim() === r.escola?.toLowerCase().trim() ||
+                (e.email && e.email?.toLowerCase().trim() === r.escola?.toLowerCase().trim())
+            ));
+
+            exportarDashboardPDF(recTarget, escolasTarget, todosModelos, tituloPDF);
+            setIsExportModalOpen(false);
+        } catch (error) {
+            console.error('Erro ao gerar PDF:', error);
+            alert('Falha ao gerar o PDF. Verifique a conexão com o banco de dados.');
+        } finally {
+            setExportando(false);
+        }
+    };
+
+    // Segmentos únicos para o select de opções
+    const todosOsSegmentos = Array.from(new Set(todasEscolasExport.flatMap(e => e.segmentos || []))).filter(Boolean);
+
     return (
         <div className="space-y-8 pb-20 animate-in fade-in duration-500">
             {/* Header */}
-            <div>
-                <h2 className="text-2xl font-black text-[#005A9C] dark:text-[#66b3ff] flex items-center gap-2">
-                    <BarChart3 size={28} />
-                    Painel Logístico Avançado
-                </h2>
-                <p className="text-sm text-gray-500 font-medium">{t.dashboard.subtitulo}</p>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 className="text-2xl font-black text-[#005A9C] dark:text-[#66b3ff] flex items-center gap-2">
+                        <BarChart3 size={28} />
+                        Painel Logístico Avançado
+                    </h2>
+                    <p className="text-sm text-gray-500 font-medium">{t.dashboard.subtitulo}</p>
+                </div>
+
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => setIsExportModalOpen(true)}
+                        className="flex items-center gap-2 px-6 py-2.5 bg-[#DC2626] hover:bg-[#B91C1C] text-white rounded-xl shadow-[0_4px_14px_0_rgba(220,38,38,0.39)] transition-all font-black uppercase tracking-widest text-xs active:scale-95"
+                    >
+                        <FileText size={18} />
+                        Gerar PDF
+                    </button>
+                </div>
             </div>
 
             {/* KPI Cards */}
@@ -397,85 +496,240 @@ export const DashboardAdmin: React.FC = () => {
                 </div>
             </div>
 
-            {/* School Detailing Table */}
-            <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-sm overflow-hidden mt-8">
-                <div className="border-b border-gray-50 dark:border-zinc-800 px-6 md:px-8 py-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex space-x-2">
+            {/* Toolbar Central - Novo Design */}
+            <div className="flex flex-col items-center justify-center mb-10 mt-12">
+
+                {/* Linha 1: Filtro de Segmentos */}
+                <div className="flex items-center gap-2 mb-4">
+                    <Filter className="text-gray-400 w-4 h-4" />
+                    <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Filtrar</span>
+                    <select
+                        value={selectedSegmento}
+                        onChange={(e) => setSelectedSegmento(e.target.value)}
+                        className="bg-gray-50 dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 rounded-xl px-4 py-2 text-xs font-black text-gray-700 dark:text-zinc-300 uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-[#005A9C] transition-all cursor-pointer"
+                    >
+                        <option value="todos">Segmentos: Todos</option>
+                        {todosOsSegmentos.map((s, idx) => {
+                            const label = (s as string).replace('CONJUNTO UNIFORMA ESCOLAR ', '').replace('CONJUNTO UNIFORME ESCOLAR ', '');
+                            return <option key={idx} value={s as string}>{label}</option>;
+                        })}
+                    </select>
+                </div>
+
+                {/* Linha 2: Ano, Busca, Tabs */}
+                <div className="flex flex-wrap items-center justify-center gap-4">
+
+                    {/* Ano */}
+                    <div className="flex items-center gap-2 bg-gray-50 dark:bg-zinc-800 rounded-[24px] px-6 py-3 border border-gray-100 dark:border-zinc-700 shadow-sm">
+                        <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Ano:</span>
+                        <select
+                            value={selectedYear}
+                            onChange={(e) => setSelectedYear(Number(e.target.value))}
+                            className="bg-transparent border-none p-0 text-sm font-black text-[#005A9C] dark:text-[#66b3ff] focus:ring-0 cursor-pointer outline-none"
+                        >
+                            <option value={2026}>2026</option>
+                            <option value={2025}>2025</option>
+                            <option value={2024}>2024</option>
+                        </select>
+                    </div>
+
+                    {/* Busca */}
+                    <div className="relative flex items-center bg-gray-50 dark:bg-zinc-800 rounded-[24px] px-4 py-3 border border-gray-100 dark:border-zinc-700 shadow-sm w-48 transition-all focus-within:w-64 focus-within:ring-2 focus-within:ring-[#005A9C]/50">
+                        <Search className="text-gray-400 mr-2" size={18} />
+                        <input
+                            type="text"
+                            placeholder="Buscar"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="bg-transparent border-none p-0 w-full text-sm text-gray-700 dark:text-zinc-300 placeholder-gray-400 outline-none"
+                        />
+                    </div>
+
+                    {/* Tabs Todo/Concluido/Pendente */}
+                    <div className="flex items-center bg-gray-50 dark:bg-zinc-800 rounded-[24px] p-1 border border-gray-100 dark:border-zinc-700 shadow-sm">
+                        <button
+                            onClick={() => setActiveTab('todos')}
+                            className={`px-6 py-2 rounded-[20px] text-xs font-black uppercase tracking-wider transition-all duration-300 ${activeTab === 'todos' ? 'bg-[#D97706] text-white shadow-md' : 'text-gray-400 hover:text-gray-600 dark:hover:text-zinc-300'}`}
+                        >
+                            Todos
+                        </button>
                         <button
                             onClick={() => setActiveTab('informaram')}
-                            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${activeTab === 'informaram' ? 'bg-blue-50 text-blue-600' : 'text-gray-500 hover:bg-gray-50'}`}
+                            className={`px-6 py-2 rounded-[20px] text-xs font-black uppercase tracking-wider transition-all duration-300 ${activeTab === 'informaram' ? 'bg-[#D97706] text-white shadow-md' : 'text-gray-400 hover:text-gray-600 dark:hover:text-zinc-300'}`}
                         >
-                            <CheckCircle2 size={16} />
-                            {t.dashboard.jaInformaram} ({stats.escolasInformaramList.length})
+                            Concluído
                         </button>
                         <button
                             onClick={() => setActiveTab('faltam')}
-                            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${activeTab === 'faltam' ? 'bg-red-50 text-red-600' : 'text-gray-500 hover:bg-gray-50'}`}
+                            className={`px-6 py-2 rounded-[20px] text-xs font-black uppercase tracking-wider transition-all duration-300 ${activeTab === 'faltam' ? 'bg-[#D97706] text-white shadow-md' : 'text-gray-400 hover:text-gray-600 dark:hover:text-zinc-300'}`}
                         >
-                            <AlertCircle size={16} />
-                            {t.dashboard.faltamInformar} ({stats.escolasPendentesList.length})
+                            Pendente
                         </button>
                     </div>
 
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                        <input
-                            type="text"
-                            placeholder={t.escolas.buscarEscola}
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10 pr-4 py-2 bg-gray-50 dark:bg-zinc-800 border-none rounded-xl text-sm focus:ring-2 focus:ring-[#005A9C] outline-none w-full md:w-64 transition-all"
-                        />
-                    </div>
                 </div>
 
+                {/* Linha 3: Refresh */}
+                <div className="flex items-center justify-center gap-3 mt-6">
+                    <button
+                        onClick={fetchDashboardData}
+                        className="p-3 bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700 border border-gray-100 dark:border-zinc-700 text-gray-600 rounded-2xl shadow-sm transition-all active:scale-95 flex items-center justify-center"
+                        title="Atualizar Dados"
+                    >
+                        <RefreshCw size={22} className={loading ? "animate-spin text-[#005A9C]" : ""} />
+                    </button>
+                </div>
+            </div>
+
+            {/* School Detailing Table */}
+            <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
                             <tr className="bg-gray-50/50 dark:bg-zinc-800/50">
                                 <th className="px-6 md:px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">{t.escolas.nomeEscola}</th>
-                                <th className="px-6 md:px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">{t.dashboard.contatoEmail}</th>
+                                <th className="px-6 md:px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Etapas Atendidas</th>
                                 <th className="px-6 md:px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">{t.common.status}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50 dark:divide-zinc-800 text-sm">
-                            {(activeTab === 'informaram' ? stats.escolasInformaramList : stats.escolasPendentesList)
+                            {(activeTab === 'todos' ? stats.escolasInformaramList.concat(stats.escolasPendentesList) : (activeTab === 'informaram' ? stats.escolasInformaramList : stats.escolasPendentesList))
                                 .filter(e => e.nome.toLowerCase().includes(searchTerm.toLowerCase()))
-                                .map(esc => (
-                                    <tr key={esc.id} className="hover:bg-gray-50/50 dark:hover:bg-zinc-800/50 transition-colors">
-                                        <td className="px-6 md:px-8 py-4">
-                                            <div className="flex items-center space-x-3">
-                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${activeTab === 'informaram' ? 'bg-blue-50 text-blue-600' : 'bg-red-50 text-red-600'}`}>
-                                                    <Building2 size={16} />
+                                .filter(e => selectedSegmento === 'todos' || (e.segmentos && e.segmentos.includes(selectedSegmento)))
+                                .sort((a, b) => a.nome.localeCompare(b.nome))
+                                .map(esc => {
+                                    const jaInformou = stats?.escolasInformaramList.some(i => i.id === esc.id);
+
+                                    return (
+                                        <tr key={esc.id} className="hover:bg-gray-50/50 dark:hover:bg-zinc-800/50 transition-colors">
+                                            <td className="px-6 md:px-8 py-4">
+                                                <div className="flex items-center space-x-3">
+                                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${jaInformou ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
+                                                        <Building2 size={16} />
+                                                    </div>
+                                                    <span className="font-bold text-gray-700 dark:text-zinc-300">{esc.nome}</span>
                                                 </div>
-                                                <span className="font-bold text-gray-700 dark:text-zinc-300">{esc.nome}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 md:px-8 py-4 text-gray-500 dark:text-zinc-400">{esc.email}</td>
-                                        <td className="px-6 md:px-8 py-4 text-right">
-                                            {activeTab === 'informaram' ? (
-                                                <span className="px-3 py-1 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 text-[10px] font-black rounded-lg uppercase tracking-wider">
-                                                    Recebido
-                                                </span>
-                                            ) : (
-                                                <span className="px-3 py-1 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 text-[10px] font-black rounded-lg uppercase tracking-wider">
-                                                    Pendente
-                                                </span>
-                                            )}
+                                            </td>
+                                            <td className="px-6 md:px-8 py-4 text-xs font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-wider">
+                                                {esc.segmentos && esc.segmentos.length > 0 ? esc.segmentos.map((s: string) => s.replace('CONJUNTO UNIFORMA ESCOLAR ', '').replace('CONJUNTO UNIFORME ESCOLAR ', '')).join(', ') : '-'}
+                                            </td>
+                                            <td className="px-6 md:px-8 py-4 text-right">
+                                                {jaInformou ? (
+                                                    <span className="px-3 py-1 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-black rounded-lg uppercase tracking-wider border border-emerald-100/50">
+                                                        Concluído
+                                                    </span>
+                                                ) : (
+                                                    <span className="px-3 py-1 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 text-[10px] font-black rounded-lg uppercase tracking-wider border border-amber-100/50">
+                                                        Pendente
+                                                    </span>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            {((activeTab === 'todos' ? stats.escolasInformaramList.concat(stats.escolasPendentesList) : (activeTab === 'informaram' ? stats.escolasInformaramList : stats.escolasPendentesList))
+                                .filter(e => e.nome.toLowerCase().includes(searchTerm.toLowerCase()))
+                                .filter(e => selectedSegmento === 'todos' || (e.segmentos && e.segmentos.includes(selectedSegmento)))
+                                .length === 0) && (
+                                    <tr>
+                                        <td colSpan={3} className="px-8 py-16 text-center text-gray-400 font-medium tracking-wide">
+                                            Nenhuma escola encontrada para os filtros selecionados.
                                         </td>
                                     </tr>
-                                ))}
-                            {((activeTab === 'informaram' ? stats.escolasInformaramList : stats.escolasPendentesList).filter(e => e.nome.toLowerCase().includes(searchTerm.toLowerCase())).length === 0) && (
-                                <tr>
-                                    <td colSpan={3} className="px-8 py-16 text-center text-gray-400 font-medium">
-                                        Nenhuma escola encontrada para esta pesquisa.
-                                    </td>
-                                </tr>
-                            )}
+                                )}
                         </tbody>
                     </table>
                 </div>
             </div>
+
+            {/* Modal de Exportação */}
+            {isExportModalOpen && (
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-zinc-900 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden shadow-black/20 transform transition-all">
+                        <div className="p-6 border-b border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-800/50 flex justify-between items-center">
+                            <h3 className="text-lg font-bold text-[#005A9C] dark:text-[#66b3ff] flex items-center gap-2">
+                                <ClipboardList size={22} />
+                                Exportar Relatório de Solicitações
+                            </h3>
+                            <button
+                                onClick={() => setIsExportModalOpen(false)}
+                                className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                            >
+                                <AlertCircle size={20} className="rotate-45 relative right-[1px]" />
+                            </button>
+                        </div>
+
+                        <div className="p-6 space-y-6">
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-gray-700 dark:text-zinc-300">Tipo de Relatório</label>
+                                <select
+                                    value={exportFiltro}
+                                    onChange={(e) => setExportFiltro(e.target.value as any)}
+                                    className="w-full bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#005A9C] focus:border-transparent outline-none transition-all dark:text-white"
+                                >
+                                    <option value="todas">Todas as Unidades Escolares</option>
+                                    <option value="unidade">Por Unidade Escolar</option>
+                                    <option value="etapa">Por Etapas Atendidas (Segmentos)</option>
+                                </select>
+                            </div>
+
+                            {exportFiltro === 'unidade' && (
+                                <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                                    <label className="text-sm font-bold text-gray-700 dark:text-zinc-300">Selecione a Unidade</label>
+                                    <select
+                                        value={exportEscolaSelecionada}
+                                        onChange={(e) => setExportEscolaSelecionada(e.target.value)}
+                                        className="w-full bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#005A9C] focus:border-transparent outline-none transition-all dark:text-white"
+                                    >
+                                        <option value="">Selecione uma escola...</option>
+                                        {todasEscolasExport.map(e => (
+                                            <option key={e.id} value={e.nome}>{e.nome}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+
+                            {exportFiltro === 'etapa' && (
+                                <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                                    <label className="text-sm font-bold text-gray-700 dark:text-zinc-300">Selecione a Etapa Atendida</label>
+                                    <select
+                                        value={exportEtapaSelecionada}
+                                        onChange={(e) => setExportEtapaSelecionada(e.target.value)}
+                                        className="w-full bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#005A9C] focus:border-transparent outline-none transition-all dark:text-white"
+                                    >
+                                        <option value="">Selecione um segmento...</option>
+                                        {todosOsSegmentos.map((s, idx) => {
+                                            const label = (s as string).replace('CONJUNTO UNIFORMA ESCOLAR ', '').replace('CONJUNTO UNIFORME ESCOLAR ', '');
+                                            return <option key={idx} value={s as string}>{label}</option>;
+                                        })}
+                                    </select>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="p-6 border-t border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-800/30 flex justify-end gap-3">
+                            <button
+                                onClick={() => setIsExportModalOpen(false)}
+                                className="px-5 py-2.5 rounded-xl font-bold text-gray-600 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+                                disabled={exportando}
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleExportPDF}
+                                disabled={exportando || (exportFiltro === 'unidade' && !exportEscolaSelecionada) || (exportFiltro === 'etapa' && !exportEtapaSelecionada)}
+                                className="flex items-center gap-2 px-6 py-2.5 bg-[#005A9C] hover:bg-[#004a80] text-white rounded-xl shadow-lg shadow-[#005A9C]/20 transition-all font-bold active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {exportando ? (
+                                    <>Aguarde, processando e gerando PDF...</>
+                                ) : (
+                                    <>Baixar Relatório em PDF</>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
