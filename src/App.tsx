@@ -20,6 +20,7 @@ import { CadastroModelos } from './views/CadastroModelos';
 import { InstallPrompt } from './components/InstallPrompt';
 import { BottomNav } from './components/BottomNav';
 import { AuditLogs } from './views/AuditLogs';
+import { UpdateModal } from './components/UpdateModal';
 
 
 function App() {
@@ -289,6 +290,7 @@ function App() {
           </div>
           <BottomNav activeView={activeView} setActiveView={setActiveView} isAdmin={isAdmin} />
           <InstallPrompt />
+          <UpdateModal isAdmin={isAdmin} currentVersion="2.0.4" />
         </div>
       </div>
     </LanguageProvider>
