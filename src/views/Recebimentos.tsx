@@ -6,6 +6,26 @@ import { Recebimento } from '../types';
 import { supabase } from '../lib/supabaseClient';
 import { exportarRecebimentosExcel, exportarRecebimentosPDF } from '../utils/exportUtils';
 
+const CRECHES_AUTORIZADAS = [
+    'cm.aparecidaazedo@edu.itaguai.rj.gov.br',
+    'cm.mariaeduvigesdorosariosilva@edu.itaguai.rj.gov.br',
+    'cm.daniellebatistadasilva@edu.itaguai.rj.gov.br',
+    'cm.edsoncruzamado@edu.itaguai.rj.gov.br',
+    'cm.euclydesjoseborges@edu.itaguai.rj.gov.br',
+    'cm.estreladoceu@edu.itaguai.rj.gov.br',
+    'cm.florentinoelias@edu.itaguai.rj.gov.br',
+    'cm.franciscoxavierdemourabrito@edu.itaguai.rj.gov.br',
+    'cm.jardimmar@edu.itaguai.rj.gov.br',
+    'cm.joaquiminoue@edu.itaguai.rj.gov.br',
+    'cm.renatobarbosaladislau@edu.itaguai.rj.gov.br',
+    'cm.elianelopesbarbosa@edu.itaguai.rj.gov.br',
+    'cm.mariacristinapadelacabraldasilva@edu.itaguai.rj.gov.br',
+    'cm.mariadelurdessgarcia@edu.itaguai.rj.gov.br',
+    'cm.taniamaramottademenezes@edu.itaguai.rj.gov.br',
+    'cm.ritaferreirafeijo@edu.itaguai.rj.gov.br',
+    'cm.mariarosagomesdonascimento@edu.itaguai.rj.gov.br'
+];
+
 export const Recebimentos: React.FC = () => {
     const { t } = useT();
     const [recebimentos, setRecebimentos] = useState<Recebimento[]>([]);
@@ -379,8 +399,17 @@ export const Recebimentos: React.FC = () => {
 
         // Lógica Geral de Interseção: Se a escola tem algum dos segmentos do modelo, exibe.
         const matchesSegment = modelSegmentsUpper.some(ms => {
+            // REGRA DE SEGURANÇA: Itens de CRECHE ou BERÇÁRIO só aparecem para a lista autorizada
+            const isCrecheOrBerçario = ms.includes('CRECHE') || ms.includes('BERÇÁRIO') ||
+                modelo.nome.toUpperCase().includes('CRECHE') ||
+                modelo.nome.toUpperCase().includes('BERÇÁRIO');
+
+            if (isCrecheOrBerçario) {
+                return CRECHES_AUTORIZADAS.includes(escola.toLowerCase().trim());
+            }
+
             // Normaliza o segmento do modelo para busca parcial no segmento da escola
-            // Ex: "CRECHE" deve bater em "CONJUNTO UNIFORME ESCOLAR CRECHE"
+            // Ex: "INICIAIS" deve bater em "CONJUNTO UNIFORME ESCOLAR FUNDAMENTAL 1-3 ANOS"
             return schoolSegmentsUpper.some(ss => ss.includes(ms) || ms.includes(ss));
         });
 
