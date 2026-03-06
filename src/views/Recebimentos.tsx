@@ -26,6 +26,44 @@ const CRECHES_AUTORIZADAS = [
     'cm.mariarosagomesdonascimento@edu.itaguai.rj.gov.br'
 ];
 
+const WHITELIST_CRECHES = [
+    'Conjunto de Material Pedagógico - 01',
+    'Conjunto de Material Pedagógico - 02',
+    'MOCHILA DE COSTA',
+    'MODELO 01',
+    'MODELO 02',
+    'MODELO 03',
+    'MODELO 04',
+    'MODELO 22',
+    'MODELO 24 (Creche)',
+    'MODELO 26'
+];
+
+const WHITELIST_ESCOLAS = [
+    'Conjunto de Material Pedagógico - 02', // Aparece para ambos, mas filtramos versão creche abaixo
+    'Conjunto de Material Pedagógico - 03',
+    'Conjunto de Material Pedagógico - 04',
+    'Conjunto de Material Pedagógico - 05',
+    'Conjunto de Material Pedagógico - 06',
+    'MOCHILA DE COSTA',
+    'MOCHILA DE RODINHA',
+    'MOCHILA COM RODINHA',
+    'MODELO 05',
+    'MODELO 06',
+    'MODELO 07',
+    'MODELO 08',
+    'MODELO 09',
+    'MODELO 10',
+    'MODELO 11',
+    'MODELO 12',
+    'MODELO 14',
+    'MODELO 18',
+    'MODELO 19',
+    'MODELO 21',
+    'MODELO 23',
+    'MODELO 24'
+];
+
 export const Recebimentos: React.FC = () => {
     const { t } = useT();
     const [recebimentos, setRecebimentos] = useState<Recebimento[]>([]);
@@ -372,50 +410,23 @@ export const Recebimentos: React.FC = () => {
         // Administradores veem todos os modelos por padrão
         if (isAdmin) return true;
 
-        const schoolSegmentsUpper = segmentosEscola.map(s => s.toUpperCase());
-        const modelSegmentsUpper = modelo.segmentos.map(s => s.toUpperCase());
         const normalizedEscola = escola.toLowerCase().trim();
+        const nomeModeloUpper = modelo.nome.toUpperCase().trim();
+        const isCrecheAutorizada = CRECHES_AUTORIZADAS.includes(normalizedEscola);
 
-        // Se o modelo é GERAL, todos veem
-        if (modelSegmentsUpper.includes('GERAL')) return true;
-
-        // Lógica de Interseção com Restrição de Segurança (Granular por Segmento)
-        const hasValidSegmentMatch = modelSegmentsUpper.some(ms => {
-            // Normaliza nomes de segmentos para comparação flexível
-            const normalizedMS = ms.replace('CONJUNTO UNIFORME ESCOLAR ', '').trim();
-
-            // Verifica se o segmento da escola combina com este segmento do modelo
-            const isMatch = schoolSegmentsUpper.some(ss => {
-                const normalizedSS = ss.replace('CONJUNTO UNIFORMA ESCOLAR ', '').trim();
-
-                // Caso especial: INICIAIS costuma se referir a FUNDAMENTAL 1-3 ou 1-5
-                if (normalizedMS === 'INICIAIS' && normalizedSS.includes('FUNDAMENTAL')) return true;
-                if (normalizedSS === 'INICIAIS' && normalizedMS.includes('FUNDAMENTAL')) return true;
-
-                return normalizedSS.includes(normalizedMS) || normalizedMS.includes(normalizedSS);
-            });
-
-            if (isMatch) {
-                // Se o match for em CRECHE ou BERÇÁRIO, aplica a trava de e-mail
-                const isRestrictedSegment = normalizedMS.includes('CRECHE') || normalizedMS.includes('BERÇÁRIO');
-                if (isRestrictedSegment) {
-                    return CRECHES_AUTORIZADAS.includes(normalizedEscola);
-                }
-                // Se for match em qualquer outro segmento (Fundamental, EJA, etc), é válido!
-                return true;
+        if (isCrecheAutorizada) {
+            // Se for creche, só mostra o que está na whitelist de creches
+            return WHITELIST_CRECHES.some(pref => nomeModeloUpper.includes(pref.toUpperCase()));
+        } else {
+            // Se não for creche, só mostra o que está na whitelist de escolas
+            // BLOQUEIO ESTRETO: Impede qualquer item que contenha explicitamente "CRECHE" ou "BERÇÁRIO" no nome
+            // (Isso resolve casos onde o prefixo coincide, como Mat. Pedagógico 02)
+            if (nomeModeloUpper.includes('CRECHE') || nomeModeloUpper.includes('BERÇÁRIO')) {
+                return false;
             }
-            return false;
-        });
 
-        // Caso especial secundário: Material Pedagógico (mantendo flexibilidade de EJA)
-        const isMaterialPedagogico = modelo.nome.toUpperCase().includes('MATERIAL PEDAGÓGICO');
-        if (isMaterialPedagogico && !hasValidSegmentMatch) {
-            const temEJA = schoolSegmentsUpper.some(s => s.includes('EJA') || s.includes('NCEJA'));
-            // Se tiver EJA e o modelo for EJA, permite (mesmo sem match estrito de segmento)
-            if (temEJA && modelSegmentsUpper.includes('EJA')) return true;
+            return WHITELIST_ESCOLAS.some(pref => nomeModeloUpper.includes(pref.toUpperCase()));
         }
-
-        return hasValidSegmentMatch;
     });
 
     const handleExportExcel = () => {
