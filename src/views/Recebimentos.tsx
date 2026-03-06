@@ -376,41 +376,35 @@ export const Recebimentos: React.FC = () => {
         const modelSegmentsUpper = modelo.segmentos.map(s => s.toUpperCase());
         const normalizedEscola = escola.toLowerCase().trim();
 
-        // REGRA DE SEGURANÇA MANDATÓRIA: Itens de CRECHE ou BERÇÁRIO só aparecem para a lista autorizada
-        const isCrecheOrBerçario = modelSegmentsUpper.some(ms => ms.includes('CRECHE') || ms.includes('BERÇÁRIO')) ||
-            modelo.nome.toUpperCase().includes('CRECHE') ||
-            modelo.nome.toUpperCase().includes('BERÇÁRIO');
-
-        if (isCrecheOrBerçario && !CRECHES_AUTORIZADAS.includes(normalizedEscola)) {
-            return false;
-        }
-
         // Se o modelo é GERAL, todos veem
         if (modelSegmentsUpper.includes('GERAL')) return true;
 
-        // Caso especial: Material Pedagógico
-        const isMaterialPedagogico = modelo.nome.toUpperCase().includes('MATERIAL PEDAGÓGICO');
-        if (isMaterialPedagogico) {
-            // Se for Material Pedagógico, verifica se tem EJA ou se algum segmento da escola coincide
-            const temEJA = schoolSegmentsUpper.some(s => s.includes('EJA') || s.includes('NCEJA'));
-            // Modelos de material pedagógico numerados podem ter restrições específicas por segmento
-            if (modelSegmentsUpper.includes('EJA') && !temEJA) return false;
+        // Lógica de Interseção com Restrição de Segurança (Granular por Segmento)
+        const hasValidSegmentMatch = modelSegmentsUpper.some(ms => {
+            // Verifica se o segmento da escola combina com este segmento do modelo
+            const isMatch = schoolSegmentsUpper.some(ss => ss.includes(ms) || ms.includes(ss));
 
-            // Se tiver interseção de segmentos, permite
-            const hasIntersection = modelSegmentsUpper.some(ms =>
-                schoolSegmentsUpper.some(ss => ss.includes(ms) || ms.includes(ss))
-            );
-            if (hasIntersection) return true;
-
-            if (temEJA) return true;
-        }
-
-        // Lógica Geral de Interseção
-        const matchesSegment = modelSegmentsUpper.some(ms => {
-            return schoolSegmentsUpper.some(ss => ss.includes(ms) || ms.includes(ss));
+            if (isMatch) {
+                // Se o match for em CRECHE ou BERÇÁRIO, aplica a trava de e-mail
+                const isRestrictedSegment = ms.includes('CRECHE') || ms.includes('BERÇÁRIO');
+                if (isRestrictedSegment) {
+                    return CRECHES_AUTORIZADAS.includes(normalizedEscola);
+                }
+                // Se for match em qualquer outro segmento (Fundamental, EJA, etc), é válido!
+                return true;
+            }
+            return false;
         });
 
-        return matchesSegment;
+        // Caso especial secundário: Material Pedagógico (mantendo flexibilidade de EJA)
+        const isMaterialPedagogico = modelo.nome.toUpperCase().includes('MATERIAL PEDAGÓGICO');
+        if (isMaterialPedagogico && !hasValidSegmentMatch) {
+            const temEJA = schoolSegmentsUpper.some(s => s.includes('EJA') || s.includes('NCEJA'));
+            // Se tiver EJA e o modelo for EJA, permite (mesmo sem match estrito de segmento)
+            if (temEJA && modelSegmentsUpper.includes('EJA')) return true;
+        }
+
+        return hasValidSegmentMatch;
     });
 
     const handleExportExcel = () => {
