@@ -236,51 +236,51 @@ export const ControleRecebimento: React.FC = () => {
             </div>
 
             {/* Novos Cards de Pendências Específicas e Monitoramento UX */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 {/* Card Material Pedagógico */}
-                <div className="bg-white dark:bg-zinc-900 p-5 md:p-6 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm transition-all hover:scale-[1.01] cursor-default flex items-center gap-4">
-                    <div className="p-4 bg-orange-50 dark:bg-orange-900/30 rounded-2xl text-orange-600 dark:text-orange-400">
-                        <BookOpen size={24} className="md:w-8 md:h-8" />
+                <div className="bg-white dark:bg-zinc-900 p-5 md:p-6 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center">
+                    <div className="p-3 bg-orange-50 dark:bg-orange-900/30 rounded-2xl text-orange-600 dark:text-orange-400 mb-2">
+                        <BookOpen size={20} className="md:w-8 md:h-8" />
                     </div>
                     <div className="flex-1">
-                        <p className="text-[10px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1 leading-tight">Pendência Material Pedagógico</p>
+                        <p className="text-[9px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1 leading-tight">Pendência Material</p>
                         <h3 className="text-xl md:text-3xl font-black text-orange-600 dark:text-orange-400 leading-none">{escolasSemMaterial}</h3>
                     </div>
                 </div>
 
                 {/* Card Mochilas */}
-                <div className="bg-white dark:bg-zinc-900 p-5 md:p-6 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm transition-all hover:scale-[1.01] cursor-default flex items-center gap-4">
-                    <div className="p-4 bg-purple-50 dark:bg-purple-900/30 rounded-2xl text-purple-600 dark:text-purple-400">
-                        <ShoppingBag size={24} className="md:w-8 md:h-8" />
+                <div className="bg-white dark:bg-zinc-900 p-5 md:p-6 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center">
+                    <div className="p-3 bg-purple-50 dark:bg-purple-900/30 rounded-2xl text-purple-600 dark:text-purple-400 mb-2">
+                        <ShoppingBag size={20} className="md:w-8 md:h-8" />
                     </div>
                     <div className="flex-1">
-                        <p className="text-[10px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1 leading-tight">Pendência Mochilas</p>
+                        <p className="text-[9px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1 leading-tight">Pendência Mochilas</p>
                         <h3 className="text-xl md:text-3xl font-black text-purple-600 dark:text-purple-400 leading-none">{escolasSemMochila}</h3>
                     </div>
                 </div>
 
                 {/* NOVO: Card Volume Total de Peças */}
-                <div className="bg-white dark:bg-zinc-900 p-5 md:p-6 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm transition-all hover:scale-[1.01] cursor-default flex items-center gap-4">
-                    <div className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-2xl text-blue-600 dark:text-blue-400">
-                        <Package size={24} className="md:w-8 md:h-8" />
+                <div className="bg-white dark:bg-zinc-900 p-5 md:p-6 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center">
+                    <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-2xl text-blue-600 dark:text-blue-400 mb-2">
+                        <Package size={20} className="md:w-8 md:h-8" />
                     </div>
                     <div className="flex-1">
-                        <p className="text-[10px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1 leading-tight">Volume Total de Peças</p>
+                        <p className="text-[9px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1 leading-tight">Volume de Peças</p>
                         <h3 className="text-xl md:text-3xl font-black text-blue-800 dark:text-blue-100 leading-none">{totalPecasGeral.toLocaleString('pt-BR')}</h3>
                     </div>
                 </div>
 
                 {/* NOVO: Card Última Atividade */}
-                <div className="bg-white dark:bg-zinc-900 p-5 md:p-6 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm transition-all hover:scale-[1.01] cursor-default flex items-center gap-4">
-                    <div className="p-4 bg-pink-50 dark:bg-pink-900/30 rounded-2xl text-pink-600 dark:text-pink-400">
-                        <Activity size={24} className="md:w-8 md:h-8" />
+                <div className="bg-white dark:bg-zinc-900 p-5 md:p-6 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center">
+                    <div className="p-3 bg-pink-50 dark:bg-pink-900/30 rounded-2xl text-pink-600 dark:text-pink-400 mb-2">
+                        <Activity size={20} className="md:w-8 md:h-8" />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className="text-[10px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1 leading-tight">Última Atividade</p>
-                        <h3 className="text-sm md:text-base font-black text-pink-600 dark:text-pink-400 leading-tight truncate">
+                        <p className="text-[9px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1 leading-tight">Última Atividade</p>
+                        <h3 className="text-[10px] md:text-base font-black text-pink-600 dark:text-pink-400 leading-tight truncate max-w-[120px] md:max-w-none">
                             {ultimaAtividade ? ultimaAtividade.escola : 'Nenhum lançamento'}
                         </h3>
-                        <p className="text-[9px] font-bold text-gray-400 uppercase">
+                        <p className="text-[8px] md:text-[9px] font-bold text-gray-400 uppercase">
                             {ultimaAtividade ? new Date(ultimaAtividade.data).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '-'}
                         </p>
                     </div>
