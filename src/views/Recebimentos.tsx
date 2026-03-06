@@ -381,12 +381,23 @@ export const Recebimentos: React.FC = () => {
 
         // Lógica de Interseção com Restrição de Segurança (Granular por Segmento)
         const hasValidSegmentMatch = modelSegmentsUpper.some(ms => {
+            // Normaliza nomes de segmentos para comparação flexível
+            const normalizedMS = ms.replace('CONJUNTO UNIFORME ESCOLAR ', '').trim();
+
             // Verifica se o segmento da escola combina com este segmento do modelo
-            const isMatch = schoolSegmentsUpper.some(ss => ss.includes(ms) || ms.includes(ss));
+            const isMatch = schoolSegmentsUpper.some(ss => {
+                const normalizedSS = ss.replace('CONJUNTO UNIFORMA ESCOLAR ', '').trim();
+
+                // Caso especial: INICIAIS costuma se referir a FUNDAMENTAL 1-3 ou 1-5
+                if (normalizedMS === 'INICIAIS' && normalizedSS.includes('FUNDAMENTAL')) return true;
+                if (normalizedSS === 'INICIAIS' && normalizedMS.includes('FUNDAMENTAL')) return true;
+
+                return normalizedSS.includes(normalizedMS) || normalizedMS.includes(normalizedSS);
+            });
 
             if (isMatch) {
                 // Se o match for em CRECHE ou BERÇÁRIO, aplica a trava de e-mail
-                const isRestrictedSegment = ms.includes('CRECHE') || ms.includes('BERÇÁRIO');
+                const isRestrictedSegment = normalizedMS.includes('CRECHE') || normalizedMS.includes('BERÇÁRIO');
                 if (isRestrictedSegment) {
                     return CRECHES_AUTORIZADAS.includes(normalizedEscola);
                 }
