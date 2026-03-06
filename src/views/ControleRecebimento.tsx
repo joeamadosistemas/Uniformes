@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { School, CheckCircle2, Clock, Search, BarChart3, Loader2, FileText, RefreshCw, X, Layers, AlertCircle } from 'lucide-react';
+import { School, CheckCircle2, Clock, Search, BarChart3, Loader2, FileText, RefreshCw, X, Layers, AlertCircle, BookOpen, ShoppingBag } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useT } from '../lib/LanguageContext';
 import { EscolaCadastro } from '../types';
 import { SEGMENTOS_ENSINO } from '../constants';
 import { exportarControleRecebimentoPDF, exportarRecebimentosPDF } from '../utils/exportUtils';
-import { AIInsightsCard } from '../components/AIInsightsCard';
 
 interface EscolaStatus extends EscolaCadastro {
     jaLancou: boolean;
@@ -25,6 +24,8 @@ export const ControleRecebimento: React.FC = () => {
     const [loadingDetalhes, setLoadingDetalhes] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [selectedYear, setSelectedYear] = useState<number>(2026);
+    const [escolasSemMaterial, setEscolasSemMaterial] = useState<number>(0);
+    const [escolasSemMochila, setEscolasSemMochila] = useState<number>(0);
 
     useEffect(() => {
         fetchStatusEscolas();
@@ -49,7 +50,7 @@ export const ControleRecebimento: React.FC = () => {
 
             const { data: lancamentos, error: errorLancamentos } = await supabase
                 .from('recebimentos')
-                .select('escola, data_recebimento')
+                .select('escola, data_recebimento, modelo_nome')
                 .gte('data_recebimento', startDate)
                 .lte('data_recebimento', endDate)
                 .order('data_recebimento', { ascending: false })
@@ -60,13 +61,29 @@ export const ControleRecebimento: React.FC = () => {
             }
 
             const escolasComLancamento = new Map<string, string>(); // email -> data
+            const escolasComMaterialSet = new Set<string>();
+            const escolasComMochilaSet = new Set<string>();
+
             if (lancamentos) {
                 lancamentos.forEach(l => {
                     const emailKey = (l.escola || '').toLowerCase().trim();
                     const dataAtual = l.data_recebimento;
+                    const nomeModelo = (l.modelo_nome || '').toUpperCase();
+
+                    // Geral
                     const dataExistente = escolasComLancamento.get(emailKey);
                     if (!dataExistente || new Date(dataAtual) > new Date(dataExistente)) {
                         escolasComLancamento.set(emailKey, dataAtual);
+                    }
+
+                    // Material Pedagógico
+                    if (nomeModelo.includes('MATERIAL PEDAGÓGICO')) {
+                        escolasComMaterialSet.add(emailKey);
+                    }
+
+                    // Mochilas
+                    if (nomeModelo.includes('MOCHILA')) {
+                        escolasComMochilaSet.add(emailKey);
                     }
                 });
             }
@@ -81,6 +98,20 @@ export const ControleRecebimento: React.FC = () => {
             });
 
             setEscolas(mappedEscolas);
+
+            // Calcular pendências específicas
+            const totalComMaterial = mappedEscolas.filter(esc => {
+                const emailKey = (esc.email || '').toLowerCase().trim();
+                return escolasComMaterialSet.has(emailKey);
+            }).length;
+
+            const totalComMochila = mappedEscolas.filter(esc => {
+                const emailKey = (esc.email || '').toLowerCase().trim();
+                return escolasComMochilaSet.has(emailKey);
+            }).length;
+
+            setEscolasSemMaterial(todasEscolas.length - totalComMaterial);
+            setEscolasSemMochila(todasEscolas.length - totalComMochila);
 
         } catch (error) {
             console.error('Erro ao buscar status das escolas:', error);
@@ -134,57 +165,33 @@ export const ControleRecebimento: React.FC = () => {
         exportarControleRecebimentoPDF(escolasFiltradas);
     };
 
-    const totalEscolas = escolas.length;
-    const totalLancaram = escolas.filter(e => e.jaLancou).length;
-    const totalPendentes = totalEscolas - totalLancaram;
-    const percentualConcluido = totalEscolas > 0 ? (totalLancaram / totalEscolas) * 100 : 0;
 
     return (
         <div className="space-y-8 pb-20">
             {/* Stats Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                {/* Total Unidades */}
-                <div className="bg-white dark:bg-zinc-900 p-5 md:p-6 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center">
-                    <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-2xl text-[#005A9C] dark:text-blue-400 mb-2">
-                        <School size={20} className="md:w-6 md:h-6" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 md:mt-6">
+                {/* Card Material Pedagógico */}
+                <div className="bg-white dark:bg-zinc-900 p-5 md:p-6 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm transition-all hover:scale-[1.01] cursor-default flex items-center gap-4">
+                    <div className="p-4 bg-orange-50 dark:bg-orange-900/30 rounded-2xl text-orange-600 dark:text-orange-400">
+                        <BookOpen size={24} className="md:w-8 md:h-8" />
                     </div>
-                    <p className="text-[9px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1">{t.dashboardControle.totalUnidades}</p>
-                    <h3 className="text-xl md:text-3xl font-black text-gray-800 dark:text-white">{totalEscolas}</h3>
+                    <div className="flex-1">
+                        <p className="text-[10px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1 leading-tight">Escolas ainda não registraram Conjunto de Material Pedagógico</p>
+                        <h3 className="text-xl md:text-3xl font-black text-orange-600 dark:text-orange-400 leading-none">{escolasSemMaterial}</h3>
+                    </div>
                 </div>
 
-                {/* Informaram Recebimento */}
-                <div className="bg-white dark:bg-zinc-900 p-5 md:p-6 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center">
-                    <div className="p-3 bg-green-50 dark:bg-green-900/30 rounded-2xl text-green-600 dark:text-green-400 mb-2">
-                        <CheckCircle2 size={20} className="md:w-6 md:h-6" />
+                {/* Card Mochilas */}
+                <div className="bg-white dark:bg-zinc-900 p-5 md:p-6 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm transition-all hover:scale-[1.01] cursor-default flex items-center gap-4">
+                    <div className="p-4 bg-purple-50 dark:bg-purple-900/30 rounded-2xl text-purple-600 dark:text-purple-400">
+                        <ShoppingBag size={24} className="md:w-8 md:h-8" />
                     </div>
-                    <p className="text-[9px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1">{t.dashboardControle.informaram}</p>
-                    <h3 className="text-xl md:text-3xl font-black text-green-600 dark:text-green-400">{totalLancaram}</h3>
-                </div>
-
-                {/* Aguardando Lançamento */}
-                <div className="bg-white dark:bg-zinc-900 p-5 md:p-6 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center">
-                    <div className="p-3 bg-amber-50 dark:bg-amber-900/30 rounded-2xl text-amber-600 dark:text-amber-400 mb-2">
-                        <Clock size={20} className="md:w-6 md:h-6" />
-                    </div>
-                    <p className="text-[9px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Pendente</p>
-                    <h3 className="text-xl md:text-3xl font-black text-amber-600 dark:text-amber-400">{totalPendentes}</h3>
-                </div>
-
-                {/* Taxa de Adesão */}
-                <div className="bg-white dark:bg-zinc-900 p-5 md:p-6 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center">
-                    <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl text-indigo-600 dark:text-indigo-400 mb-2">
-                        <BarChart3 size={20} className="md:w-6 md:h-6" />
-                    </div>
-                    <p className="text-[9px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Adesão</p>
-                    <div className="flex items-baseline gap-1">
-                        <h3 className="text-xl md:text-3xl font-black text-indigo-600 dark:text-indigo-400">{percentualConcluido.toFixed(1)}</h3>
-                        <span className="text-[10px] font-bold text-indigo-400">%</span>
+                    <div className="flex-1">
+                        <p className="text-[10px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1 leading-tight">Escolas ainda não registraram Mochilas</p>
+                        <h3 className="text-xl md:text-3xl font-black text-purple-600 dark:text-purple-400 leading-none">{escolasSemMochila}</h3>
                     </div>
                 </div>
             </div>
-
-            {/* AI Insights Card */}
-            <AIInsightsCard />
 
             {/* Filters Toolbar - Premium Style (Image 2) */}
             <div className="flex flex-col md:flex-row items-center justify-center gap-4 py-6">
