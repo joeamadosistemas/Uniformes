@@ -369,11 +369,21 @@ export const Recebimentos: React.FC = () => {
         const userRoleLower = userRole?.toLowerCase() || '';
         const isAdmin = userRoleLower === 'admin' || userRoleLower === 'administrador' || userRoleLower === 'super administrador' || userRoleLower.includes('admin');
 
-        // Administradores e Diretores devem ver todos os modelos por padrão
-        if (isAdmin || userRoleLower === 'diretor') return true;
+        // Administradores veem todos os modelos por padrão
+        if (isAdmin) return true;
 
         const schoolSegmentsUpper = segmentosEscola.map(s => s.toUpperCase());
         const modelSegmentsUpper = modelo.segmentos.map(s => s.toUpperCase());
+        const normalizedEscola = escola.toLowerCase().trim();
+
+        // REGRA DE SEGURANÇA MANDATÓRIA: Itens de CRECHE ou BERÇÁRIO só aparecem para a lista autorizada
+        const isCrecheOrBerçario = modelSegmentsUpper.some(ms => ms.includes('CRECHE') || ms.includes('BERÇÁRIO')) ||
+            modelo.nome.toUpperCase().includes('CRECHE') ||
+            modelo.nome.toUpperCase().includes('BERÇÁRIO');
+
+        if (isCrecheOrBerçario && !CRECHES_AUTORIZADAS.includes(normalizedEscola)) {
+            return false;
+        }
 
         // Se o modelo é GERAL, todos veem
         if (modelSegmentsUpper.includes('GERAL')) return true;
@@ -384,7 +394,6 @@ export const Recebimentos: React.FC = () => {
             // Se for Material Pedagógico, verifica se tem EJA ou se algum segmento da escola coincide
             const temEJA = schoolSegmentsUpper.some(s => s.includes('EJA') || s.includes('NCEJA'));
             // Modelos de material pedagógico numerados podem ter restrições específicas por segmento
-            // Se o modelo for EJA (ex: Material 06), só aparece se tiver EJA na escola
             if (modelSegmentsUpper.includes('EJA') && !temEJA) return false;
 
             // Se tiver interseção de segmentos, permite
@@ -393,23 +402,11 @@ export const Recebimentos: React.FC = () => {
             );
             if (hasIntersection) return true;
 
-            // Se for Material Pedagógico e a escola tem EJA, mas o modelo não tem segmento específico bloqueante, permite
             if (temEJA) return true;
         }
 
-        // Lógica Geral de Interseção: Se a escola tem algum dos segmentos do modelo, exibe.
+        // Lógica Geral de Interseção
         const matchesSegment = modelSegmentsUpper.some(ms => {
-            // REGRA DE SEGURANÇA: Itens de CRECHE ou BERÇÁRIO só aparecem para a lista autorizada
-            const isCrecheOrBerçario = ms.includes('CRECHE') || ms.includes('BERÇÁRIO') ||
-                modelo.nome.toUpperCase().includes('CRECHE') ||
-                modelo.nome.toUpperCase().includes('BERÇÁRIO');
-
-            if (isCrecheOrBerçario) {
-                return CRECHES_AUTORIZADAS.includes(escola.toLowerCase().trim());
-            }
-
-            // Normaliza o segmento do modelo para busca parcial no segmento da escola
-            // Ex: "INICIAIS" deve bater em "CONJUNTO UNIFORME ESCOLAR FUNDAMENTAL 1-3 ANOS"
             return schoolSegmentsUpper.some(ss => ss.includes(ms) || ms.includes(ss));
         });
 
