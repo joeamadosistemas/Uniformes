@@ -111,7 +111,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="seu.email@educ.itaguai.rj.gov.br"
+                                    placeholder="seu.email@edu.itaguai.rj.gov.br"
                                     className="flex-1 py-2 pr-3 text-sm text-gray-700 outline-none bg-transparent"
                                     style={{ fontSize: '0.85rem' }}
                                     required

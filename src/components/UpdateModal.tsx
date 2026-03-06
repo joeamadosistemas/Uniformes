@@ -68,7 +68,7 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({ isAdmin, currentVersio
                 {/* Content */}
                 <div className="p-8 text-center space-y-6">
                     <p className="text-slate-600 dark:text-zinc-300 font-medium text-sm leading-relaxed">
-                        O sistema <strong>Google Antigravity</strong> aplicou novas melhorias de interface, identidade visual oficial e otimizações de navegação.
+                        O sistema <strong>já</strong> aplicou novas melhorias de interface, identidade visual oficial e otimizações de navegação.
                     </p>
 
                     <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl text-xs text-blue-700 dark:text-blue-300 font-semibold border border-blue-100 dark:border-blue-800/50">
