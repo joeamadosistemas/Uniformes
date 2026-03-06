@@ -165,11 +165,59 @@ export const ControleRecebimento: React.FC = () => {
         exportarControleRecebimentoPDF(escolasFiltradas);
     };
 
+    const totalEscolas = escolas.length;
+    const totalLancaram = escolas.filter(e => e.jaLancou).length;
+    const totalPendentes = totalEscolas - totalLancaram;
+    const percentualConcluido = totalEscolas > 0 ? (totalLancaram / totalEscolas) * 100 : 0;
+
 
     return (
         <div className="space-y-8 pb-20">
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 md:mt-6">
+            {/* Stats Cards Originais */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                {/* Total Unidades */}
+                <div className="bg-white dark:bg-zinc-900 p-5 md:p-6 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center">
+                    <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-2xl text-[#005A9C] dark:text-blue-400 mb-2">
+                        <School size={20} className="md:w-6 md:h-6" />
+                    </div>
+                    <p className="text-[9px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1">{t.dashboardControle.totalUnidades}</p>
+                    <h3 className="text-xl md:text-3xl font-black text-gray-800 dark:text-white">{totalEscolas}</h3>
+                </div>
+
+                {/* Informaram Recebimento */}
+                <div className="bg-white dark:bg-zinc-900 p-5 md:p-6 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center">
+                    <div className="p-3 bg-green-50 dark:bg-green-900/30 rounded-2xl text-green-600 dark:text-green-400 mb-2">
+                        <CheckCircle2 size={20} className="md:w-6 md:h-6" />
+                    </div>
+                    <p className="text-[9px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1">{t.dashboardControle.informaram}</p>
+                    <h3 className="text-xl md:text-3xl font-black text-green-600 dark:text-green-400">{totalLancaram}</h3>
+                </div>
+
+                {/* Aguardando Lançamento */}
+                <div className="bg-white dark:bg-zinc-900 p-5 md:p-6 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center">
+                    <div className="p-3 bg-amber-50 dark:bg-amber-900/30 rounded-2xl text-amber-600 dark:text-amber-400 mb-2">
+                        <Clock size={20} className="md:w-6 md:h-6" />
+                    </div>
+                    <p className="text-[9px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Pendente</p>
+                    <h3 className="text-xl md:text-3xl font-black text-amber-600 dark:text-amber-400">{totalPendentes}</h3>
+                </div>
+
+                {/* Taxa de Adesão */}
+                <div className="bg-white dark:bg-zinc-900 p-5 md:p-6 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center">
+                    <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl text-indigo-600 dark:text-indigo-400 mb-2">
+                        <BarChart3 size={20} className="md:w-6 md:h-6" />
+                    </div>
+                    <p className="text-[9px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Adesão</p>
+                    <div className="flex items-baseline gap-1">
+                        <h3 className="text-xl md:text-3xl font-black text-indigo-600 dark:text-indigo-400">{percentualConcluido.toFixed(1)}</h3>
+                        <span className="text-[10px] font-bold text-indigo-400">%</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Novos Cards de Pendências Específicas */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 {/* Card Material Pedagógico */}
                 <div className="bg-white dark:bg-zinc-900 p-5 md:p-6 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm transition-all hover:scale-[1.01] cursor-default flex items-center gap-4">
                     <div className="p-4 bg-orange-50 dark:bg-orange-900/30 rounded-2xl text-orange-600 dark:text-orange-400">
