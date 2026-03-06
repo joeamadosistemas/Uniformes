@@ -344,7 +344,7 @@ export const UnidadeEscolar: React.FC = () => {
                 <option value="">{t.escolas.todosSegmentos}</option>
                 {SEGMENTOS_ENSINO.map(seg => (
                   <option key={seg} value={seg}>
-                    {seg.replace('CONJUNTO UNIFORMA ESCOLAR ', '').replace('EJA', 'SEJA')}
+                    {seg.replace('CONJUNTO UNIFORME ESCOLAR ', '').replace('EJA', 'NCEJA')}
                   </option>
                 ))}
               </select>
@@ -394,7 +394,7 @@ export const UnidadeEscolar: React.FC = () => {
                         <div className="flex flex-wrap gap-1">
                           {escola.segmentos.map(seg => (
                             <span key={seg} className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px] uppercase font-semibold">
-                              {seg.replace('CONJUNTO UNIFORMA ESCOLAR ', '').replace('EJA', 'SEJA')}
+                              {seg.replace('CONJUNTO UNIFORME ESCOLAR ', '').replace('EJA', 'NCEJA')}
                             </span>
                           ))}
                         </div>
