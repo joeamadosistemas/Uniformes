@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { School, CheckCircle2, Clock, Search, BarChart3, Loader2, FileText, RefreshCw, X, Layers, AlertCircle, BookOpen, ShoppingBag } from 'lucide-react';
+import { School, CheckCircle2, Clock, Search, BarChart3, Loader2, FileText, RefreshCw, X, Layers, AlertCircle, BookOpen, ShoppingBag, Activity, Package } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useT } from '../lib/LanguageContext';
 import { EscolaCadastro } from '../types';
@@ -26,6 +26,8 @@ export const ControleRecebimento: React.FC = () => {
     const [selectedYear, setSelectedYear] = useState<number>(2026);
     const [escolasSemMaterial, setEscolasSemMaterial] = useState<number>(0);
     const [escolasSemMochila, setEscolasSemMochila] = useState<number>(0);
+    const [totalPecasGeral, setTotalPecasGeral] = useState<number>(0);
+    const [ultimaAtividade, setUltimaAtividade] = useState<{ escola: string; data: string } | null>(null);
 
     useEffect(() => {
         fetchStatusEscolas();
@@ -50,7 +52,7 @@ export const ControleRecebimento: React.FC = () => {
 
             const { data: lancamentos, error: errorLancamentos } = await supabase
                 .from('recebimentos')
-                .select('escola, data_recebimento, modelo_nome')
+                .select('escola, data_recebimento, modelo_nome, quantidade')
                 .gte('data_recebimento', startDate)
                 .lte('data_recebimento', endDate)
                 .order('data_recebimento', { ascending: false })
@@ -63,12 +65,27 @@ export const ControleRecebimento: React.FC = () => {
             const escolasComLancamento = new Map<string, string>(); // email -> data
             const escolasComMaterialSet = new Set<string>();
             const escolasComMochilaSet = new Set<string>();
+            let volumeTotal = 0;
+            let ultimoRegistro: { escola: string; data: string } | null = null;
 
             if (lancamentos) {
                 lancamentos.forEach(l => {
                     const emailKey = (l.escola || '').toLowerCase().trim();
                     const dataAtual = l.data_recebimento;
                     const nomeModelo = (l.modelo_nome || '').toUpperCase();
+                    const qtd = l.quantidade || 0;
+
+                    // Volume Geral
+                    volumeTotal += qtd;
+
+                    // Última Atividade
+                    if (!ultimoRegistro || new Date(dataAtual) > new Date(ultimoRegistro.data)) {
+                        const escolaInfo = todasEscolas.find(e => (e.email || '').toLowerCase().trim() === emailKey);
+                        ultimoRegistro = {
+                            escola: escolaInfo?.nome || emailKey,
+                            data: dataAtual
+                        };
+                    }
 
                     // Geral
                     const dataExistente = escolasComLancamento.get(emailKey);
@@ -112,6 +129,8 @@ export const ControleRecebimento: React.FC = () => {
 
             setEscolasSemMaterial(todasEscolas.length - totalComMaterial);
             setEscolasSemMochila(todasEscolas.length - totalComMochila);
+            setTotalPecasGeral(volumeTotal);
+            setUltimaAtividade(ultimoRegistro);
 
         } catch (error) {
             console.error('Erro ao buscar status das escolas:', error);
@@ -216,15 +235,15 @@ export const ControleRecebimento: React.FC = () => {
                 </div>
             </div>
 
-            {/* Novos Cards de Pendências Específicas */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            {/* Novos Cards de Pendências Específicas e Monitoramento UX */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 {/* Card Material Pedagógico */}
                 <div className="bg-white dark:bg-zinc-900 p-5 md:p-6 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm transition-all hover:scale-[1.01] cursor-default flex items-center gap-4">
                     <div className="p-4 bg-orange-50 dark:bg-orange-900/30 rounded-2xl text-orange-600 dark:text-orange-400">
                         <BookOpen size={24} className="md:w-8 md:h-8" />
                     </div>
                     <div className="flex-1">
-                        <p className="text-[10px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1 leading-tight">Escolas ainda não registraram Conjunto de Material Pedagógico</p>
+                        <p className="text-[10px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1 leading-tight">Pendência Material Pedagógico</p>
                         <h3 className="text-xl md:text-3xl font-black text-orange-600 dark:text-orange-400 leading-none">{escolasSemMaterial}</h3>
                     </div>
                 </div>
@@ -235,8 +254,35 @@ export const ControleRecebimento: React.FC = () => {
                         <ShoppingBag size={24} className="md:w-8 md:h-8" />
                     </div>
                     <div className="flex-1">
-                        <p className="text-[10px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1 leading-tight">Escolas ainda não registraram Mochilas</p>
+                        <p className="text-[10px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1 leading-tight">Pendência Mochilas</p>
                         <h3 className="text-xl md:text-3xl font-black text-purple-600 dark:text-purple-400 leading-none">{escolasSemMochila}</h3>
+                    </div>
+                </div>
+
+                {/* NOVO: Card Volume Total de Peças */}
+                <div className="bg-white dark:bg-zinc-900 p-5 md:p-6 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm transition-all hover:scale-[1.01] cursor-default flex items-center gap-4">
+                    <div className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-2xl text-blue-600 dark:text-blue-400">
+                        <Package size={24} className="md:w-8 md:h-8" />
+                    </div>
+                    <div className="flex-1">
+                        <p className="text-[10px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1 leading-tight">Volume Total de Peças</p>
+                        <h3 className="text-xl md:text-3xl font-black text-blue-800 dark:text-blue-100 leading-none">{totalPecasGeral.toLocaleString('pt-BR')}</h3>
+                    </div>
+                </div>
+
+                {/* NOVO: Card Última Atividade */}
+                <div className="bg-white dark:bg-zinc-900 p-5 md:p-6 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm transition-all hover:scale-[1.01] cursor-default flex items-center gap-4">
+                    <div className="p-4 bg-pink-50 dark:bg-pink-900/30 rounded-2xl text-pink-600 dark:text-pink-400">
+                        <Activity size={24} className="md:w-8 md:h-8" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <p className="text-[10px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1 leading-tight">Última Atividade</p>
+                        <h3 className="text-sm md:text-base font-black text-pink-600 dark:text-pink-400 leading-tight truncate">
+                            {ultimaAtividade ? ultimaAtividade.escola : 'Nenhum lançamento'}
+                        </h3>
+                        <p className="text-[9px] font-bold text-gray-400 uppercase">
+                            {ultimaAtividade ? new Date(ultimaAtividade.data).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '-'}
+                        </p>
                     </div>
                 </div>
             </div>
