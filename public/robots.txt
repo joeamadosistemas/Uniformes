@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://unif-smedu.netlify.app/sitemap.xml
