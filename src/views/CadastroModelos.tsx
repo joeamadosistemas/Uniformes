@@ -2,16 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Search, Edit2, Trash2, Check, X, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useT } from '../lib/LanguageContext';
-import { RecebimentoModelo } from '../constants/recebimentosConstants';
+import { RECEBIMENTOS_MODELOS, RecebimentoModelo } from '../constants/recebimentosConstants';
 import { exportarModelosPDF } from '../utils/exportUtils';
 
 export const CadastroModelos: React.FC = () => {
-    const { t } = useT();
     const [modelos, setModelos] = useState<RecebimentoModelo[]>([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [editingId, setEditingId] = useState<string | null>(null);
+    const [userRole, setUserRole] = useState<string | null>(null);
 
     const [formData, setFormData] = useState({
         nome: '',
@@ -23,8 +23,24 @@ export const CadastroModelos: React.FC = () => {
     const [novoTamanho, setNovoTamanho] = useState('');
 
     useEffect(() => {
-        fetchModelos();
+        const init = async () => {
+            await fetchUserRole();
+            await fetchModelos();
+        };
+        init();
     }, []);
+
+    const fetchUserRole = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.id) {
+            const { data } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', session.user.id)
+                .maybeSingle();
+            if (data?.role) setUserRole(data.role);
+        }
+    };
 
     const fetchModelos = async () => {
         try {
@@ -37,7 +53,7 @@ export const CadastroModelos: React.FC = () => {
             if (error) throw error;
 
             // Map table data to RecebimentoModelo type
-            const mapped: RecebimentoModelo[] = (data || []).map((m: any) => ({
+            const mappedDB: RecebimentoModelo[] = (data || []).map((m: any) => ({
                 id: m.id,
                 nome: m.nome,
                 descricao: m.descricao,
@@ -45,7 +61,21 @@ export const CadastroModelos: React.FC = () => {
                 segmentos: Array.isArray(m.segmentos) ? m.segmentos : (m.segmentos?.split(',') || ['GERAL'])
             }));
 
-            setModelos(mapped);
+            // Combine with hardcoded models
+            // Priority: DB models override hardcoded models with same name OR ID
+            const combined = [...mappedDB];
+            RECEBIMENTOS_MODELOS.forEach(standard => {
+                const isAlreadyInDB = combined.some(m =>
+                    m.id === standard.id ||
+                    m.nome.toLowerCase().trim() === standard.nome.toLowerCase().trim()
+                );
+
+                if (!isAlreadyInDB) {
+                    combined.push(standard);
+                }
+            });
+
+            setModelos(combined);
         } catch (error) {
             console.error('Erro ao buscar modelos:', error);
         } finally {
@@ -70,14 +100,29 @@ export const CadastroModelos: React.FC = () => {
             };
 
             if (editingId) {
-                const { error } = await supabase
-                    .from('modelos_recebimento')
-                    .update({
-                        ...payload,
-                        updated_at: new Date().toISOString()
-                    })
-                    .eq('id', editingId);
-                if (error) throw error;
+                // Check if editingId is a valid UUID
+                const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(editingId);
+
+                if (isUUID) {
+                    const { error } = await supabase
+                        .from('modelos_recebimento')
+                        .upsert({
+                            id: editingId,
+                            ...payload,
+                            updated_at: new Date().toISOString()
+                        });
+                    if (error) throw error;
+                } else {
+                    // It's a hardcoded model, insert it as a new DB record
+                    // This creates a customized DB version of the hardcoded model
+                    const { error } = await supabase
+                        .from('modelos_recebimento')
+                        .insert([{
+                            ...payload,
+                            created_at: new Date().toISOString()
+                        }]);
+                    if (error) throw error;
+                }
             } else {
                 const { error } = await supabase
                     .from('modelos_recebimento')
@@ -168,6 +213,11 @@ export const CadastroModelos: React.FC = () => {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
+                    {userRole && !userRole.toLowerCase().includes('admin') && !userRole.toLowerCase().includes('diretor') && (
+                        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 p-4 rounded-xl text-amber-800 dark:text-amber-200 text-sm font-medium mb-4">
+                            Você está visualizando os modelos em modo de leitura. Apenas administradores podem criar ou editar modelos.
+                        </div>
+                    )}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <label className="text-xs font-black text-gray-500 dark:text-zinc-400 uppercase tracking-widest ml-1">Nome do Modelo</label>
@@ -237,7 +287,7 @@ export const CadastroModelos: React.FC = () => {
                     <div className="pt-4 flex items-center space-x-3">
                         <button
                             type="submit"
-                            disabled={saving}
+                            disabled={saving || (!userRole?.toLowerCase().includes('admin') && !userRole?.toLowerCase().includes('diretor'))}
                             className="flex-1 md:flex-none md:min-w-[200px] flex items-center justify-center space-x-2 py-4 bg-[#005A9C] text-white rounded-xl font-bold hover:bg-[#004a80] transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50"
                         >
                             {saving ? <Loader2 className="animate-spin" size={20} /> : <Check size={20} />}
@@ -326,14 +376,16 @@ export const CadastroModelos: React.FC = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 text-right">
-                                        <div className="flex items-center justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button onClick={() => handleEdit(m)} className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all">
-                                                <Edit2 size={16} />
-                                            </button>
-                                            <button onClick={() => handleDelete(m.id)} className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all">
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </div>
+                                        {(userRole?.toLowerCase().includes('admin') || userRole?.toLowerCase().includes('diretor')) && (
+                                            <div className="flex items-center justify-end space-x-2 transition-opacity">
+                                                <button onClick={() => handleEdit(m)} className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all" title="Editar">
+                                                    <Edit2 size={16} />
+                                                </button>
+                                                <button onClick={() => handleDelete(m.id)} className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all" title="Excluir">
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                        )}
                                     </td>
                                 </tr>
                             ))}

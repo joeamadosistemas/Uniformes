@@ -125,7 +125,7 @@ export const Recebimentos: React.FC = () => {
                 const { data, error } = await supabase.from('modelos_recebimento').select('*').order('created_at', { ascending: false });
                 if (!isMounted) return;
 
-                if (!error && data) {
+                if (!error && data && data.length > 0) {
                     const mapped: RecebimentoModelo[] = data.map((m: any) => ({
                         id: m.id,
                         nome: m.nome,
@@ -135,40 +135,32 @@ export const Recebimentos: React.FC = () => {
                     }));
 
                     const combined = [...mapped];
-                    for (const standard of RECEBIMENTOS_MODELOS) {
-                        if (!mapped.some(m => m.id === standard.id)) {
+                    RECEBIMENTOS_MODELOS.forEach(standard => {
+                        if (!combined.find(m => m.id === standard.id)) {
                             combined.push(standard);
                         }
-                    }
+                    });
+
                     setModelosDisponiveis(combined);
+                    localStorage.setItem('@Uniformes:modelos_customizados', JSON.stringify(combined));
                 } else {
-                    const local = localStorage.getItem('@Uniformes:modelos_customizados');
-                    if (local) {
-                        const parsedLocal = JSON.parse(local);
-                        const combinedLocal = [...parsedLocal];
-                        for (const standard of RECEBIMENTOS_MODELOS) {
-                            if (!parsedLocal.some((m: RecebimentoModelo) => m.id === standard.id)) {
-                                combinedLocal.push(standard);
-                            }
-                        }
-                        setModelosDisponiveis(combinedLocal);
-                    }
+                    setModelosDisponiveis(RECEBIMENTOS_MODELOS);
+                    localStorage.setItem('@Uniformes:modelos_customizados', JSON.stringify(RECEBIMENTOS_MODELOS));
                 }
             } catch (e) {
                 if (!isMounted) return;
                 const local = localStorage.getItem('@Uniformes:modelos_customizados');
                 if (local) {
-                    const parsedLocal = JSON.parse(local);
-                    const combinedLocal = [...parsedLocal];
-                    for (const standard of RECEBIMENTOS_MODELOS) {
-                        if (!parsedLocal.some((m: RecebimentoModelo) => m.id === standard.id)) {
-                            combinedLocal.push(standard);
-                        }
+                    try {
+                        setModelosDisponiveis(JSON.parse(local));
+                    } catch {
+                        setModelosDisponiveis(RECEBIMENTOS_MODELOS);
                     }
-                    setModelosDisponiveis(combinedLocal);
+                } else {
+                    setModelosDisponiveis(RECEBIMENTOS_MODELOS);
                 }
             }
-        }
+        };
 
         carregarModelosCustomizados();
 
@@ -359,15 +351,13 @@ export const Recebimentos: React.FC = () => {
         const isAdmin = userRoleLower === 'admin' || userRoleLower === 'administrador' || userRoleLower === 'super administrador' || userRoleLower.includes('admin');
         if (isAdmin) return true;
 
-        const isCreche = segmentosEscola.includes('CONJUNTO UNIFORMA ESCOLAR CRECHE');
-        const isModeloCreche = modelo.segmentos.includes('CONJUNTO UNIFORMA ESCOLAR CRECHE');
+        const isCreche = segmentosEscola.some(s => s.toUpperCase().includes('CRECHE'));
+        const isModeloCreche = modelo.segmentos.some(s => s.toUpperCase().includes('CRECHE'));
 
         if (isCreche) {
-            // Se for Creche, mostra apenas modelos de Creche
             return isModeloCreche;
         } else {
-            // Se não for Creche, ignora modelos de Creche e mostra os GERAIS
-            return !isModeloCreche;
+            return !isModeloCreche || modelo.segmentos.includes('GERAL');
         }
     });
 

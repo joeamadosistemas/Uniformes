@@ -142,10 +142,10 @@ export const ControleRecebimento: React.FC = () => {
     return (
         <div className="space-y-8 pb-20">
             {/* Stats Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                 {/* Total Unidades */}
-                <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-xl p-4 md:p-6 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-2xl dark:shadow-black/20 transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center">
-                    <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-2xl text-blue-600 dark:text-blue-400 mb-2">
+                <div className="bg-white dark:bg-zinc-900 p-5 md:p-6 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center">
+                    <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-2xl text-[#005A9C] dark:text-blue-400 mb-2">
                         <School size={20} className="md:w-6 md:h-6" />
                     </div>
                     <p className="text-[9px] md:text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1">{t.dashboardControle.totalUnidades}</p>
@@ -153,7 +153,7 @@ export const ControleRecebimento: React.FC = () => {
                 </div>
 
                 {/* Informaram Recebimento */}
-                <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-xl p-4 md:p-6 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-2xl dark:shadow-black/20 transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center">
+                <div className="bg-white dark:bg-zinc-900 p-5 md:p-6 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center">
                     <div className="p-3 bg-green-50 dark:bg-green-900/30 rounded-2xl text-green-600 dark:text-green-400 mb-2">
                         <CheckCircle2 size={20} className="md:w-6 md:h-6" />
                     </div>
@@ -162,7 +162,7 @@ export const ControleRecebimento: React.FC = () => {
                 </div>
 
                 {/* Aguardando Lançamento */}
-                <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-xl p-4 md:p-6 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-2xl dark:shadow-black/20 transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center">
+                <div className="bg-white dark:bg-zinc-900 p-5 md:p-6 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center">
                     <div className="p-3 bg-amber-50 dark:bg-amber-900/30 rounded-2xl text-amber-600 dark:text-amber-400 mb-2">
                         <Clock size={20} className="md:w-6 md:h-6" />
                     </div>
@@ -171,7 +171,7 @@ export const ControleRecebimento: React.FC = () => {
                 </div>
 
                 {/* Taxa de Adesão */}
-                <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-xl p-4 md:p-6 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-2xl dark:shadow-black/20 transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center relative overflow-hidden">
+                <div className="bg-white dark:bg-zinc-900 p-5 md:p-6 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center">
                     <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl text-indigo-600 dark:text-indigo-400 mb-2">
                         <BarChart3 size={20} className="md:w-6 md:h-6" />
                     </div>
@@ -180,202 +180,197 @@ export const ControleRecebimento: React.FC = () => {
                         <h3 className="text-xl md:text-3xl font-black text-indigo-600 dark:text-indigo-400">{percentualConcluido.toFixed(1)}</h3>
                         <span className="text-[10px] font-bold text-indigo-400">%</span>
                     </div>
-                    <div className="w-12 bg-gray-100 dark:bg-zinc-800 h-1.5 rounded-full mt-2 overflow-hidden">
-                        <div
-                            className="bg-indigo-600 h-full transition-all duration-1000"
-                            style={{ width: `${percentualConcluido}%` }}
-                        ></div>
-                    </div>
                 </div>
             </div>
 
             {/* AI Insights Card */}
             <AIInsightsCard />
 
-            {/* List Table */}
-            <div className="bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-gray-100 dark:border-zinc-800 shadow-xl shadow-gray-200/50 dark:shadow-none overflow-hidden">
-                <div className="p-6 md:p-8 border-b border-gray-50 dark:border-zinc-800 flex flex-col gap-4 bg-white dark:bg-zinc-900">
+            {/* Filters Toolbar - Premium Style (Image 2) */}
+            <div className="flex flex-col md:flex-row items-center justify-center gap-4 py-6">
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                    {/* Label Filtrar */}
+                    <div className="flex items-center gap-2">
+                        <Search size={16} className="text-gray-400" />
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Filtrar</span>
+                    </div>
 
-                    {/* Linha 1: Ano + Busca + Status */}
-                    <div className="flex flex-wrap items-center gap-3">
-                        {/* Seletor de Ano */}
-                        <div className="flex items-center gap-2 bg-gray-50 dark:bg-zinc-800 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 focus-within:border-blue-500/40 transition-all shrink-0">
-                            <span className="text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest">ANO:</span>
-                            <select
-                                value={selectedYear}
-                                onChange={(e) => setSelectedYear(Number(e.target.value))}
-                                className="bg-transparent border-none text-sm font-black text-[#005A9C] dark:text-[#66b3ff] focus:ring-0 cursor-pointer"
-                            >
-                                <option value={2026}>2026</option>
-                                <option value={2025}>2025</option>
-                                <option value={2024}>2024</option>
-                            </select>
-                        </div>
-
-                        {/* Campo de busca */}
-                        <div className="relative flex-1 min-w-[200px] max-w-sm group">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={18} />
-                            <input
-                                type="text"
-                                placeholder={t.dashboardControle.buscarEscola}
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-11 pr-10 py-2.5 bg-gray-50 dark:bg-zinc-800/50 border border-gray-200 dark:border-zinc-700 focus:border-blue-500/40 rounded-xl focus:ring-4 focus:ring-blue-500/5 outline-none transition-all text-sm font-bold dark:text-white"
-                            />
-                            <select
-                                value={filterSegmento}
-                                onChange={(e) => setFilterSegmento(e.target.value)}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none text-gray-400 focus:ring-0 cursor-pointer text-xs"
-                                title="Filtrar por segmento"
-                            >
-                                <option value="todos">▾</option>
-                                {SEGMENTOS_ENSINO.map(seg => (
-                                    <option key={seg} value={seg}>
-                                        {seg.replace('CONJUNTO UNIFORMA ESCOLAR ', '')}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        {/* Botões de Status */}
-                        <div className="flex items-center gap-1 bg-gray-50 dark:bg-zinc-800 p-1 rounded-xl border border-gray-200 dark:border-zinc-700 shrink-0">
-                            {[
-                                { id: 'todos', label: t.dashboardControle.todos },
-                                { id: 'concluido', label: t.dashboardControle.concluido },
-                                { id: 'pendente', label: t.dashboardControle.pendente }
-                            ].map(status => (
-                                <button
-                                    key={status.id}
-                                    onClick={() => setFilterStatus(status.id as any)}
-                                    className={`px-5 py-2 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all ${filterStatus === status.id
-                                        ? 'bg-[#005A9C] text-white shadow-md'
-                                        : 'text-gray-500 dark:text-zinc-400 hover:text-gray-800 dark:hover:text-white'
-                                        }`}
-                                >
-                                    {status.label}
-                                </button>
+                    {/* Seletor Segmento */}
+                    <div className="bg-white dark:bg-zinc-800/80 px-5 py-3 rounded-[1.5rem] border border-gray-100 dark:border-zinc-700 shadow-sm flex items-center gap-2 min-w-[200px]">
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Segmentos:</span>
+                        <select
+                            value={filterSegmento}
+                            onChange={(e) => setFilterSegmento(e.target.value)}
+                            className="bg-transparent border-none p-0 text-xs font-black text-[#005A9C] dark:text-[#66b3ff] focus:ring-0 cursor-pointer uppercase tracking-tight"
+                        >
+                            <option value="todos">Todos</option>
+                            {SEGMENTOS_ENSINO.map(seg => (
+                                <option key={seg} value={seg}>
+                                    {seg.replace('CONJUNTO UNIFORMA ESCOLAR ', '').replace('CONJUNTO UNIFORME ESCOLAR ', '')}
+                                </option>
                             ))}
-                        </div>
+                        </select>
                     </div>
 
-                    {/* Linha 2: Ações */}
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={fetchStatusEscolas}
-                            disabled={refreshing}
-                            className="p-2.5 bg-gray-50 dark:bg-zinc-800 text-gray-600 dark:text-zinc-300 rounded-xl border border-gray-200 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-700 transition-all active:scale-90"
-                            title="Atualizar dados"
+                    {/* Seletor Ano */}
+                    <div className="bg-white dark:bg-zinc-800/80 px-5 py-3 rounded-[1.5rem] border border-gray-100 dark:border-zinc-700 shadow-sm flex items-center gap-2">
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Ano:</span>
+                        <select
+                            value={selectedYear}
+                            onChange={(e) => setSelectedYear(Number(e.target.value))}
+                            className="bg-transparent border-none p-0 text-xs font-black text-[#005A9C] dark:text-[#66b3ff] focus:ring-0 cursor-pointer"
                         >
-                            <RefreshCw size={18} className={refreshing ? 'animate-spin' : ''} />
-                        </button>
-
-                        <button
-                            onClick={handleExportPDF}
-                            disabled={loading || escolasFiltradas.length === 0}
-                            className="flex items-center gap-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all shadow-lg shadow-red-600/20 active:scale-95"
-                        >
-                            <FileText size={16} /> Exportar PDF
-                        </button>
+                            <option value={2026}>2026</option>
+                            <option value={2025}>2025</option>
+                            <option value={2024}>2024</option>
+                        </select>
                     </div>
+
+                    {/* Busca */}
+                    <div className="relative bg-white dark:bg-zinc-800/80 rounded-[1.5rem] px-5 py-3 border border-gray-100 dark:border-zinc-700 shadow-sm w-48 focus-within:w-64 transition-all">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                        <input
+                            type="text"
+                            placeholder="Buscar"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="bg-transparent border-none p-0 pl-6 w-full text-xs font-bold text-gray-700 dark:text-zinc-300 placeholder-gray-400 outline-none"
+                        />
+                    </div>
+
+                    {/* Status Tabs */}
+                    <div className="bg-white dark:bg-zinc-800/80 p-1 rounded-[1.5rem] border border-gray-100 dark:border-zinc-700 shadow-sm flex items-center">
+                        {[
+                            { id: 'todos', label: 'Todos' },
+                            { id: 'concluido', label: 'Concluído' },
+                            { id: 'pendente', label: 'Pendente' }
+                        ].map(status => (
+                            <button
+                                key={status.id}
+                                onClick={() => setFilterStatus(status.id as any)}
+                                className={`px-6 py-2 rounded-[1.2rem] text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${filterStatus === status.id
+                                    ? 'bg-[#D97706] text-white shadow-md shadow-amber-600/20'
+                                    : 'text-gray-400 hover:text-gray-600'
+                                    }`}
+                            >
+                                {status.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Refresh */}
+                    <button
+                        onClick={fetchStatusEscolas}
+                        disabled={refreshing}
+                        className="w-11 h-11 flex items-center justify-center bg-white dark:bg-zinc-800 rounded-full border border-gray-100 dark:border-zinc-700 text-gray-400 hover:text-[#005A9C] shadow-sm transition-all active:scale-95"
+                    >
+                        <RefreshCw size={20} className={refreshing ? 'animate-spin' : ''} />
+                    </button>
                 </div>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-gray-50/50 dark:bg-zinc-800/20">
-                                <th className="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">{t.dashboardControle.unidadeEscolar}</th>
-                                <th className="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">{t.dashboardControle.etapasAtendidas}</th>
-                                <th className="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">{t.dashboardControle.status}</th>
-                                <th className="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">{t.dashboardControle.ultimoLancamento}</th>
+                <button
+                    onClick={handleExportPDF}
+                    disabled={loading || escolasFiltradas.length === 0}
+                    className="flex items-center gap-2 bg-[#DC2626] hover:bg-red-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-red-600/20"
+                >
+                    <FileText size={16} /> Exportar PDF
+                </button>
+            </div>
+
+            <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                    <thead>
+                        <tr className="bg-gray-50/50 dark:bg-zinc-800/20">
+                            <th className="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">{t.dashboardControle.unidadeEscolar}</th>
+                            <th className="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">{t.dashboardControle.etapasAtendidas}</th>
+                            <th className="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">{t.dashboardControle.status}</th>
+                            <th className="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">{t.dashboardControle.ultimoLancamento}</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50 dark:divide-zinc-800">
+                        {loading ? (
+                            <tr>
+                                <td colSpan={4} className="px-10 py-32 text-center">
+                                    <div className="flex flex-col items-center gap-4">
+                                        <div className="w-16 h-16 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
+                                        <p className="text-xs font-black text-gray-400 uppercase tracking-widest animate-pulse">{t.dashboardControle.sincronizando}</p>
+                                    </div>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-50 dark:divide-zinc-800">
-                            {loading ? (
-                                <tr>
-                                    <td colSpan={4} className="px-10 py-32 text-center">
-                                        <div className="flex flex-col items-center gap-4">
-                                            <div className="w-16 h-16 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
-                                            <p className="text-xs font-black text-gray-400 uppercase tracking-widest animate-pulse">{t.dashboardControle.sincronizando}</p>
+                        ) : escolasFiltradas.length === 0 ? (
+                            <tr>
+                                <td colSpan={4} className="px-10 py-32 text-center">
+                                    <div className="flex flex-col items-center gap-4 opacity-30">
+                                        <School size={80} />
+                                        <p className="text-sm font-bold text-gray-400 uppercase tracking-tight">{t.dashboardControle.nenhumaEscola}</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        ) : (
+                            escolasFiltradas.map((esc) => (
+                                <tr
+                                    key={esc.id}
+                                    onClick={() => fetchDetalhesEscola(esc)}
+                                    className="hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-all group cursor-pointer"
+                                >
+                                    <td className="px-10 py-8">
+                                        <div className="flex items-center gap-5">
+                                            <div className={`w - 1.5 h - 12 rounded - full transition - all group - hover: h - 14 ${esc.jaLancou ? 'bg-green-500 shadow-lg shadow-green-500/30' : 'bg-amber-500 shadow-lg shadow-amber-500/30'} `}></div>
+                                            <div>
+                                                <p className="font-black text-gray-800 dark:text-zinc-100 text-base group-hover:text-[#005A9C] transition-colors uppercase tracking-tight">{esc.nome}</p>
+                                                <p className="text-xs text-gray-400 font-bold tracking-tight">{esc.email}</p>
+                                            </div>
                                         </div>
                                     </td>
-                                </tr>
-                            ) : escolasFiltradas.length === 0 ? (
-                                <tr>
-                                    <td colSpan={4} className="px-10 py-32 text-center">
-                                        <div className="flex flex-col items-center gap-4 opacity-30">
-                                            <School size={80} />
-                                            <p className="text-sm font-bold text-gray-400 uppercase tracking-tight">{t.dashboardControle.nenhumaEscola}</p>
+                                    <td className="px-10 py-8">
+                                        <div className="flex flex-wrap gap-2 max-w-sm">
+                                            {esc.segmentos && esc.segmentos.map(seg => (
+                                                <span key={seg} className="px-3 py-1.5 bg-gray-50 dark:bg-zinc-800 text-gray-500 dark:text-zinc-400 rounded-xl text-[9px] font-black uppercase tracking-widest border border-gray-100 dark:border-zinc-700 shadow-sm transition-all group-hover:border-blue-500/20 group-hover:bg-white dark:group-hover:bg-zinc-700">
+                                                    {seg.replace('CONJUNTO UNIFORMA ESCOLAR ', '')}
+                                                </span>
+                                            ))}
                                         </div>
                                     </td>
+                                    <td className="px-10 py-8 text-center">
+                                        {esc.jaLancou ? (
+                                            <span className="inline-flex items-center px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border border-green-100 dark:border-green-800/30 shadow-sm">
+                                                <CheckCircle2 size={14} className="mr-2" /> {t.dashboardControle.concluido}
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex items-center px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-800/30 shadow-sm">
+                                                <Clock size={14} className="mr-2" /> {t.dashboardControle.pendente}
+                                            </span>
+                                        )}
+                                    </td>
+                                    <td className="px-10 py-8 text-right">
+                                        <p className="text-sm font-black text-gray-700 dark:text-zinc-200 tabular-nums">
+                                            {esc.dataUltimoLancamento ? new Date(esc.dataUltimoLancamento).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '-'}
+                                        </p>
+                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                            {esc.dataUltimoLancamento ? new Date(esc.dataUltimoLancamento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : ''}
+                                        </p>
+                                    </td>
                                 </tr>
-                            ) : (
-                                escolasFiltradas.map((esc) => (
-                                    <tr
-                                        key={esc.id}
-                                        onClick={() => fetchDetalhesEscola(esc)}
-                                        className="hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-all group cursor-pointer"
-                                    >
-                                        <td className="px-10 py-8">
-                                            <div className="flex items-center gap-5">
-                                                <div className={`w - 1.5 h - 12 rounded - full transition - all group - hover: h - 14 ${esc.jaLancou ? 'bg-green-500 shadow-lg shadow-green-500/30' : 'bg-amber-500 shadow-lg shadow-amber-500/30'} `}></div>
-                                                <div>
-                                                    <p className="font-black text-gray-800 dark:text-zinc-100 text-base group-hover:text-[#005A9C] transition-colors uppercase tracking-tight">{esc.nome}</p>
-                                                    <p className="text-xs text-gray-400 font-bold tracking-tight">{esc.email}</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-10 py-8">
-                                            <div className="flex flex-wrap gap-2 max-w-sm">
-                                                {esc.segmentos && esc.segmentos.map(seg => (
-                                                    <span key={seg} className="px-3 py-1.5 bg-gray-50 dark:bg-zinc-800 text-gray-500 dark:text-zinc-400 rounded-xl text-[9px] font-black uppercase tracking-widest border border-gray-100 dark:border-zinc-700 shadow-sm transition-all group-hover:border-blue-500/20 group-hover:bg-white dark:group-hover:bg-zinc-700">
-                                                        {seg.replace('CONJUNTO UNIFORMA ESCOLAR ', '')}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </td>
-                                        <td className="px-10 py-8 text-center">
-                                            {esc.jaLancou ? (
-                                                <span className="inline-flex items-center px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border border-green-100 dark:border-green-800/30 shadow-sm">
-                                                    <CheckCircle2 size={14} className="mr-2" /> {t.dashboardControle.concluido}
-                                                </span>
-                                            ) : (
-                                                <span className="inline-flex items-center px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-800/30 shadow-sm">
-                                                    <Clock size={14} className="mr-2" /> {t.dashboardControle.pendente}
-                                                </span>
-                                            )}
-                                        </td>
-                                        <td className="px-10 py-8 text-right">
-                                            <p className="text-sm font-black text-gray-700 dark:text-zinc-200 tabular-nums">
-                                                {esc.dataUltimoLancamento ? new Date(esc.dataUltimoLancamento).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '-'}
-                                            </p>
-                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                                                {esc.dataUltimoLancamento ? new Date(esc.dataUltimoLancamento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : ''}
-                                            </p>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
 
-                {!loading && (
-                    <div className="bg-gray-50 dark:bg-zinc-800/50 px-10 py-6 flex flex-col md:flex-row items-center justify-between border-t border-gray-100 dark:border-zinc-800 gap-4">
-                        <p className="text-[10px] font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest">
-                            {t.dashboardControle.mostrandoUnidades.replace('{count}', escolasFiltradas.length.toString()).replace('{total}', escolas.length.toString())}
-                        </p>
-                        <div className="flex items-center gap-6">
-                            <div className="flex items-center gap-2">
-                                <div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-lg shadow-green-500/30"></div>
-                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t.dashboardControle.legendaRecebido}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <div className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-lg shadow-amber-500/30"></div>
-                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t.dashboardControle.legendaPendente}</span>
-                            </div>
-                        </div>
+            <div className="bg-gray-50 dark:bg-zinc-800/50 px-10 py-6 flex flex-col md:flex-row items-center justify-between border-t border-gray-100 dark:border-zinc-800 gap-4">
+                <p className="text-[10px] font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest">
+                    {t.dashboardControle.mostrandoUnidades.replace('{count}', escolasFiltradas.length.toString()).replace('{total}', escolas.length.toString())}
+                </p>
+                <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-2">
+                        <div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-lg shadow-green-500/30"></div>
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t.dashboardControle.legendaRecebido}</span>
                     </div>
-                )}
+                    <div className="flex items-center gap-2">
+                        <div className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-lg shadow-amber-500/30"></div>
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t.dashboardControle.legendaPendente}</span>
+                    </div>
+                </div>
             </div>
 
             {/* Modal de Detalhes da Unidade */}

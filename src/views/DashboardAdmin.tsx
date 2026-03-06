@@ -480,36 +480,38 @@ export const DashboardAdmin: React.FC = () => {
                 </div>
             </div>
 
-            {/* Toolbar Central - Novo Design */}
-            <div className="flex flex-col items-center justify-center mb-10 mt-12">
+            {/* Toolbar Central - Novo Design (Image 2 Style) */}
+            <div className="flex flex-col md:flex-row items-center justify-center gap-4 py-6">
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                    {/* Label Filtrar */}
+                    <div className="flex items-center gap-2">
+                        <Search size={16} className="text-gray-400" />
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Filtrar</span>
+                    </div>
 
-                {/* Linha 1: Filtro de Segmentos */}
-                <div className="flex items-center gap-2 mb-4">
-                    <Filter className="text-gray-400 w-4 h-4" />
-                    <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Filtrar</span>
-                    <select
-                        value={selectedSegmento}
-                        onChange={(e) => setSelectedSegmento(e.target.value)}
-                        className="bg-gray-50 dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 rounded-xl px-4 py-2 text-xs font-black text-gray-700 dark:text-zinc-300 uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-[#005A9C] transition-all cursor-pointer"
-                    >
-                        <option value="todos">Segmentos: Todos</option>
-                        {todosOsSegmentos.map((s, idx) => {
-                            const label = (s as string).replace('CONJUNTO UNIFORMA ESCOLAR ', '').replace('CONJUNTO UNIFORME ESCOLAR ', '');
-                            return <option key={idx} value={s as string}>{label}</option>;
-                        })}
-                    </select>
-                </div>
+                    {/* Seletor Segmento */}
+                    <div className="bg-white dark:bg-zinc-800/80 px-5 py-3 rounded-[1.5rem] border border-gray-100 dark:border-zinc-700 shadow-sm flex items-center gap-2 min-w-[200px]">
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Segmentos:</span>
+                        <select
+                            value={selectedSegmento}
+                            onChange={(e) => setSelectedSegmento(e.target.value)}
+                            className="bg-transparent border-none p-0 text-xs font-black text-[#005A9C] dark:text-[#66b3ff] focus:ring-0 cursor-pointer uppercase tracking-tight"
+                        >
+                            <option value="todos">Todos</option>
+                            {todosOsSegmentos.map((s, idx) => {
+                                const label = (s as string).replace('CONJUNTO UNIFORMA ESCOLAR ', '').replace('CONJUNTO UNIFORME ESCOLAR ', '');
+                                return <option key={idx} value={s as string}>{label}</option>;
+                            })}
+                        </select>
+                    </div>
 
-                {/* Linha 2: Ano, Busca, Tabs */}
-                <div className="flex flex-wrap items-center justify-center gap-4">
-
-                    {/* Ano */}
-                    <div className="flex items-center gap-2 bg-gray-50 dark:bg-zinc-800 rounded-[24px] px-6 py-3 border border-gray-100 dark:border-zinc-700 shadow-sm">
-                        <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Ano:</span>
+                    {/* Seletor Ano */}
+                    <div className="bg-white dark:bg-zinc-800/80 px-5 py-3 rounded-[1.5rem] border border-gray-100 dark:border-zinc-700 shadow-sm flex items-center gap-2">
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Ano:</span>
                         <select
                             value={selectedYear}
                             onChange={(e) => setSelectedYear(Number(e.target.value))}
-                            className="bg-transparent border-none p-0 text-sm font-black text-[#005A9C] dark:text-[#66b3ff] focus:ring-0 cursor-pointer outline-none"
+                            className="bg-transparent border-none p-0 text-xs font-black text-[#005A9C] dark:text-[#66b3ff] focus:ring-0 cursor-pointer"
                         >
                             <option value={2026}>2026</option>
                             <option value={2025}>2025</option>
@@ -518,49 +520,55 @@ export const DashboardAdmin: React.FC = () => {
                     </div>
 
                     {/* Busca */}
-                    <div className="relative flex items-center bg-gray-50 dark:bg-zinc-800 rounded-[24px] px-4 py-3 border border-gray-100 dark:border-zinc-700 shadow-sm w-48 transition-all focus-within:w-64 focus-within:ring-2 focus-within:ring-[#005A9C]/50">
-                        <Search className="text-gray-400 mr-2" size={18} />
+                    <div className="relative bg-white dark:bg-zinc-800/80 rounded-[1.5rem] px-5 py-3 border border-gray-100 dark:border-zinc-700 shadow-sm w-48 focus-within:w-64 transition-all">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                         <input
                             type="text"
                             placeholder="Buscar"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="bg-transparent border-none p-0 w-full text-sm text-gray-700 dark:text-zinc-300 placeholder-gray-400 outline-none"
+                            className="bg-transparent border-none p-0 pl-6 w-full text-xs font-bold text-gray-700 dark:text-zinc-300 placeholder-gray-400 outline-none"
                         />
                     </div>
 
-                    {/* Tabs Todo/Concluido/Pendente */}
-                    <div className="flex items-center bg-gray-50 dark:bg-zinc-800 rounded-[24px] p-1 border border-gray-100 dark:border-zinc-700 shadow-sm">
+                    {/* Status Tabs */}
+                    <div className="bg-white dark:bg-zinc-800/80 p-1 rounded-[1.5rem] border border-gray-100 dark:border-zinc-700 shadow-sm flex items-center">
                         <button
                             onClick={() => setActiveTab('todos')}
-                            className={`px-6 py-2 rounded-[20px] text-xs font-black uppercase tracking-wider transition-all duration-300 ${activeTab === 'todos' ? 'bg-[#D97706] text-white shadow-md' : 'text-gray-400 hover:text-gray-600 dark:hover:text-zinc-300'}`}
+                            className={`px-6 py-2 rounded-[1.2rem] text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${activeTab === 'todos'
+                                ? 'bg-[#D97706] text-white shadow-md shadow-amber-600/20'
+                                : 'text-gray-400 hover:text-gray-600'
+                                }`}
                         >
                             Todos
                         </button>
                         <button
                             onClick={() => setActiveTab('informaram')}
-                            className={`px-6 py-2 rounded-[20px] text-xs font-black uppercase tracking-wider transition-all duration-300 ${activeTab === 'informaram' ? 'bg-[#D97706] text-white shadow-md' : 'text-gray-400 hover:text-gray-600 dark:hover:text-zinc-300'}`}
+                            className={`px-6 py-2 rounded-[1.2rem] text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${activeTab === 'informaram'
+                                ? 'bg-[#D97706] text-white shadow-md shadow-amber-600/20'
+                                : 'text-gray-400 hover:text-gray-600'
+                                }`}
                         >
                             Concluído
                         </button>
                         <button
                             onClick={() => setActiveTab('faltam')}
-                            className={`px-6 py-2 rounded-[20px] text-xs font-black uppercase tracking-wider transition-all duration-300 ${activeTab === 'faltam' ? 'bg-[#D97706] text-white shadow-md' : 'text-gray-400 hover:text-gray-600 dark:hover:text-zinc-300'}`}
+                            className={`px-6 py-2 rounded-[1.2rem] text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${activeTab === 'faltam'
+                                ? 'bg-[#D97706] text-white shadow-md shadow-amber-600/20'
+                                : 'text-gray-400 hover:text-gray-600'
+                                }`}
                         >
                             Pendente
                         </button>
                     </div>
 
-                </div>
-
-                {/* Linha 3: Refresh */}
-                <div className="flex items-center justify-center gap-3 mt-6">
+                    {/* Refresh */}
                     <button
                         onClick={fetchDashboardData}
-                        className="p-3 bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700 border border-gray-100 dark:border-zinc-700 text-gray-600 rounded-2xl shadow-sm transition-all active:scale-95 flex items-center justify-center"
-                        title="Atualizar Dados"
+                        disabled={loading}
+                        className="w-11 h-11 flex items-center justify-center bg-white dark:bg-zinc-800 rounded-full border border-gray-100 dark:border-zinc-700 text-gray-400 hover:text-[#005A9C] shadow-sm transition-all active:scale-95"
                     >
-                        <RefreshCw size={22} className={loading ? "animate-spin text-[#005A9C]" : ""} />
+                        <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
                     </button>
                 </div>
             </div>
