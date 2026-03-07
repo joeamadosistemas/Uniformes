@@ -419,15 +419,30 @@ export const Recebimentos: React.FC = () => {
 
         if (isCrecheAutorizada) {
             // Se for creche autorizada, só mostra o que está na whitelist de creches
-            return WHITELIST_CRECHES.some(pref => nomeModeloUpper.includes(pref.toUpperCase()));
+            // BLOQUEIO ADICIONAL: Creches não veem itens de nível fundamental/EJA mesmo que o prefixo coincida
+            if (nomeModeloUpper.includes('ANOS INICIAIS') ||
+                nomeModeloUpper.includes('ANOS FINAIS') ||
+                nomeModeloUpper.includes('NCEJA') ||
+                nomeModeloUpper.includes('EJA')) {
+                return false;
+            }
+
+            return WHITELIST_CRECHES.some(pref => {
+                const p = pref.toUpperCase().trim();
+                return nomeModeloUpper === p || nomeModeloUpper.startsWith(p + ' ') || nomeModeloUpper.startsWith(p + ' -');
+            });
         } else {
             // Se não for das 17 creches, só mostra o que está na whitelist de escolas
             // BLOQUEIO ESTRETO: Impede qualquer item que contenha explicitamente "CRECHE" ou "BERÇÁRIO" no nome
+            // (Isso impede que o "Mat. 02 - CRECHE" apareça na escola regular, mesmo o "Mat. 02" estando na whitelist)
             if (nomeModeloUpper.includes('CRECHE') || nomeModeloUpper.includes('BERÇÁRIO')) {
                 return false;
             }
 
-            return WHITELIST_ESCOLAS.some(pref => nomeModeloUpper.includes(pref.toUpperCase()));
+            return WHITELIST_ESCOLAS.some(pref => {
+                const p = pref.toUpperCase().trim();
+                return nomeModeloUpper === p || nomeModeloUpper.startsWith(p + ' ') || nomeModeloUpper.startsWith(p + ' -');
+            });
         }
     });
 
