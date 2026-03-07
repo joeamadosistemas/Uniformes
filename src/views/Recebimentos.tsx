@@ -402,8 +402,11 @@ export const Recebimentos: React.FC = () => {
         setEditingId(null);
     };
 
+    // Unifica e de-duplica modelos (hardcoded + banco) pelo nome
+    const todosModelos = [...RECEBIMENTOS_MODELOS, ...(modelosDisponiveis.filter(m => !RECEBIMENTOS_MODELOS.some(h => h.nome === m.nome)))];
+
     // Filtra os modelos baseados no segmento da escola e na role do usuário
-    const modelosFiltrados = modelosDisponiveis.filter(modelo => {
+    const modelosFiltrados = todosModelos.filter(modelo => {
         const userRoleLower = userRole?.toLowerCase() || '';
         const isAdmin = userRoleLower === 'admin' || userRoleLower === 'administrador' || userRoleLower === 'super administrador' || userRoleLower.includes('admin');
 
@@ -415,12 +418,11 @@ export const Recebimentos: React.FC = () => {
         const isCrecheAutorizada = CRECHES_AUTORIZADAS.includes(normalizedEscola);
 
         if (isCrecheAutorizada) {
-            // Se for creche, só mostra o que está na whitelist de creches
+            // Se for creche autorizada, só mostra o que está na whitelist de creches
             return WHITELIST_CRECHES.some(pref => nomeModeloUpper.includes(pref.toUpperCase()));
         } else {
-            // Se não for creche, só mostra o que está na whitelist de escolas
+            // Se não for das 17 creches, só mostra o que está na whitelist de escolas
             // BLOQUEIO ESTRETO: Impede qualquer item que contenha explicitamente "CRECHE" ou "BERÇÁRIO" no nome
-            // (Isso resolve casos onde o prefixo coincide, como Mat. Pedagógico 02)
             if (nomeModeloUpper.includes('CRECHE') || nomeModeloUpper.includes('BERÇÁRIO')) {
                 return false;
             }
