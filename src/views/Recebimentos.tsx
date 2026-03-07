@@ -415,33 +415,35 @@ export const Recebimentos: React.FC = () => {
 
         const normalizedEscola = escola.toLowerCase().trim();
         const nomeModeloUpper = modelo.nome.toUpperCase().trim();
+        const descModeloUpper = (modelo.descricao || '').toUpperCase().trim();
+        const combinedText = `${nomeModeloUpper} ${descModeloUpper}`.trim();
         const isCrecheAutorizada = CRECHES_AUTORIZADAS.includes(normalizedEscola);
 
         if (isCrecheAutorizada) {
             // Se for creche autorizada, só mostra o que está na whitelist de creches
             // BLOQUEIO ADICIONAL: Creches não veem itens de nível fundamental/EJA mesmo que o prefixo coincida
-            if (nomeModeloUpper.includes('ANOS INICIAIS') ||
-                nomeModeloUpper.includes('ANOS FINAIS') ||
-                nomeModeloUpper.includes('NCEJA') ||
-                nomeModeloUpper.includes('EJA')) {
+            if (combinedText.includes('ANOS INICIAIS') ||
+                combinedText.includes('ANOS FINAIS') ||
+                combinedText.includes('NCEJA') ||
+                combinedText.includes('EJA')) {
                 return false;
             }
 
             return WHITELIST_CRECHES.some(pref => {
                 const p = pref.toUpperCase().trim();
-                return nomeModeloUpper === p || nomeModeloUpper.startsWith(p + ' ') || nomeModeloUpper.startsWith(p + ' -');
+                return combinedText === p || combinedText.startsWith(p + ' ') || combinedText.startsWith(p + ' -') || nomeModeloUpper === p || nomeModeloUpper.startsWith(p + ' ') || nomeModeloUpper.startsWith(p + ' -');
             });
         } else {
             // Se não for das 17 creches, só mostra o que está na whitelist de escolas
             // BLOQUEIO ESTRETO: Impede qualquer item que contenha explicitamente "CRECHE" ou "BERÇÁRIO" no nome
             // (Isso impede que o "Mat. 02 - CRECHE" apareça na escola regular, mesmo o "Mat. 02" estando na whitelist)
-            if (nomeModeloUpper.includes('CRECHE') || nomeModeloUpper.includes('BERÇÁRIO')) {
+            if (combinedText.includes('CRECHE') || combinedText.includes('BERÇÁRIO')) {
                 return false;
             }
 
             return WHITELIST_ESCOLAS.some(pref => {
                 const p = pref.toUpperCase().trim();
-                return nomeModeloUpper === p || nomeModeloUpper.startsWith(p + ' ') || nomeModeloUpper.startsWith(p + ' -');
+                return combinedText === p || combinedText.startsWith(p + ' ') || combinedText.startsWith(p + ' -') || nomeModeloUpper === p || nomeModeloUpper.startsWith(p + ' ') || nomeModeloUpper.startsWith(p + ' -');
             });
         }
     });
