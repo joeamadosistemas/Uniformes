@@ -34,10 +34,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, isA
     ...(isAdmin ? [
       { id: 'controle-recebimento', label: t.sidebar.controleRecebimento, icon: ClipboardList },
       { id: 'admin-dashboard', label: 'Dashboard', icon: FileText },
+      { id: 'lancamentos', label: t.sidebar.lancamentos, icon: LayoutDashboard },
+      { id: 'transferencias', label: t.sidebar.transferencias, icon: ArrowLeftRight },
     ] : []),
-    { id: 'lancamentos', label: t.sidebar.lancamentos, icon: LayoutDashboard },
-    { id: 'transferencias', label: t.sidebar.transferencias, icon: ArrowLeftRight },
   ];
+
 
   const configItems = [
     { id: 'config-uniformes', label: t.sidebar.cadastrosUniformes, icon: Shirt },

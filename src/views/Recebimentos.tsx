@@ -550,7 +550,7 @@ export const Recebimentos: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div className="space-y-3">
                         <label className="text-xs md:text-sm font-black text-gray-900 dark:text-zinc-200 uppercase tracking-widest block">
-                            MODELO
+                            SELECIONE CADA O OBJETO RECEBIDO E INFORME ABAIXO AS REPECTIVAS QUANTIDADES
                         </label>
                         <select
                             className="w-full h-12 bg-gray-50 dark:bg-zinc-800 border-none rounded-xl px-4 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#005A9C] transition-all cursor-pointer"
@@ -580,9 +580,12 @@ export const Recebimentos: React.FC = () => {
 
                 {modeloSelecionado && (
                     <div className="space-y-6 p-6 bg-gray-50 dark:bg-zinc-800/50 rounded-2xl border border-dashed border-gray-200 dark:border-zinc-700">
-                        <h3 className="text-lg font-bold text-[#005A9C] dark:text-[#66b3ff] flex items-center gap-2">
+                        <h3 className="text-lg font-bold text-[#005A9C] dark:text-[#66b3ff] flex items-center gap-2 flex-wrap">
                             <Package size={20} />
                             {modeloSelecionado.descricao}
+                            <span className="text-sm font-normal text-gray-500 dark:text-zinc-400">
+                                - Digite as quantidades nos campos abaixo e clique em 'Adicionar Item'.
+                            </span>
                         </h3>
 
                         <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-2">
