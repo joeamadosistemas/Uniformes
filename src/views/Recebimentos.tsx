@@ -23,7 +23,8 @@ const CRECHES_AUTORIZADAS = [
     'cm.mariadelurdessgarcia@edu.itaguai.rj.gov.br',
     'cm.taniamaramottademenezes@edu.itaguai.rj.gov.br',
     'cm.ritaferreirafeijo@edu.itaguai.rj.gov.br',
-    'cm.mariarosagomesdonascimento@edu.itaguai.rj.gov.br'
+    'cm.mariarosagomesdonascimento@edu.itaguai.rj.gov.br',
+    'cm.teresinhadejesuscamposdefarias@edu.itaguai.rj.gov.br'
 ];
 
 const WHITELIST_CRECHES = [
