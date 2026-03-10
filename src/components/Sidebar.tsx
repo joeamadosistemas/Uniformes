@@ -30,11 +30,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, isA
   const { t } = useT();
 
   const menuItems = [
-    { id: 'recebimentos', label: t.sidebar.recebimentos, icon: ClipboardList },
+    { id: 'lancamentos', label: t.sidebar.lancamentos, icon: LayoutDashboard },
     ...(isAdmin ? [
+      { id: 'recebimentos', label: t.sidebar.recebimentos, icon: ClipboardList },
       { id: 'controle-recebimento', label: t.sidebar.controleRecebimento, icon: ClipboardList },
       { id: 'admin-dashboard', label: 'Dashboard', icon: FileText },
-      { id: 'lancamentos', label: t.sidebar.lancamentos, icon: LayoutDashboard },
       { id: 'transferencias', label: t.sidebar.transferencias, icon: ArrowLeftRight },
     ] : []),
   ];

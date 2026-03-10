@@ -62,7 +62,7 @@ export const pt = {
         titulo: 'Inventário dos Uniformes',
         subtitulo: 'Registre a distribuição de uniformes para alunos',
         totalAlunos: 'Total de Alunos Matriculados',
-        novoRegistro: 'Novo Registro',
+        novoRegistro: 'SELECIONE CADA OBJETO RECEBIDO E INFORME ABAIXO AS RESPECTIVAS QUANTIDADES',
         categoria: 'Categoria / Nível Escolar',
         tipoUniforme: 'Tipo de Uniforme',
         qtdSobrando: 'Qtd. Sobrando',

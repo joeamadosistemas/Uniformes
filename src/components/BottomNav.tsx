@@ -1,5 +1,5 @@
 import React from 'react';
-import { Package, ClipboardList, ArrowLeftRight, FileText } from 'lucide-react';
+import { Package, ClipboardList, FileText } from 'lucide-react';
 
 interface Props {
     activeView: string;
@@ -12,12 +12,11 @@ export const BottomNav: React.FC<Props> = ({ activeView, setActiveView, isAdmin 
         ? [
             { id: 'controle-recebimento', label: 'Controle', icon: FileText },
             { id: 'recebimentos', label: 'Recebimentos', icon: Package },
-            { id: 'admin-dashboard', label: 'Dashboard', icon: FileText }
+            { id: 'admin-dashboard', label: 'Dashboard', icon: FileText },
+            { id: 'lancamentos', label: 'Inventário', icon: ClipboardList },
         ]
         : [
-            { id: 'recebimentos', label: 'Recebimentos', icon: Package },
             { id: 'lancamentos', label: 'Inventário', icon: ClipboardList },
-            { id: 'transferencias', label: 'Transferências', icon: ArrowLeftRight },
         ];
 
     return (

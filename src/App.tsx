@@ -27,7 +27,7 @@ function App() {
   const { t } = useT();
   const [session, setSession] = useState<Session | null>(null);
   const [loadingSession, setLoadingSession] = useState(true);
-  const [activeView, setActiveView] = useState('recebimentos');
+  const [activeView, setActiveView] = useState('lancamentos');
   const [isDarkMode, setIsDarkMode] = useState(() => {
     if (typeof window !== 'undefined' && window.innerWidth < 768) {
       localStorage.setItem('theme', 'light');
@@ -204,7 +204,19 @@ function App() {
   const isAdmin = userRole === 'Super Administrador' || userRole === 'admin';
 
   const renderView = () => {
-    const adminViews = ['admin-dashboard', 'controle-recebimento', 'config-escola', 'config-usuarios', 'config-uniformes', 'config-modelos', 'config-backup', 'config-sobre', 'config-audit'];
+    const adminViews = [
+      'admin-dashboard',
+      'controle-recebimento',
+      'recebimentos',
+      'transferencias',
+      'config-escola',
+      'config-usuarios',
+      'config-uniformes',
+      'config-modelos',
+      'config-backup',
+      'config-sobre',
+      'config-audit'
+    ];
     if (!isAdmin && adminViews.includes(activeView)) {
       return (
         <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-3 py-24">
