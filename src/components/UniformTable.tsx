@@ -101,6 +101,7 @@ export const UniformTable: React.FC<Props> = ({
           <thead>
             <tr className="bg-gray-50/50 dark:bg-zinc-900/50 text-gray-400 dark:text-zinc-500 text-[10px] font-bold uppercase tracking-widest border-b border-gray-100 dark:border-zinc-800">
               <th className="px-8 py-4">{t.lancamentos.data}</th>
+              <th className="px-8 py-4">ESCOLA</th>
               <th className="px-8 py-4">{t.lancamentos.categoriaItem}</th>
               <th className="px-8 py-4 text-center">{t.lancamentos.alunos}</th>
               <th className="px-8 py-4 text-center">{t.lancamentos.sobrando}</th>
@@ -111,7 +112,7 @@ export const UniformTable: React.FC<Props> = ({
           <tbody className="divide-y divide-gray-100 text-sm">
             {registros.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
                   {t.lancamentos.semRegistros}
                 </td>
               </tr>
@@ -120,6 +121,9 @@ export const UniformTable: React.FC<Props> = ({
                 <tr key={registro.id} className="hover:bg-slate-50 transition-colors">
                   <td className="px-8 py-5 whitespace-nowrap text-xs font-bold text-gray-400 dark:text-zinc-500 tracking-wider">
                     {format(new Date(registro.data_registro), 'dd/MM/yyyy')}
+                  </td>
+                  <td className="px-8 py-5 text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                    {registro.escola}
                   </td>
                   <td className="px-8 py-5">
                     <div className="text-[10px] font-black text-[#005A9C] dark:text-[#66b3ff] mb-1 uppercase tracking-widest">{registro.categoria || t.lancamentos.naoDefinida}</div>
