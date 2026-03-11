@@ -947,8 +947,8 @@ export const exportarRemanejamentoPDF = (
     styles: { fontSize: 8, cellPadding: 3, halign: 'center' },
     columnStyles: {
       tipo: { halign: 'left', cellWidth: 'auto' },
-      origem: { halign: 'left', cellWidth: 'auto' },
-      destino: { halign: 'left', cellWidth: 'auto' },
+      origem: { halign: 'left', cellWidth: 'auto', textColor: [22, 163, 74] },
+      destino: { halign: 'left', cellWidth: 'auto', textColor: [220, 38, 38] },
       qtd: { fontStyle: 'bold' }
     }
   });
