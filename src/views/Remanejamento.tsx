@@ -447,8 +447,16 @@ export const Remanejamento: React.FC = () => {
               <TrendingUp size={20} className="text-[#005A9C]" />
             </div>
             
-            <button className="w-full py-3 bg-gradient-to-r from-[#005A9C] to-[#004a80] text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
-              {t.remanejamento.simularRedistribuicao}
+            <button 
+              onClick={() => exportarRemanejamentoPDF(
+                sugestoes, 
+                { totalSobra, totalFalta, totalRotas: totalRemanejamentos }, 
+                t
+              )}
+              className="w-full py-3 bg-gradient-to-r from-[#005A9C] to-[#004a80] text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            >
+              <Download size={16} />
+              {t.remanejamento.baixarPlano}
             </button>
           </div>
 
