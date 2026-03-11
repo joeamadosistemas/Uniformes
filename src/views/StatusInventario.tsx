@@ -150,39 +150,39 @@ export const StatusInventario: React.FC = () => {
             {/* Stats Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                 {/* Total Unidades */}
-                <div className="bg-[#1e1e2d]/80 backdrop-blur-md p-5 md:p-6 rounded-[2rem] border border-white/5 shadow-xl transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center">
-                    <div className="p-3 bg-blue-500/10 rounded-2xl text-blue-400 mb-2">
+                <div className="bg-white dark:bg-[#1e1e2d]/80 p-5 md:p-6 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-xl transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center">
+                    <div className="p-3 bg-[#005A9C]/10 dark:bg-blue-500/10 rounded-2xl text-[#005A9C] dark:text-blue-400 mb-2">
                         <School size={24} />
                     </div>
-                    <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">TOTAL DE UNIDADES</p>
-                    <h3 className="text-2xl md:text-3xl font-black text-white">{totalUnidades}</h3>
+                    <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">TOTAL DE UNIDADES</p>
+                    <h3 className="text-2xl md:text-3xl font-black text-zinc-900 dark:text-white">{totalUnidades}</h3>
                 </div>
 
                 {/* Informaram Recebimento */}
-                <div className="bg-[#1e1e2d]/80 backdrop-blur-md p-5 md:p-6 rounded-[2rem] border border-white/5 shadow-xl transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center">
-                    <div className="p-3 bg-emerald-500/10 rounded-2xl text-emerald-400 mb-2">
+                <div className="bg-white dark:bg-[#1e1e2d]/80 p-5 md:p-6 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-xl transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center">
+                    <div className="p-3 bg-emerald-500/10 rounded-2xl text-emerald-600 dark:text-emerald-400 mb-2">
                         <Package size={24} />
                     </div>
-                    <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">INFORMARAM RECEBIMENTO</p>
-                    <h3 className="text-2xl md:text-3xl font-black text-emerald-400">{informaramRecebimento}</h3>
+                    <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">INFORMARAM RECEBIMENTO</p>
+                    <h3 className="text-2xl md:text-3xl font-black text-emerald-600 dark:text-emerald-400">{informaramRecebimento}</h3>
                 </div>
 
                 {/* Concluído */}
-                <div className="bg-[#1e1e2d]/80 backdrop-blur-md p-5 md:p-6 rounded-[2rem] border border-white/5 shadow-xl transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center">
-                    <div className="p-3 bg-blue-500/10 rounded-2xl text-blue-400 mb-2">
+                <div className="bg-white dark:bg-[#1e1e2d]/80 p-5 md:p-6 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-xl transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center">
+                    <div className="p-3 bg-blue-500/10 rounded-2xl text-blue-600 dark:text-blue-400 mb-2">
                         <CheckCircle2 size={24} />
                     </div>
-                    <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">CONCLUÍDO</p>
-                    <h3 className="text-2xl md:text-3xl font-black text-blue-400">{concluidos}</h3>
+                    <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">CONCLUÍDO</p>
+                    <h3 className="text-2xl md:text-3xl font-black text-blue-600 dark:text-blue-400">{concluidos}</h3>
                 </div>
 
                 {/* Pendente */}
-                <div className="bg-[#1e1e2d]/80 backdrop-blur-md p-5 md:p-6 rounded-[2rem] border border-white/5 shadow-xl transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center">
-                    <div className="p-3 bg-amber-500/10 rounded-2xl text-amber-400 mb-2">
+                <div className="bg-white dark:bg-[#1e1e2d]/80 p-5 md:p-6 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-xl transition-all hover:scale-[1.02] cursor-default flex flex-col items-center text-center">
+                    <div className="p-3 bg-amber-500/10 rounded-2xl text-amber-600 dark:text-amber-400 mb-2">
                         <Clock size={24} />
                     </div>
-                    <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">PENDENTE</p>
-                    <h3 className="text-2xl md:text-3xl font-black text-amber-400">{pendentes}</h3>
+                    <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">PENDENTE</p>
+                    <h3 className="text-2xl md:text-3xl font-black text-amber-600 dark:text-amber-400">{pendentes}</h3>
                 </div>
             </div>
 
