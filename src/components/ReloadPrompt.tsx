@@ -37,6 +37,13 @@ export function ReloadPrompt() {
         }
     }, [needRefresh]);
 
+    const handleRefresh = async () => {
+        setNeedRefresh(false);
+        await updateServiceWorker(true);
+        // Force a clean reload to bypass any remaining browser cache
+        window.location.reload();
+    };
+
     const close = () => {
         setNeedRefresh(false);
     };
@@ -66,7 +73,7 @@ export function ReloadPrompt() {
             </div>
             <div className="flex flex-col gap-2 shrink-0 w-full sm:w-auto mt-4 sm:mt-0">
                 <button
-                    onClick={() => updateServiceWorker(true)}
+                    onClick={handleRefresh}
                     className="w-full bg-[#005A9C] hover:bg-blue-700 text-white text-[10px] font-black uppercase tracking-widest px-6 py-3 rounded-xl transition-all shadow-lg shadow-blue-500/20 active:scale-95"
                 >
                     Atualizar

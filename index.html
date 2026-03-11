@@ -23,22 +23,17 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="UnifSMEDU">
+
+  <!-- Cache-Control - Prevent caching of the entry point -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
 </head>
 
 <body>
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').then(reg => {
-          console.log('SW registradolivremente', reg.scope);
-        }).catch(err => {
-          console.log('Falha ao registrar SW', err);
-        });
-      });
-    }
-  </script>
+  <script type="module" src="/src/main.tsx"></script>
 </body>
 
 </html>
