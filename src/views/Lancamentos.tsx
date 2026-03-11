@@ -24,6 +24,7 @@ export const Lancamentos: React.FC = () => {
   const [filtros, setFiltros] = useState<Filtros>({ categoria: '', tipo_uniforme: '', data: '' });
   const [mensagem, setMensagem] = useState<{ texto: string; tipo: 'sucesso' | 'erro' } | null>(null);
   const [escola, setEscola] = useState('');
+  const [escolasMap, setEscolasMap] = useState<Record<string, string>>({});
   const [categoriaDefault, setCategoriaDefault] = useState('');
   const [categoriaLocked, setCategoriaLocked] = useState(false);
   // Categorias que este escola tem permissão de registrar (vazio = todas)
@@ -82,7 +83,21 @@ export const Lancamentos: React.FC = () => {
         }
       }
 
-      // 3. Busca lançamentos (do Supabase, filtrando por escola se não for admin)
+      // 3. Busca nomes das escolas para o mapeamento
+      const { data: escolasMapData } = await supabase
+        .from('escolas')
+        .select('email, nome')
+        .eq('ativo', true);
+      
+      const newEscolasMap: Record<string, string> = {};
+      if (escolasMapData) {
+        escolasMapData.forEach(e => {
+          if (e.email) newEscolasMap[e.email.toLowerCase().trim()] = e.nome;
+        });
+      }
+      if (isMounted) setEscolasMap(newEscolasMap);
+
+      // 4. Busca lançamentos (do Supabase, filtrando por escola se não for admin)
       try {
         let query = supabase.from('registros_uniformes').select('*').order('data_registro', { ascending: false });
         
@@ -239,7 +254,8 @@ export const Lancamentos: React.FC = () => {
           setFiltros={setFiltros}
           onEdit={setRegistroEmEdicao}
           onDelete={handleDelete}
-          onExportPDF={() => exportarParaPDF(registrosFiltrados, escola, true)}
+          onExportPDF={() => exportarParaPDF(registrosFiltrados, escola, escolasMap)}
+          escolasMap={escolasMap}
           onExportExcel={() => exportarParaExcel(registrosFiltrados)}
         />
       )}

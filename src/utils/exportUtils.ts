@@ -50,7 +50,7 @@ const drawGovHeader = (doc: jsPDF, titulo: string, subinfo?: string[]) => {
   return 44 + ((subinfo?.length || 0) * 5) + 10; // Retorna o próximo Y disponível
 };
 
-export const exportarParaPDF = (registros: RegistroUniforme[], escolaNome: string = 'Todas as Escolas', includeSchoolColumn: boolean = false) => {
+export const exportarParaPDF = (registros: RegistroUniforme[], escolaNome: string = 'Todas as Escolas', includeSchoolColumn: boolean | Record<string, string> = false) => {
   const doc = new jsPDF('landscape');
 
   const startY = drawGovHeader(doc, 'Relatório de Controle de Uniformes', [
@@ -80,7 +80,12 @@ export const exportarParaPDF = (registros: RegistroUniforme[], escolaNome: strin
       `${r.qtd_faltando ?? 0} (${r.tamanho_faltando || '-'})`
     ];
     if (includeSchoolColumn) {
-      baseRow.splice(1, 0, r.escola || '-');
+      let nomeEscola = r.escola || '-';
+      if (typeof includeSchoolColumn === 'object') {
+        const key = nomeEscola.toLowerCase().trim();
+        nomeEscola = includeSchoolColumn[key] || nomeEscola;
+      }
+      baseRow.splice(1, 0, nomeEscola);
     }
     return baseRow;
   });
