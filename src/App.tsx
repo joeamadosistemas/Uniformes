@@ -21,6 +21,7 @@ import { InstallPrompt } from './components/InstallPrompt';
 import { BottomNav } from './components/BottomNav';
 import { AuditLogs } from './views/AuditLogs';
 import { UpdateModal } from './components/UpdateModal';
+import { StatusInventario } from './views/StatusInventario';
 
 
 function App() {
@@ -206,6 +207,7 @@ function App() {
   const renderView = () => {
     const adminViews = [
       'admin-dashboard',
+      'status-inventario',
       'controle-recebimento',
       'recebimentos',
       'transferencias',
@@ -235,6 +237,7 @@ function App() {
       case 'recebimentos': return <Recebimentos />;
       case 'transferencias': return <Transferencias />;
       case 'admin-dashboard': return <DashboardAdmin />;
+      case 'status-inventario': return <StatusInventario />;
       case 'controle-recebimento': return <ControleRecebimento />;
       case 'config-escola': return <UnidadeEscolar />;
       case 'config-usuarios': return <Usuarios />;

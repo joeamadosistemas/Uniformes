@@ -41,6 +41,7 @@ export const pt = {
         sobreSistema: 'Sobre o Sistema',
         auditLogs: 'Histórico de Auditoria',
         versao: 'Versão',
+        statusInventario: 'Status Inventário',
     },
 
     // Login
@@ -415,6 +416,7 @@ export const en: Translations = {
         sobreSistema: 'About the System',
         auditLogs: 'Audit History',
         versao: 'Version',
+        statusInventario: 'Inventory Status',
     },
     login: {
         titulo: 'System Access',
@@ -780,6 +782,7 @@ export const es: Translations = {
         sobreSistema: 'Acerca del Sistema',
         auditLogs: 'Historial de Auditoría',
         versao: 'Versión',
+        statusInventario: 'Estado del Inventario',
     },
     login: {
         titulo: 'Acceso al Sistema',

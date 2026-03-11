@@ -14,7 +14,8 @@ import {
   ClipboardList,
   Info,
   Layers,
-  History
+  History,
+  BarChart3
 } from 'lucide-react';
 import { useT } from '../lib/LanguageContext';
 
@@ -32,6 +33,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, isA
   const menuItems = [
     { id: 'lancamentos', label: t.sidebar.lancamentos, icon: LayoutDashboard },
     ...(isAdmin ? [
+      { id: 'status-inventario', label: t.sidebar.statusInventario, icon: BarChart3 },
       { id: 'recebimentos', label: t.sidebar.recebimentos, icon: ClipboardList },
       { id: 'controle-recebimento', label: t.sidebar.controleRecebimento, icon: ClipboardList },
       { id: 'admin-dashboard', label: 'Dashboard', icon: FileText },

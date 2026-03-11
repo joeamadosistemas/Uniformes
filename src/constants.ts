@@ -53,7 +53,7 @@ export const CATEGORIAS_UNIFORMES: Record<string, string[]> = {
 };
 
 export const TAMANHOS_DISPONIVEIS = [
-  'P', 'M', 'G', 'XG', 'Outros'
+  '1', '2', '3', '4', '6', '8', '10', '12', '14', '16', 'P', 'M', 'G', 'GG', 'EG', 'OUTROS'
 ];
 
 export const UNIDADES_MEDIDA = [

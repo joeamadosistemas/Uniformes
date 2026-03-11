@@ -29,19 +29,38 @@ export const Lancamentos: React.FC = () => {
   // Categorias que este escola tem permissão de registrar (vazio = todas)
   const [categoriasPermitidas, setCategoriasPermitidas] = useState<string[]>([]);
   const [selectedYear, setSelectedYear] = useState<number>(2026);
+  const [loading, setLoading] = useState(true);
 
-  // Busca a sessão e depois consulta os segmentos reais da escola no banco
   useEffect(() => {
     let isMounted = true;
 
-    supabase.auth.getSession().then(async ({ data }) => {
+    const fetchData = async () => {
+      setLoading(true);
+      const { data } = await supabase.auth.getSession();
       if (!isMounted) return;
       const email = data.session?.user?.email ?? '';
+      const userId = data.session?.user?.id;
+      
       setEscola(email);
 
-      if (!email) return;
+      if (!email || !userId) {
+        setLoading(false);
+        return;
+      }
 
-      // Busca a escola cadastrada cujo e-mail corresponde ao usuário logado
+      // 1. Verifica Role/Perfil
+      let userIsAdmin = false;
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', userId)
+        .maybeSingle();
+
+      if (profile && profile.role) {
+        userIsAdmin = profile.role === 'Super Administrador' || profile.role === 'admin' || profile.role === 'Diretor';
+      }
+
+      // 2. Busca segmentos da escola
       const { data: escolaData, error } = await supabase
         .from('escolas')
         .select('segmentos')
@@ -53,65 +72,114 @@ export const Lancamentos: React.FC = () => {
 
       if (!error && escolaData && Array.isArray(escolaData.segmentos) && escolaData.segmentos.length > 0) {
         const categorias = escolaData.segmentos.map(segmentoToCategoria);
-        // Restringe o dropdown apenas às categorias cadastradas para esta escola
         setCategoriasPermitidas(categorias);
-        // Se a escola atende apenas 1 segmento, pré-seleciona e trava o campo.
-        // Se atende vários, deixa o usuário escolher (sem travar).
         if (categorias.length === 1) {
           setCategoriaDefault(categorias[0]);
           setCategoriaLocked(true);
         } else {
-          setCategoriaDefault(''); // sem pré-seleção quando há múltiplos segmentos
+          setCategoriaDefault('');
           setCategoriaLocked(false);
         }
       }
-    });
+
+      // 3. Busca lançamentos (do Supabase, filtrando por escola se não for admin)
+      try {
+        let query = supabase.from('registros_uniformes').select('*').order('data_registro', { ascending: false });
+        
+        if (!userIsAdmin) {
+           query = query.ilike('escola', email);
+        }
+
+        const { data: records, error: recordsError } = await query;
+        if (recordsError) throw recordsError;
+        
+        if (records && isMounted) {
+           setRegistros(records);
+        }
+      } catch (err) {
+        console.error("Erro ao carregar registros:", err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchData();
 
     return () => {
       isMounted = false;
     };
   }, []);
 
-  useEffect(() => {
-    const dadosSalvos = localStorage.getItem('@Uniformes:registros');
-    if (dadosSalvos) setRegistros(JSON.parse(dadosSalvos));
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('@Uniformes:registros', JSON.stringify(registros));
-  }, [registros]);
-
   const mostrarMensagem = (texto: string, tipo: 'sucesso' | 'erro' = 'sucesso') => {
     setMensagem({ texto, tipo });
     setTimeout(() => setMensagem(null), 3000);
   };
 
-  const handleSave = (novosDados: Omit<RegistroUniforme, 'id' | 'data_registro' | 'escola' | 'diretor'>[]) => {
-    if (registroEmEdicao) {
-      const dados = novosDados[0];
-      setRegistros(prev => prev.map(r =>
-        r.id === registroEmEdicao.id
-          ? { ...dados, id: r.id, data_registro: r.data_registro, escola, diretor: '' }
-          : r
-      ));
-      setRegistroEmEdicao(null);
-      mostrarMensagem(t.lancamentos.sucessoAtualizar);
-    } else {
-      const novosRegistros: RegistroUniforme[] = novosDados.map(dados => ({
-        ...dados,
-        id: crypto.randomUUID(),
-        data_registro: new Date().toISOString(),
-        escola,
-        diretor: '',
-      }));
-      setRegistros(prev => [...novosRegistros, ...prev]);
-      mostrarMensagem(t.lancamentos.sucessoSalvar);
+  const handleSave = async (novosDados: Omit<RegistroUniforme, 'id' | 'data_registro' | 'escola' | 'diretor'>[]) => {
+    try {
+      if (registroEmEdicao) {
+        const dados = novosDados[0];
+        const { error } = await supabase
+          .from('registros_uniformes')
+          .update({
+            qtd_alunos: dados.qtd_alunos,
+            categoria: dados.categoria,
+            tipo_uniforme: dados.tipo_uniforme,
+            qtd_sobrando: dados.qtd_sobrando,
+            tamanho_sobrando: dados.tamanho_sobrando,
+            qtd_faltando: dados.qtd_faltando,
+            tamanho_faltando: dados.tamanho_faltando
+          })
+          .eq('id', registroEmEdicao.id);
+          
+        if (error) throw error;
+
+        setRegistros(prev => prev.map(r =>
+          r.id === registroEmEdicao.id
+            ? { ...r, ...dados }
+            : r
+        ));
+        setRegistroEmEdicao(null);
+        mostrarMensagem(t.lancamentos.sucessoAtualizar);
+      } else {
+        const novosRegistros: RegistroUniforme[] = novosDados.map(dados => ({
+          ...dados,
+          id: crypto.randomUUID(),
+          data_registro: new Date().toISOString(),
+          escola,
+          diretor: '',
+        }));
+
+        const { error } = await supabase
+          .from('registros_uniformes')
+          .insert(novosRegistros);
+          
+        if (error) throw error;
+
+        setRegistros(prev => [...novosRegistros, ...prev]);
+        mostrarMensagem(t.lancamentos.sucessoSalvar);
+      }
+    } catch (err) {
+      console.error(err);
+      mostrarMensagem('Erro ao salvar no banco de dados. Tente novamente.', 'erro');
     }
   };
 
-  const handleDelete = (id: string) => {
-    setRegistros(prev => prev.filter(r => r.id !== id));
-    mostrarMensagem(t.lancamentos.sucessoExcluir);
+  const handleDelete = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('registros_uniformes')
+        .delete()
+        .eq('id', id);
+        
+      if (error) throw error;
+
+      setRegistros(prev => prev.filter(r => r.id !== id));
+      mostrarMensagem(t.lancamentos.sucessoExcluir);
+    } catch (err) {
+      console.error(err);
+      mostrarMensagem('Erro ao apagar registro.', 'erro');
+    }
   };
 
   const registrosFiltrados = registros.filter(r => {
@@ -160,16 +228,21 @@ export const Lancamentos: React.FC = () => {
         categoriasPermitidas={categoriasPermitidas}
       />
 
-
-      <UniformTable
-        registros={registrosFiltrados}
-        filtros={filtros}
-        setFiltros={setFiltros}
-        onEdit={setRegistroEmEdicao}
-        onDelete={handleDelete}
-        onExportPDF={() => exportarParaPDF(registrosFiltrados, escola)}
-        onExportExcel={() => exportarParaExcel(registrosFiltrados)}
-      />
+      {loading ? (
+        <div className="flex justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#005A9C]"></div>
+        </div>
+      ) : (
+        <UniformTable
+          registros={registrosFiltrados}
+          filtros={filtros}
+          setFiltros={setFiltros}
+          onEdit={setRegistroEmEdicao}
+          onDelete={handleDelete}
+          onExportPDF={() => exportarParaPDF(registrosFiltrados, escola)}
+          onExportExcel={() => exportarParaExcel(registrosFiltrados)}
+        />
+      )}
     </div>
   );
 };
