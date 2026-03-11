@@ -110,7 +110,8 @@ function App() {
         if (profile.role) {
           setUserRole(profile.role);
           if (profile.role === 'Super Administrador' || profile.role === 'admin' || profile.role === 'Diretor') {
-            setActiveView('controle-recebimento');
+            setActiveView('status-inventario');
+            setIsDarkMode(false);
           }
         }
         if (profile.nome) setUserName(profile.nome);
@@ -139,7 +140,8 @@ function App() {
           if (profileOld.role) {
             setUserRole(profileOld.role);
             if (profileOld.role === 'Super Administrador' || profileOld.role === 'admin' || profileOld.role === 'Diretor') {
-              setActiveView('controle-recebimento');
+              setActiveView('status-inventario');
+              setIsDarkMode(false);
             }
           }
           if (profileOld.nome) setUserName(profileOld.nome);
