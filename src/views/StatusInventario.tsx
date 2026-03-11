@@ -22,6 +22,8 @@ import { SEGMENTOS_ENSINO } from '../constants';
 import { exportarControleRecebimentoPDF } from '../utils/exportUtils';
 import * as XLSX from 'xlsx';
 import { format } from 'date-fns';
+import { SchoolDetailModal } from '../components/SchoolDetailModal';
+import { RegistroUniforme } from '../types';
 
 interface EscolaStatus extends EscolaCadastro {
     jaLancou: boolean;
@@ -38,6 +40,12 @@ export const StatusInventario: React.FC = () => {
     const [filterSegmento, setFilterSegmento] = useState<string>('todos');
     const [selectedYear, setSelectedYear] = useState<number>(2026);
     const [refreshing, setRefreshing] = useState(false);
+
+    // Modal State
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedEscolaModal, setSelectedEscolaModal] = useState<EscolaStatus | null>(null);
+    const [escolaRegistros, setEscolaRegistros] = useState<RegistroUniforme[]>([]);
+    const [loadingRecords, setLoadingRecords] = useState(false);
 
     useEffect(() => {
         fetchStatusInventario();
@@ -144,6 +152,33 @@ export const StatusInventario: React.FC = () => {
 
         return matchesSearch && matchesStatus && matchesSegmento;
     });
+
+    const handleOpenModal = async (escola: EscolaStatus) => {
+        setSelectedEscolaModal(escola);
+        setIsModalOpen(true);
+        setLoadingRecords(true);
+        
+        try {
+            // Buscar lançamentos detalhados desta escola para o ano selecionado
+            const startDate = `${selectedYear}-01-01T00:00:00Z`;
+            const endDate = `${selectedYear}-12-31T23:59:59Z`;
+
+            const { data, error } = await supabase
+                .from('registros_uniformes')
+                .select('*')
+                .eq('escola', escola.nome)
+                .gte('data_registro', startDate)
+                .lte('data_registro', endDate)
+                .order('data_registro', { ascending: false });
+
+            if (error) throw error;
+            setEscolaRegistros(data || []);
+        } catch (error) {
+            console.error('Erro ao buscar detalhes da escola:', error);
+        } finally {
+            setLoadingRecords(false);
+        }
+    };
 
     return (
         <div className="space-y-8 pb-20">
@@ -310,7 +345,10 @@ export const StatusInventario: React.FC = () => {
                                         <td className="px-10 py-8">
                                             <div className="flex items-center gap-5">
                                                 <div className={`w-1.5 h-12 rounded-full transition-all group-hover:h-14 ${esc.jaLancou ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.3)]'}`}></div>
-                                                <div>
+                                                <div 
+                                                    className="cursor-pointer hover:opacity-80 transition-all"
+                                                    onClick={() => handleOpenModal(esc)}
+                                                >
                                                     <p className="font-black text-zinc-900 dark:text-gray-100 text-base uppercase tracking-tight group-hover:text-[#005A9C] dark:group-hover:text-blue-400 transition-colors">{esc.nome}</p>
                                                     <p className="text-xs text-gray-500 dark:text-gray-400 font-bold tracking-tight">{esc.email}</p>
                                                 </div>
@@ -385,6 +423,16 @@ export const StatusInventario: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {/* School Detail Modal */}
+            <SchoolDetailModal 
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                escola={selectedEscolaModal}
+                registros={escolaRegistros}
+                loading={loadingRecords}
+                onExportPDF={handleExportPDF}
+            />
         </div>
     );
 };
