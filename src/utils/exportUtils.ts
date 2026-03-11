@@ -50,16 +50,32 @@ const drawGovHeader = (doc: jsPDF, titulo: string, subinfo?: string[]) => {
   return 44 + ((subinfo?.length || 0) * 5) + 10; // Retorna o próximo Y disponível
 };
 
-export const exportarParaPDF = (registros: RegistroUniforme[], escolaNome: string = 'Todas as Escolas', includeSchoolColumn: boolean | Record<string, string> = false) => {
+export const exportarParaPDF = (
+  registros: RegistroUniforme[], 
+  escolaNome: string = 'Todas as Escolas', 
+  includeSchoolColumn: boolean | Record<string, string> = false,
+  filter?: 'sobra' | 'falta'
+) => {
   const doc = new jsPDF('landscape');
+  
+  let titulo = 'Relatório de Controle de Uniformes';
+  let filteredRegistros = [...registros];
 
-  const startY = drawGovHeader(doc, 'Relatório de Controle de Uniformes', [
+  if (filter === 'sobra') {
+    titulo = 'Relatório de Itens SOBRANDO';
+    filteredRegistros = registros.filter(r => (r.qtd_sobrando ?? 0) > 0);
+  } else if (filter === 'falta') {
+    titulo = 'Relatório de Itens FALTANDO';
+    filteredRegistros = registros.filter(r => (r.qtd_faltando ?? 0) > 0);
+  }
+
+  const startY = drawGovHeader(doc, titulo, [
     `Unidade Escolar: ${escolaNome}`
   ]);
 
   // Totais Consolidados
-  const totalFaltando = registros.reduce((acc, curr) => acc + (curr.qtd_faltando || 0), 0);
-  const totalSobrando = registros.reduce((acc, curr) => acc + (curr.qtd_sobrando || 0), 0);
+  const totalFaltando = filteredRegistros.reduce((acc, curr) => acc + (curr.qtd_faltando || 0), 0);
+  const totalSobrando = filteredRegistros.reduce((acc, curr) => acc + (curr.qtd_sobrando || 0), 0);
 
   doc.setFontSize(10);
   doc.setTextColor(0);
@@ -70,7 +86,7 @@ export const exportarParaPDF = (registros: RegistroUniforme[], escolaNome: strin
     ? ["Data", "Unidade Escolar", "Categoria", "Tipo", "Alunos", "Sobrando (Qtd/Tam)", "Faltando (Qtd/Tam)"]
     : ["Data", "Categoria", "Tipo", "Alunos", "Sobrando (Qtd/Tam)", "Faltando (Qtd/Tam)"];
 
-  const tableRows = registros.map(r => {
+  const tableRows = filteredRegistros.map(r => {
     const baseRow = [
       format(safeDate(r.data_registro), 'dd/MM/yyyy'),
       r.categoria || '-',
@@ -95,13 +111,14 @@ export const exportarParaPDF = (registros: RegistroUniforme[], escolaNome: strin
     body: tableRows,
     startY: startY + 2,
     styles: { fontSize: 8 },
-    headStyles: { fillColor: [0, 51, 102] },
+    headStyles: { fillColor: filter === 'sobra' ? [22, 163, 74] : (filter === 'falta' ? [220, 38, 38] : [0, 51, 102]) },
     columnStyles: includeSchoolColumn 
       ? { 1: { cellWidth: 50 }, 3: { cellWidth: 50 } }
       : { 2: { cellWidth: 50 } }
   });
 
-  doc.save(`relatorio_uniformes_${format(new Date(), 'yyyyMMdd')}.pdf`);
+  const suffix = filter ? `_${filter}` : '';
+  doc.save(`relatorio_uniformes${suffix}_${format(new Date(), 'yyyyMMdd')}.pdf`);
 };
 
 export const exportarTodasParaPDF = (registrosPorEscola: { escolaNome: string, registros: RegistroUniforme[] }[]) => {

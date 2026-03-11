@@ -12,8 +12,11 @@ interface Props {
   onEdit: (registro: RegistroUniforme) => void;
   onDelete: (id: string) => void;
   onExportPDF: () => void;
+  onExportSobraPDF: () => void;
+  onExportFaltaPDF: () => void;
   onExportExcel: () => void;
   escolasMap?: Record<string, string>;
+  isAdmin?: boolean;
 }
 
 export const UniformTable: React.FC<Props> = ({
@@ -23,8 +26,11 @@ export const UniformTable: React.FC<Props> = ({
   onEdit,
   onDelete,
   onExportPDF,
+  onExportSobraPDF,
+  onExportFaltaPDF,
   onExportExcel,
-  escolasMap = {}
+  escolasMap = {},
+  isAdmin = false
 }) => {
   const { t } = useT();
 
@@ -48,9 +54,29 @@ export const UniformTable: React.FC<Props> = ({
             <FileText size={16} className="mr-2" />
             {t.lancamentos.gerarPDF}
           </button>
+          
+          {isAdmin && (
+            <>
+              <button
+                onClick={onExportSobraPDF}
+                className="flex items-center px-5 py-2.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl hover:bg-emerald-500/20 transition-all text-xs font-bold uppercase tracking-widest"
+              >
+                <FileText size={16} className="mr-2" />
+                {t.lancamentos.sobraIndividual || 'PDF (SOBRA)'}
+              </button>
+              <button
+                onClick={onExportFaltaPDF}
+                className="flex items-center px-5 py-2.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-xl hover:bg-orange-500/20 transition-all text-xs font-bold uppercase tracking-widest"
+              >
+                <FileText size={16} className="mr-2" />
+                {t.lancamentos.faltaIndividual || 'PDF (FALTA)'}
+              </button>
+            </>
+          )}
+
           <button
             onClick={onExportExcel}
-            className="flex items-center px-5 py-2.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl hover:bg-emerald-500/20 transition-all text-xs font-bold uppercase tracking-widest"
+            className="flex items-center px-5 py-2.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl hover:bg-blue-500/20 transition-all text-xs font-bold uppercase tracking-widest"
           >
             <FileSpreadsheet size={16} className="mr-2" />
             {t.lancamentos.exportarExcel}

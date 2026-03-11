@@ -31,6 +31,7 @@ export const Lancamentos: React.FC = () => {
   const [categoriasPermitidas, setCategoriasPermitidas] = useState<string[]>([]);
   const [selectedYear, setSelectedYear] = useState<number>(2026);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -59,6 +60,7 @@ export const Lancamentos: React.FC = () => {
 
       if (profile && profile.role) {
         userIsAdmin = profile.role === 'Super Administrador' || profile.role === 'admin';
+        setIsAdmin(userIsAdmin);
       }
 
       // 2. Busca segmentos da escola
@@ -255,8 +257,11 @@ export const Lancamentos: React.FC = () => {
           onEdit={setRegistroEmEdicao}
           onDelete={handleDelete}
           onExportPDF={() => exportarParaPDF(registrosFiltrados, escola, escolasMap)}
+          onExportSobraPDF={() => exportarParaPDF(registrosFiltrados, 'Todas as Unidades (Sobra)', escolasMap, 'sobra')}
+          onExportFaltaPDF={() => exportarParaPDF(registrosFiltrados, 'Todas as Unidades (Falta)', escolasMap, 'falta')}
           escolasMap={escolasMap}
           onExportExcel={() => exportarParaExcel(registrosFiltrados)}
+          isAdmin={isAdmin}
         />
       )}
     </div>
