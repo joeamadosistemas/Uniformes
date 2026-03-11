@@ -187,7 +187,7 @@ export const StatusInventario: React.FC = () => {
             </div>
 
             {/* Filters Toolbar */}
-            <div className="flex flex-col lg:flex-row items-center justify-between gap-6 bg-[#1e1e2d]/40 p-6 rounded-[2.5rem] border border-white/5">
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-6 bg-gray-200 dark:bg-[#1e1e2d]/40 p-6 rounded-[2.5rem] border border-gray-300 dark:border-white/5 shadow-inner">
                 <div className="flex flex-wrap items-center gap-4">
                     {/* Label Filtrar */}
                     <div className="flex items-center gap-2">
@@ -196,12 +196,12 @@ export const StatusInventario: React.FC = () => {
                     </div>
 
                     {/* Ano Letivo */}
-                    <div className="bg-zinc-800/50 px-5 py-3 rounded-2xl border border-white/5 flex items-center gap-2">
-                        <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">ANO:</span>
+                    <div className="bg-gray-400 dark:bg-zinc-800/50 px-5 py-3 rounded-2xl border border-transparent dark:border-white/5 flex items-center gap-2">
+                        <span className="text-[10px] font-black text-gray-100 dark:text-gray-500 uppercase tracking-widest">ANO:</span>
                         <select
                             value={selectedYear}
                             onChange={(e) => setSelectedYear(Number(e.target.value))}
-                            className="bg-transparent border-none p-0 text-xs font-black text-[#66b3ff] focus:ring-0 cursor-pointer"
+                            className="bg-transparent border-none p-0 text-xs font-black text-[#005A9C] dark:text-[#66b3ff] focus:ring-0 cursor-pointer"
                         >
                             <option value={2026}>2026</option>
                             <option value={2025}>2025</option>
@@ -210,12 +210,12 @@ export const StatusInventario: React.FC = () => {
                     </div>
 
                     {/* Segmentos */}
-                    <div className="bg-zinc-800/50 px-5 py-3 rounded-2xl border border-white/5 flex items-center gap-2 min-w-[200px]">
-                        <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest whitespace-nowrap">SEGMENTOS:</span>
+                    <div className="bg-gray-400 dark:bg-zinc-800/50 px-5 py-3 rounded-2xl border border-transparent dark:border-white/5 flex items-center gap-2 min-w-[200px]">
+                        <span className="text-[10px] font-black text-gray-100 dark:text-gray-500 uppercase tracking-widest whitespace-nowrap">SEGMENTOS:</span>
                         <select
                             value={filterSegmento}
                             onChange={(e) => setFilterSegmento(e.target.value)}
-                            className="bg-transparent border-none p-0 text-xs font-black text-[#66b3ff] focus:ring-0 cursor-pointer uppercase tracking-tight w-full"
+                            className="bg-transparent border-none p-0 text-xs font-black text-[#005A9C] dark:text-[#66b3ff] focus:ring-0 cursor-pointer uppercase tracking-tight w-full"
                         >
                             <option value="todos">TODOS</option>
                             {SEGMENTOS_ENSINO.map(seg => (
@@ -227,21 +227,21 @@ export const StatusInventario: React.FC = () => {
                     </div>
 
                     {/* Escola */}
-                    <div className="relative bg-zinc-800/50 rounded-2xl px-5 py-3 border border-white/5 w-64 focus-within:w-80 transition-all">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+                    <div className="relative bg-gray-400 dark:bg-zinc-800/50 rounded-2xl px-5 py-3 border border-transparent dark:border-white/5 w-64 focus-within:w-80 transition-all">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-200 dark:text-gray-500" size={16} />
                         <input
                             type="text"
                             placeholder="BUSCAR ESCOLA"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="bg-transparent border-none p-0 pl-6 w-full text-xs font-bold text-gray-300 placeholder-gray-500 outline-none uppercase"
+                            className="bg-transparent border-none p-0 pl-6 w-full text-xs font-bold text-gray-100 dark:text-gray-300 placeholder-gray-200 dark:placeholder-gray-500 outline-none uppercase"
                         />
                     </div>
                 </div>
 
                 <div className="flex items-center gap-3">
                     {/* Status Tabs */}
-                    <div className="bg-zinc-800/80 p-1 rounded-2xl border border-white/5 flex items-center">
+                    <div className="bg-gray-500 dark:bg-zinc-800/80 p-1 rounded-2xl border border-transparent dark:border-white/5 flex items-center">
                         {[
                             { id: 'todos', label: 'TODOS' },
                             { id: 'concluido', label: 'CONCLUÍDOS' },
@@ -251,8 +251,8 @@ export const StatusInventario: React.FC = () => {
                                 key={status.id}
                                 onClick={() => setFilterStatus(status.id as any)}
                                 className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${filterStatus === status.id
-                                    ? 'bg-[#D97706] text-white shadow-lg shadow-amber-600/20'
-                                    : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'
+                                    ? 'bg-[#F59E0B] text-white shadow-lg shadow-amber-600/20'
+                                    : 'text-gray-200 dark:text-gray-500 hover:text-white dark:hover:text-gray-300 hover:bg-white/10 dark:hover:bg-white/5'
                                     }`}
                             >
                                 {status.label}
@@ -264,7 +264,7 @@ export const StatusInventario: React.FC = () => {
                     <button
                         onClick={fetchStatusInventario}
                         disabled={refreshing}
-                        className="w-12 h-12 flex items-center justify-center bg-zinc-800/80 rounded-2xl border border-white/5 text-gray-400 hover:text-[#66b3ff] transition-all active:scale-95 disabled:opacity-50"
+                        className="w-12 h-12 flex items-center justify-center bg-gray-400 dark:bg-zinc-800/80 rounded-2xl border border-transparent dark:border-white/5 text-gray-100 dark:text-gray-400 hover:text-white dark:hover:text-[#66b3ff] transition-all active:scale-95 disabled:opacity-50"
                     >
                         <RefreshCw size={20} className={refreshing ? 'animate-spin' : ''} />
                     </button>
@@ -272,52 +272,52 @@ export const StatusInventario: React.FC = () => {
             </div>
 
             {/* Data Table */}
-            <div className="bg-[#1e1e2d] border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl">
+            <div className="bg-white dark:bg-[#1e1e2d] border border-gray-100 dark:border-white/5 rounded-[2.5rem] overflow-hidden shadow-xl mt-6">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-white/5 border-b border-white/5">
+                            <tr className="bg-gray-50/80 dark:bg-white/5 border-b border-gray-100 dark:border-white/5">
                                 <th className="px-10 py-6 text-[11px] font-black text-gray-500 uppercase tracking-widest">NOME DA ESCOLA</th>
                                 <th className="px-10 py-6 text-[11px] font-black text-gray-500 uppercase tracking-widest text-center">ETAPAS ATENDIDAS</th>
                                 <th className="px-10 py-6 text-[11px] font-black text-gray-500 uppercase tracking-widest text-center">STATUS</th>
                                 <th className="px-10 py-6 text-[11px] font-black text-gray-500 uppercase tracking-widest text-right">AÇÕES</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody className="divide-y divide-gray-50 dark:divide-white/5">
                             {loading ? (
                                 <tr>
                                     <td colSpan={4} className="px-10 py-32 text-center">
                                         <div className="flex flex-col items-center gap-4">
                                             <Loader2 className="animate-spin text-blue-500" size={40} />
-                                            <p className="text-xs font-black text-gray-500 uppercase tracking-widest animate-pulse">SINCRONIZANDO DADOS...</p>
+                                            <p className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest animate-pulse">SINCRONIZANDO DADOS...</p>
                                         </div>
                                     </td>
                                 </tr>
                             ) : escolasFiltradas.length === 0 ? (
                                 <tr>
                                     <td colSpan={4} className="px-10 py-32 text-center">
-                                        <div className="flex flex-col items-center gap-4 opacity-30">
-                                            <School size={80} className="text-gray-500" />
-                                            <p className="text-sm font-bold text-gray-500 uppercase tracking-tight">NENHUMA UNIDADE ENCONTRADA</p>
+                                        <div className="flex flex-col items-center gap-4 opacity-50 dark:opacity-30">
+                                            <School size={80} className="text-gray-400 dark:text-gray-500" />
+                                            <p className="text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tight">NENHUMA UNIDADE ENCONTRADA</p>
                                         </div>
                                     </td>
                                 </tr>
                             ) : (
                                 escolasFiltradas.map((esc) => (
-                                    <tr key={esc.id} className="hover:bg-white/[0.02] transition-colors group">
+                                    <tr key={esc.id} className="hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors group">
                                         <td className="px-10 py-8">
                                             <div className="flex items-center gap-5">
                                                 <div className={`w-1.5 h-12 rounded-full transition-all group-hover:h-14 ${esc.jaLancou ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.3)]'}`}></div>
                                                 <div>
-                                                    <p className="font-black text-gray-100 text-base uppercase tracking-tight group-hover:text-blue-400 transition-colors">{esc.nome}</p>
-                                                    <p className="text-xs text-gray-500 font-bold tracking-tight">{esc.email}</p>
+                                                    <p className="font-black text-zinc-900 dark:text-gray-100 text-base uppercase tracking-tight group-hover:text-[#005A9C] dark:group-hover:text-blue-400 transition-colors">{esc.nome}</p>
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400 font-bold tracking-tight">{esc.email}</p>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-10 py-8">
                                             <div className="flex flex-wrap justify-center gap-2 max-w-md mx-auto">
                                                 {esc.segmentos && esc.segmentos.map(seg => (
-                                                    <span key={seg} className="px-3 py-1.5 bg-zinc-800/80 text-gray-400 rounded-xl text-[9px] font-black uppercase tracking-widest border border-white/5 shadow-inner">
+                                                    <span key={seg} className="px-3 py-1.5 bg-gray-100 dark:bg-zinc-800/80 text-gray-500 dark:text-gray-400 rounded-xl text-[9px] font-black uppercase tracking-widest border border-gray-200 dark:border-white/5 shadow-inner">
                                                         {seg.replace('CONJUNTO UNIFORMA ESCOLAR ', '')}
                                                     </span>
                                                 ))}
@@ -325,21 +325,21 @@ export const StatusInventario: React.FC = () => {
                                         </td>
                                         <td className="px-10 py-8 text-center">
                                             {esc.jaLancou ? (
-                                                <span className="inline-flex items-center px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                                <span className="inline-flex items-center px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
                                                     <CheckCircle2 size={14} className="mr-2" /> CONCLUÍDO
                                                 </span>
                                             ) : (
-                                                <span className="inline-flex items-center px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                                <span className="inline-flex items-center px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20">
                                                     <Clock size={14} className="mr-2" /> PENDENTE
                                                 </span>
                                             )}
                                         </td>
                                         <td className="px-10 py-8 text-right">
                                             <div className="flex flex-col items-end">
-                                                <p className="text-sm font-black text-gray-300 tabular-nums">
+                                                <p className="text-sm font-black text-zinc-700 dark:text-gray-300 tabular-nums">
                                                     {esc.dataUltimoLancamento ? format(new Date(esc.dataUltimoLancamento), 'dd/MM/yyyy') : '-'}
                                                 </p>
-                                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                                                <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
                                                     {esc.dataUltimoLancamento ? format(new Date(esc.dataUltimoLancamento), 'HH:mm') : ''}
                                                 </p>
                                             </div>
@@ -352,7 +352,7 @@ export const StatusInventario: React.FC = () => {
                 </div>
 
                 {/* Footer Actions */}
-                <div className="bg-white/5 px-10 py-8 flex flex-col md:flex-row items-center justify-between border-t border-white/5 gap-6">
+                <div className="bg-gray-50/50 dark:bg-white/5 px-10 py-8 flex flex-col md:flex-row items-center justify-between border-t border-gray-100 dark:border-white/5 gap-6">
                     <div className="flex items-center gap-10">
                         <div className="flex items-center gap-3">
                             <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
@@ -362,7 +362,7 @@ export const StatusInventario: React.FC = () => {
                             <div className="w-3 h-3 rounded-full bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]"></div>
                             <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">PENDENTE</span>
                         </div>
-                        <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest border-l border-white/10 pl-10">
+                        <p className="text-[10px] font-black text-gray-500 dark:text-gray-600 uppercase tracking-widest border-l border-gray-200 dark:border-white/10 pl-10">
                             MOSTRANDO {escolasFiltradas.length} DE {escolas.length} UNIDADES
                         </p>
                     </div>
@@ -372,13 +372,13 @@ export const StatusInventario: React.FC = () => {
                             onClick={handleExportPDF}
                             className="flex-1 md:flex-none flex items-center justify-center gap-3 bg-[#DC2626] hover:bg-red-700 text-white px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-red-600/20 active:scale-95"
                         >
-                            <FileText size={18} /> GERAR PDF
+                            <FileText size={18} /> EXPORTAR PDF
                         </button>
                         <button
                             onClick={handleExportExcel}
                             className="flex-1 md:flex-none flex items-center justify-center gap-3 bg-[#16A34A] hover:bg-green-700 text-white px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-green-600/20 active:scale-95"
                         >
-                            <Download size={18} /> GERAR EXCEL
+                            <Download size={18} /> EXPORTAR EXCEL
                         </button>
                     </div>
                 </div>

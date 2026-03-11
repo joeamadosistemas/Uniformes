@@ -582,7 +582,7 @@ export const exportarRecebimentosPDF = (
 export const exportarControleRecebimentoPDF = (
   escolas: { nome: string; email: string; segmentos?: string[]; jaLancou: boolean; dataUltimoLancamento?: string }[]
 ) => {
-  const doc = new jsPDF();
+  const doc = new jsPDF('landscape');
   const startY = drawGovHeader(doc, 'Controle de Recebimento por Unidade Escolar');
 
   const tableColumn = ["Unidade Escolar", "Etapas Atendidas", "Status", "Último Lançamento"];
@@ -600,9 +600,9 @@ export const exportarControleRecebimentoPDF = (
     styles: { fontSize: 8 },
     headStyles: { fillColor: [0, 51, 102] },
     columnStyles: {
-      0: { cellWidth: 60 },
-      1: { cellWidth: 50 },
-      2: { cellWidth: 30, halign: 'center' },
+      0: { cellWidth: 100 },
+      1: { cellWidth: 100 },
+      2: { cellWidth: 35, halign: 'center' },
       3: { cellWidth: 35, halign: 'right' }
     },
     didParseCell: (hookData) => {
