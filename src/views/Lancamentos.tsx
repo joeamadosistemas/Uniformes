@@ -239,7 +239,7 @@ export const Lancamentos: React.FC = () => {
           setFiltros={setFiltros}
           onEdit={setRegistroEmEdicao}
           onDelete={handleDelete}
-          onExportPDF={() => exportarParaPDF(registrosFiltrados, escola)}
+          onExportPDF={() => exportarParaPDF(registrosFiltrados, escola, true)}
           onExportExcel={() => exportarParaExcel(registrosFiltrados)}
         />
       )}

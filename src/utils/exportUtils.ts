@@ -50,7 +50,7 @@ const drawGovHeader = (doc: jsPDF, titulo: string, subinfo?: string[]) => {
   return 44 + ((subinfo?.length || 0) * 5) + 10; // Retorna o próximo Y disponível
 };
 
-export const exportarParaPDF = (registros: RegistroUniforme[], escolaNome: string = 'Todas as Escolas') => {
+export const exportarParaPDF = (registros: RegistroUniforme[], escolaNome: string = 'Todas as Escolas', includeSchoolColumn: boolean = false) => {
   const doc = new jsPDF('landscape');
 
   const startY = drawGovHeader(doc, 'Relatório de Controle de Uniformes', [
@@ -66,15 +66,24 @@ export const exportarParaPDF = (registros: RegistroUniforme[], escolaNome: strin
   doc.text(`Resumo: Total Faltando: ${totalFaltando} | Total Sobrando: ${totalSobrando}`, 14, startY - 2);
 
   // Tabela
-  const tableColumn = ["Data", "Categoria", "Tipo", "Alunos", "Sobrando (Qtd/Tam)", "Faltando (Qtd/Tam)"];
-  const tableRows = registros.map(r => [
-    format(safeDate(r.data_registro), 'dd/MM/yyyy'),
-    r.categoria || '-',
-    r.tipo_uniforme,
-    (r.qtd_alunos ?? 0).toString(),
-    `${r.qtd_sobrando ?? 0} (${r.tamanho_sobrando || '-'})`,
-    `${r.qtd_faltando ?? 0} (${r.tamanho_faltando || '-'})`
-  ]);
+  const tableColumn = includeSchoolColumn 
+    ? ["Data", "Unidade Escolar", "Categoria", "Tipo", "Alunos", "Sobrando (Qtd/Tam)", "Faltando (Qtd/Tam)"]
+    : ["Data", "Categoria", "Tipo", "Alunos", "Sobrando (Qtd/Tam)", "Faltando (Qtd/Tam)"];
+
+  const tableRows = registros.map(r => {
+    const baseRow = [
+      format(safeDate(r.data_registro), 'dd/MM/yyyy'),
+      r.categoria || '-',
+      r.tipo_uniforme,
+      (r.qtd_alunos ?? 0).toString(),
+      `${r.qtd_sobrando ?? 0} (${r.tamanho_sobrando || '-'})`,
+      `${r.qtd_faltando ?? 0} (${r.tamanho_faltando || '-'})`
+    ];
+    if (includeSchoolColumn) {
+      baseRow.splice(1, 0, r.escola || '-');
+    }
+    return baseRow;
+  });
 
   autoTable(doc, {
     head: [tableColumn],
@@ -82,9 +91,9 @@ export const exportarParaPDF = (registros: RegistroUniforme[], escolaNome: strin
     startY: startY + 2,
     styles: { fontSize: 8 },
     headStyles: { fillColor: [0, 51, 102] },
-    columnStyles: {
-      2: { cellWidth: 50 }
-    }
+    columnStyles: includeSchoolColumn 
+      ? { 1: { cellWidth: 50 }, 3: { cellWidth: 50 } }
+      : { 2: { cellWidth: 50 } }
   });
 
   doc.save(`relatorio_uniformes_${format(new Date(), 'yyyyMMdd')}.pdf`);
