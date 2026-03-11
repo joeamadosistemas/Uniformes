@@ -80,22 +80,37 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, isA
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeView === item.id;
+            const isRemanejamento = item.id === 'remanejamento';
+            
             return (
               <li key={item.id} className="md:px-3 md:mb-1">
                 <button
                   onClick={() => setActiveView(item.id)}
-                  className={`w-full flex flex-col md:flex-row items-center md:px-4 py-3 rounded-xl transition-all duration-200 ${isActive
-                    ? 'bg-[#005A9C]/10 text-[#005A9C] dark:bg-[#66b3ff]/10 dark:text-[#66b3ff]'
-                    : 'text-gray-500 dark:text-zinc-400 hover:bg-gray-50 dark:hover:bg-zinc-900 hover:text-gray-900 dark:hover:text-white'
-                    }`}
+                  className={`w-full flex flex-col md:flex-row items-center md:px-4 py-3 rounded-xl transition-all duration-200 ${
+                    isRemanejamento
+                      ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700'
+                      : isActive
+                        ? 'bg-[#005A9C]/10 text-[#005A9C] dark:bg-[#66b3ff]/10 dark:text-[#66b3ff]'
+                        : 'text-gray-500 dark:text-zinc-400 hover:bg-gray-50 dark:hover:bg-zinc-900 hover:text-gray-900 dark:hover:text-white'
+                  }`}
                 >
                   <div className="flex flex-col md:flex-row items-center md:space-x-4 flex-1">
-                    <Icon className={`w-6 h-6 md:w-5 md:h-5 mb-1.5 md:mb-0 ${isActive ? 'text-[#005A9C] dark:text-[#66b3ff]' : 'text-gray-400 group-hover:text-[#005A9C] dark:group-hover:text-[#66b3ff]'}`} />
-                    <span className={`text-[10px] md:text-sm text-center leading-tight font-medium ${isActive ? 'font-bold' : ''}`}>
+                    <Icon className={`w-6 h-6 md:w-5 md:h-5 mb-1.5 md:mb-0 ${
+                      isRemanejamento 
+                        ? 'text-white' 
+                        : isActive 
+                          ? 'text-[#005A9C] dark:text-[#66b3ff]' 
+                          : 'text-gray-400 group-hover:text-[#005A9C] dark:group-hover:text-[#66b3ff]'
+                    }`} />
+                    <span className={`text-[10px] md:text-sm text-center leading-tight font-medium ${
+                      isRemanejamento || isActive ? 'font-black' : ''
+                    }`}>
                       {item.label}
                     </span>
                   </div>
-                  <ChevronRight size={14} className={`hidden md:block ${isActive ? 'opacity-100' : 'opacity-0'} group-hover:opacity-100 group-hover:translate-x-1 transition-all`} />
+                  <ChevronRight size={14} className={`hidden md:block ${
+                    isRemanejamento || isActive ? 'opacity-100' : 'opacity-0'
+                  } group-hover:opacity-100 group-hover:translate-x-1 transition-all`} />
                 </button>
               </li>
             );
