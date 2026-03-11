@@ -57,7 +57,7 @@ export const Lancamentos: React.FC = () => {
         .maybeSingle();
 
       if (profile && profile.role) {
-        userIsAdmin = profile.role === 'Super Administrador' || profile.role === 'admin' || profile.role === 'Diretor';
+        userIsAdmin = profile.role === 'Super Administrador' || profile.role === 'admin';
       }
 
       // 2. Busca segmentos da escola
