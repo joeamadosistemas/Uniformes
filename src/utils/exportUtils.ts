@@ -923,19 +923,19 @@ export const exportarRemanejamentoPDF = (
 
   // Tabela de Sugestões
   const columnsSugestoes = [
-    { header: t.remanejamento.origem, dataKey: 'origem' },
-    { header: t.remanejamento.destino, dataKey: 'destino' },
     { header: t.remanejamento.tipo, dataKey: 'tipo' },
     { header: t.remanejamento.tamanho, dataKey: 'tamanho' },
-    { header: t.remanejamento.qtdSugerida, dataKey: 'qtd' }
+    { header: t.remanejamento.origem, dataKey: 'origem' },
+    { header: t.remanejamento.qtdSugerida, dataKey: 'qtd' },
+    { header: t.remanejamento.destino, dataKey: 'destino' }
   ];
 
   const rowsSugestoes = sugestoes.map(s => ({
-    origem: `${s.origemNome} (+${s.qtdOrigem})`,
-    destino: `${s.destinoNome} (-${s.qtdDestino})`,
     tipo: s.tipo,
     tamanho: s.tamanho,
-    qtd: s.quantidade
+    origem: `${s.origemNome} (+${s.qtdOrigem})`,
+    qtd: s.quantidade,
+    destino: `${s.destinoNome} (-${s.qtdDestino})`
   }));
 
   autoTable(doc, {
@@ -946,6 +946,7 @@ export const exportarRemanejamentoPDF = (
     headStyles: { fillColor: [0, 90, 156], textColor: 255, fontSize: 9, halign: 'center' },
     styles: { fontSize: 8, cellPadding: 3, halign: 'center' },
     columnStyles: {
+      tipo: { halign: 'left', cellWidth: 'auto' },
       origem: { halign: 'left', cellWidth: 'auto' },
       destino: { halign: 'left', cellWidth: 'auto' },
       qtd: { fontStyle: 'bold' }
