@@ -8,6 +8,12 @@ export function ReloadPrompt() {
     } = useRegisterSW({
         onRegistered(r) {
             console.log('SW Registered: ' + r);
+            // Verifica atualizações periodicamente (Ex: a cada 1 hora)
+            if (r) {
+                setInterval(() => {
+                    r.update();
+                }, 60 * 60 * 1000);
+            }
         },
         onRegisterError(error) {
             console.log('SW registration error', error);
