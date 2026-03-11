@@ -90,6 +90,85 @@ export const exportarParaPDF = (registros: RegistroUniforme[], escolaNome: strin
   doc.save(`relatorio_uniformes_${format(new Date(), 'yyyyMMdd')}.pdf`);
 };
 
+export const exportarTodasParaPDF = (registrosPorEscola: { escolaNome: string, registros: RegistroUniforme[] }[]) => {
+  const doc = new jsPDF('landscape');
+  let isFirstPage = true;
+  let totalGeralFaltando = 0;
+  let totalGeralSobrando = 0;
+
+  registrosPorEscola.forEach(({ escolaNome, registros }) => {
+    if (!isFirstPage) {
+      doc.addPage();
+    }
+    isFirstPage = false;
+
+    const startY = drawGovHeader(doc, 'Relatório de Controle de Uniformes', [
+      `Unidade Escolar: ${escolaNome}`
+    ]);
+
+    const totalFaltando = registros.reduce((acc, curr) => acc + (curr.qtd_faltando || 0), 0);
+    const totalSobrando = registros.reduce((acc, curr) => acc + (curr.qtd_sobrando || 0), 0);
+
+    totalGeralFaltando += totalFaltando;
+    totalGeralSobrando += totalSobrando;
+
+    doc.setFontSize(10);
+    doc.setTextColor(0);
+    doc.text(`Resumo: Total Faltando: ${totalFaltando} | Total Sobrando: ${totalSobrando}`, 14, startY - 2);
+
+    const tableColumn = ["Data", "Categoria", "Tipo", "Alunos", "Sobrando (Qtd/Tam)", "Faltando (Qtd/Tam)"];
+    const tableRows = registros.map(r => [
+      format(safeDate(r.data_registro), 'dd/MM/yyyy'),
+      r.categoria || '-',
+      r.tipo_uniforme,
+      (r.qtd_alunos ?? 0).toString(),
+      `${r.qtd_sobrando ?? 0} (${r.tamanho_sobrando || '-'})`,
+      `${r.qtd_faltando ?? 0} (${r.tamanho_faltando || '-'})`
+    ]);
+
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: startY + 2,
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [0, 51, 102] },
+      columnStyles: {
+        2: { cellWidth: 50 },
+        4: { cellWidth: 40, halign: 'center' },
+        5: { cellWidth: 40, halign: 'center' }
+      }
+    });
+  });
+
+  if (registrosPorEscola.length > 0) {
+    doc.addPage();
+    const finalY = drawGovHeader(doc, 'Resumo Geral de Todas as Unidades Escolares');
+
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(0, 51, 102);
+    doc.text("Totalização da Rede Escolar:", 14, finalY + 5);
+
+    autoTable(doc, {
+        head: [["Descrição", "Quantidade Total"]],
+        body: [
+            ["Total de Peças SOBRANDO", totalGeralSobrando.toString()],
+            ["Total de Peças FALTANDO", totalGeralFaltando.toString()]
+        ],
+        foot: [["Saldo (Sobrando - Faltando)", (totalGeralSobrando - totalGeralFaltando).toString()]],
+        startY: finalY + 12,
+        styles: { fontSize: 10 },
+        headStyles: { fillColor: [0, 51, 102] },
+        footStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0] },
+        columnStyles: {
+            1: { cellWidth: 50, halign: 'center' }
+        }
+    });
+  }
+
+  doc.save(`relatorio_todas_escolas_${format(new Date(), 'yyyyMMdd_HHmm')}.pdf`);
+};
+
 export const exportarParaExcel = (registros: RegistroUniforme[]) => {
   const worksheetData = registros.map(r => ({
     'Data de Registro': format(safeDate(r.data_registro), 'dd/MM/yyyy HH:mm'),

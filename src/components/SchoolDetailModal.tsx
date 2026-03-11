@@ -7,7 +7,9 @@ import {
     AlertCircle, 
     FileText,
     History,
-    Loader2
+    Loader2,
+    TrendingUp,
+    TrendingDown
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { RegistroUniforme } from '../types';
@@ -36,7 +38,8 @@ export const SchoolDetailModal: React.FC<SchoolDetailModalProps> = ({
 }) => {
     if (!isOpen || !escola) return null;
 
-    const totalPecas = registros.reduce((acc, curr) => acc + (curr.qtd_alunos || 0), 0);
+    const totalSobrando = registros.reduce((acc, curr) => acc + (curr.qtd_sobrando || 0), 0);
+    const totalFaltando = registros.reduce((acc, curr) => acc + (curr.qtd_faltando || 0), 0);
     const totalVariedades = new Set(registros.map(r => r.tipo_uniforme)).size;
     const ultimoLancamento = registros.length > 0 ? registros[0].data_registro : null;
 
@@ -49,7 +52,7 @@ export const SchoolDetailModal: React.FC<SchoolDetailModalProps> = ({
             ></div>
 
             {/* Modal Body */}
-            <div className="relative w-full max-w-4xl bg-white dark:bg-[#1a1a2e] rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] overflow-hidden animate-in slide-in-from-bottom-8 duration-500">
+            <div className="relative w-full max-w-5xl bg-white dark:bg-[#1a1a2e] rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] overflow-hidden animate-in slide-in-from-bottom-8 duration-500">
                 
                 {/* Header Section */}
                 <div className="p-8 pb-4">
@@ -89,16 +92,21 @@ export const SchoolDetailModal: React.FC<SchoolDetailModalProps> = ({
 
                 <div className="px-8 pb-8 max-h-[70vh] overflow-y-auto custom-scrollbar">
                     {/* Stats Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                        <div className="bg-zinc-50/50 dark:bg-white/[0.02] p-6 rounded-3xl border border-zinc-100 dark:border-white/5">
-                            <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1 text-center">TOTAL</p>
-                            <h4 className="text-3xl font-black text-[#005A9C] dark:text-blue-400 text-center">{totalPecas}</h4>
-                            <p className="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest text-center mt-1">PEÇAS</p>
-                        </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                         <div className="bg-zinc-50/50 dark:bg-white/[0.02] p-6 rounded-3xl border border-zinc-100 dark:border-white/5">
                             <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1 text-center">MODELOS</p>
-                            <h4 className="text-3xl font-black text-zinc-900 dark:text-white text-center">{totalVariedades}</h4>
+                            <h4 className="text-3xl font-black text-[#005A9C] dark:text-blue-400 text-center">{totalVariedades}</h4>
                             <p className="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest text-center mt-1">VARIEDADES</p>
+                        </div>
+                        <div className="bg-emerald-50/50 dark:bg-emerald-500/5 p-6 rounded-3xl border border-emerald-100 dark:border-emerald-500/10">
+                            <p className="text-[10px] font-black text-emerald-500 dark:text-emerald-400 uppercase tracking-widest mb-1 text-center">SOBRANDO</p>
+                            <h4 className="text-3xl font-black text-emerald-600 dark:text-emerald-400 text-center">{totalSobrando}</h4>
+                            <p className="text-[9px] font-bold text-emerald-400 dark:text-emerald-500 uppercase tracking-widest text-center mt-1">PEÇAS</p>
+                        </div>
+                        <div className="bg-red-50/50 dark:bg-red-500/5 p-6 rounded-3xl border border-red-100 dark:border-red-500/10">
+                            <p className="text-[10px] font-black text-red-500 dark:text-red-400 uppercase tracking-widest mb-1 text-center">FALTANDO</p>
+                            <h4 className="text-3xl font-black text-red-600 dark:text-red-400 text-center">{totalFaltando}</h4>
+                            <p className="text-[9px] font-bold text-red-400 dark:text-red-500 uppercase tracking-widest text-center mt-1">PEÇAS</p>
                         </div>
                         <div className="bg-blue-600 p-6 rounded-3xl shadow-xl shadow-blue-500/20 relative group overflow-hidden flex flex-col items-center justify-center">
                             <div className="absolute top-0 right-0 p-4 opacity-20 transform group-hover:scale-110 transition-transform">
@@ -157,8 +165,18 @@ export const SchoolDetailModal: React.FC<SchoolDetailModalProps> = ({
                                 <thead className="bg-zinc-50 dark:bg-white/5">
                                     <tr>
                                         <th className="px-6 py-4 text-[9px] font-black text-gray-400 uppercase tracking-widest">MODELO DO UNIFORME</th>
-                                        <th className="px-6 py-4 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">TAMANHO</th>
-                                        <th className="px-6 py-4 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">QUANTIDADE</th>
+                                        <th className="px-6 py-4 text-[9px] font-black text-emerald-500 uppercase tracking-widest text-center">
+                                            <div className="flex items-center justify-center gap-1.5">
+                                                <TrendingUp size={12} />
+                                                SOBRANDO
+                                            </div>
+                                        </th>
+                                        <th className="px-6 py-4 text-[9px] font-black text-red-500 uppercase tracking-widest text-center">
+                                            <div className="flex items-center justify-center gap-1.5">
+                                                <TrendingDown size={12} />
+                                                FALTANDO
+                                            </div>
+                                        </th>
                                         <th className="px-6 py-4 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right">DATA</th>
                                     </tr>
                                 </thead>
@@ -183,12 +201,36 @@ export const SchoolDetailModal: React.FC<SchoolDetailModalProps> = ({
                                                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">{reg.categoria}</p>
                                                 </td>
                                                 <td className="px-6 py-5 text-center">
-                                                    <span className="px-3 py-1 bg-zinc-100 dark:bg-white/5 rounded-lg text-xs font-black text-zinc-600 dark:text-gray-400 border border-zinc-200/50 dark:border-white/5">
-                                                        {reg.tamanho_sobrando || reg.tamanho_faltando || '---'}
-                                                    </span>
+                                                    {reg.qtd_sobrando > 0 ? (
+                                                        <div className="flex flex-col items-center gap-1">
+                                                            <span className="px-3 py-1 bg-emerald-50 dark:bg-emerald-500/10 rounded-lg text-sm font-black text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-500/20">
+                                                                {reg.qtd_sobrando} un.
+                                                            </span>
+                                                            {reg.tamanho_sobrando && (
+                                                                <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+                                                                    Tam: {reg.tamanho_sobrando}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-[10px] font-bold text-gray-300 dark:text-gray-600">—</span>
+                                                    )}
                                                 </td>
                                                 <td className="px-6 py-5 text-center">
-                                                    <p className="text-base font-black text-zinc-900 dark:text-white">{reg.qtd_alunos}</p>
+                                                    {reg.qtd_faltando > 0 ? (
+                                                        <div className="flex flex-col items-center gap-1">
+                                                            <span className="px-3 py-1 bg-red-50 dark:bg-red-500/10 rounded-lg text-sm font-black text-red-600 dark:text-red-400 border border-red-200/50 dark:border-red-500/20">
+                                                                {reg.qtd_faltando} un.
+                                                            </span>
+                                                            {reg.tamanho_faltando && (
+                                                                <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+                                                                    Tam: {reg.tamanho_faltando}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-[10px] font-bold text-gray-300 dark:text-gray-600">—</span>
+                                                    )}
                                                 </td>
                                                 <td className="px-6 py-5 text-right">
                                                     <p className="text-[11px] font-black text-zinc-700 dark:text-gray-300">

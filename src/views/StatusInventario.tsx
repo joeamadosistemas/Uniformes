@@ -19,7 +19,7 @@ import { supabase } from '../lib/supabaseClient';
 import { useT } from '../lib/LanguageContext';
 import { EscolaCadastro } from '../types';
 import { SEGMENTOS_ENSINO } from '../constants';
-import { exportarControleRecebimentoPDF } from '../utils/exportUtils';
+import { exportarControleRecebimentoPDF, exportarParaPDF, exportarTodasParaPDF } from '../utils/exportUtils';
 import * as XLSX from 'xlsx';
 import { format } from 'date-fns';
 import { SchoolDetailModal } from '../components/SchoolDetailModal';
@@ -46,6 +46,7 @@ export const StatusInventario: React.FC = () => {
     const [selectedEscolaModal, setSelectedEscolaModal] = useState<EscolaStatus | null>(null);
     const [escolaRegistros, setEscolaRegistros] = useState<RegistroUniforme[]>([]);
     const [loadingRecords, setLoadingRecords] = useState(false);
+    const [exportingAll, setExportingAll] = useState(false);
 
     useEffect(() => {
         fetchStatusInventario();
@@ -136,6 +137,70 @@ export const StatusInventario: React.FC = () => {
         })));
     };
 
+    const handleExportModalPDF = () => {
+        if (selectedEscolaModal && escolaRegistros.length > 0) {
+            exportarParaPDF(escolaRegistros, selectedEscolaModal.email); // email because that's what shows in the target PDF
+        }
+    };
+
+    const handleExportDetailedPDF = async () => {
+        try {
+            setExportingAll(true);
+            const escolasNomes = escolasFiltradas.filter(e => e.jaLancou).map(e => e.email);
+            if (escolasNomes.length === 0) {
+                 return;
+            }
+
+            const startDate = `${selectedYear}-01-01T00:00:00Z`;
+            const endDate = `${selectedYear}-12-31T23:59:59Z`;
+
+            const { data, error } = await supabase
+                .from('registros_uniformes')
+                .select('*')
+                .gte('data_registro', startDate)
+                .lte('data_registro', endDate)
+                .order('data_registro', { ascending: false })
+                .limit(10000);
+            
+            if (error) throw error;
+            
+            const validEmails = new Set(escolasNomes.map(e => e?.toLowerCase().trim()));
+            const dataFiltered = (data || []).filter(r => validEmails.has((r.escola || '').toLowerCase().trim()));
+            
+            console.log("DEBUG: emails a filtrar =", validEmails);
+            console.log("DEBUG: total registros no periodo =", data?.length);
+            console.log("DEBUG: registros apos filtro =", dataFiltered.length);
+            
+            // Group by school
+            const grouped = new Map<string, RegistroUniforme[]>();
+            dataFiltered.forEach(r => {
+                const escolaKey = (r.escola || '').toLowerCase().trim();
+                if (!grouped.has(escolaKey)) {
+                    grouped.set(escolaKey, []);
+                }
+                grouped.get(escolaKey)!.push(r);
+            });
+
+            // Map emails back to school names for display
+            const registrosPorEscola = Array.from(grouped.entries()).map(([emailKey, registros]) => {
+                const esc = escolasFiltradas.find(e => e.email?.toLowerCase().trim() === emailKey);
+                return {
+                    escolaNome: esc ? esc.nome : emailKey,
+                    registros
+                };
+            }).sort((a, b) => a.escolaNome.localeCompare(b.escolaNome));
+
+            console.log("DEBUG: quantia de escolas com registros mapeados =", registrosPorEscola.length, registrosPorEscola);
+
+            exportarTodasParaPDF(registrosPorEscola);
+
+        } catch (error) {
+            console.error("Erro ao exportar PDF detalhado:", error);
+        } finally {
+            setExportingAll(false);
+        }
+    };
+
     const totalUnidades = escolas.length;
     const informaramRecebimento = escolas.filter(e => e.jaLancou).length; // Aqui estamos usando jaLancou como proxy para "informaram"
     const concluidos = informaramRecebimento;
@@ -166,7 +231,7 @@ export const StatusInventario: React.FC = () => {
             const { data, error } = await supabase
                 .from('registros_uniformes')
                 .select('*')
-                .eq('escola', escola.nome)
+                .eq('escola', escola.email)
                 .gte('data_registro', startDate)
                 .lte('data_registro', endDate)
                 .order('data_registro', { ascending: false });
@@ -410,9 +475,17 @@ export const StatusInventario: React.FC = () => {
                     <div className="flex items-center gap-4 w-full md:w-auto">
                         <button
                             onClick={handleExportPDF}
-                            className="flex-1 md:flex-none flex items-center justify-center gap-3 bg-[#DC2626] hover:bg-red-700 text-white px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-red-600/20 active:scale-95"
+                            className="flex-1 md:flex-none flex items-center justify-center gap-3 bg-[#DC2626] hover:bg-red-700 text-white px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-red-600/20 active:scale-95"
                         >
-                            <FileText size={18} /> EXPORTAR PDF
+                            <FileText size={18} /> PDF (RESUMO)
+                        </button>
+                        <button
+                            onClick={handleExportDetailedPDF}
+                            disabled={exportingAll}
+                            className={`flex-1 md:flex-none flex items-center justify-center gap-3 ${exportingAll ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#0F766E] hover:bg-teal-700'} text-white px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-teal-600/20 active:scale-95`}
+                        >
+                            {exportingAll ? <Loader2 className="animate-spin" size={18} /> : <FileText size={18} />}
+                            {exportingAll ? 'GERANDO...' : 'PDF (DETALHADO)'}
                         </button>
                         <button
                             onClick={handleExportExcel}
@@ -424,14 +497,13 @@ export const StatusInventario: React.FC = () => {
                 </div>
             </div>
 
-            {/* School Detail Modal */}
             <SchoolDetailModal 
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 escola={selectedEscolaModal}
                 registros={escolaRegistros}
                 loading={loadingRecords}
-                onExportPDF={handleExportPDF}
+                onExportPDF={handleExportModalPDF}
             />
         </div>
     );
