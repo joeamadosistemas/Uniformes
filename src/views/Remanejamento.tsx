@@ -10,7 +10,6 @@ import {
   Download, 
   RefreshCcw,
   CheckCircle2,
-  Plus,
   X
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
@@ -220,6 +219,21 @@ export const Remanejamento: React.FC = () => {
       return matchOrigem && matchCategoria && matchTipo && matchTamanho;
     });
   }, [sugestoes, filtroEscola, filtroCategoria, filtroTipo, filtroTamanho]);
+
+  // Agrupar sugestões filtradas por Item + Tamanho (N:N)
+  const sugestoesAgrupadas = useMemo(() => {
+    const grupos: Record<string, { tipo: string, tamanho: string, items: SugestaoRemanejamento[] }> = {};
+    
+    sugestoesFiltradas.forEach(s => {
+      const key = `${s.tipo}-${s.tamanho}`;
+      if (!grupos[key]) {
+        grupos[key] = { tipo: s.tipo, tamanho: s.tamanho, items: [] };
+      }
+      grupos[key].items.push(s);
+    });
+    
+    return Object.values(grupos);
+  }, [sugestoesFiltradas]);
 
   // Totais Resumo
   const totalSobra = useMemo(() => dadosControle.reduce((acc, curr) => acc + curr.sobra, 0), [dadosControle]);
@@ -465,48 +479,68 @@ export const Remanejamento: React.FC = () => {
           </div>
 
           <div className="flex-1 overflow-y-auto">
-            {sugestoesFiltradas.length === 0 ? (
+            {sugestoesAgrupadas.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full p-12 text-center gap-4 text-gray-400">
                 <Package size={48} className="opacity-20" />
                 <p className="text-sm font-medium leading-relaxed">{t.remanejamento.nenhumaSugestao}</p>
               </div>
             ) : (
-              <div className="p-4 space-y-4">
-                {sugestoesFiltradas.map((s) => (
-                  <div key={s.id} className="p-5 bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-sm hover:shadow-md transition-all group">
-                    <div className="flex items-center justify-between mb-4 border-b border-gray-50 dark:border-zinc-950 pb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-[10px] font-black text-blue-600 rounded-lg uppercase tracking-wider">{s.tipo}</span>
-                        <span className="px-2 py-1 bg-gray-100 dark:bg-zinc-800 text-[10px] font-black text-gray-500 rounded-lg">{s.tamanho}</span>
+              <div className="p-4 space-y-6">
+                {sugestoesAgrupadas.map((grupo, gIdx) => (
+                  <div key={gIdx} className="glass dark:bg-zinc-900/40 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-sm overflow-hidden">
+                    {/* Header do Grupo de Item */}
+                    <div className="px-6 py-4 bg-gray-50/50 dark:bg-zinc-800/50 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-xl text-blue-600">
+                          <Package size={18} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-black text-zinc-800 dark:text-zinc-200">{grupo.tipo}</p>
+                          <p className="text-[10px] font-black text-blue-600/60 uppercase tracking-widest leading-none">TAMANHO: {grupo.tamanho}</p>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-lg font-black text-[#005A9C]">{s.quantidade}</span>
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">un.</span>
+                      <div className="text-right">
+                        <p className="text-lg font-black text-[#005A9C]">{grupo.items.reduce((acc, curr) => acc + curr.quantidade, 0)}</p>
+                        <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">TOTAL UN.</p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-4 relative">
-                      <div className="flex-1 space-y-1">
-                        <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">{t.remanejamento.origem}</p>
-                        <div className="flex items-center gap-2">
-                          <p className="text-xs font-bold text-zinc-800 dark:text-zinc-200 line-clamp-1">{s.origemNome}</p>
-                          <span className="px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-900/30 text-[9px] font-black text-emerald-600 rounded-md border border-emerald-100 dark:border-emerald-900">+{s.qtdOrigem}</span>
-                        </div>
-                      </div>
+                    {/* Detalhamento das Transferências */}
+                    <div className="divide-y divide-gray-50 dark:divide-zinc-800/50">
+                      {grupo.items.map((s) => (
+                        <div key={s.id} className="p-5 hover:bg-gray-50/50 dark:hover:bg-zinc-800/30 transition-all group">
+                          <div className="flex items-center gap-4 relative">
+                            {/* Origem */}
+                            <div className="flex-1 space-y-1">
+                              <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">{t.remanejamento.origem}</p>
+                              <div className="flex items-center gap-2">
+                                <p className="text-[11px] font-bold text-zinc-700 dark:text-zinc-300 line-clamp-1">{s.origemNome}</p>
+                                <span className="px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-900/30 text-[9px] font-black text-emerald-600 rounded-md border border-emerald-100 dark:border-emerald-900">+{s.qtdOrigem}</span>
+                              </div>
+                            </div>
 
-                      <div className="flex items-center justify-center p-2 bg-gray-50 dark:bg-zinc-800 rounded-full text-gray-400 z-10 group-hover:scale-110 transition-transform">
-                        <ArrowLeftRight size={14} />
-                      </div>
+                            {/* Seta e Qtd */}
+                            <div className="flex flex-col items-center gap-1 z-10">
+                              <div className="px-3 py-1 bg-[#005A9C] text-white rounded-full text-[10px] font-black shadow-sm group-hover:scale-110 transition-transform">
+                                {s.quantidade}
+                              </div>
+                              <ArrowLeftRight size={12} className="text-gray-300" />
+                            </div>
 
-                      <div className="flex-1 space-y-1 text-right">
-                        <p className="text-[8px] font-black text-red-500 uppercase tracking-widest">{t.remanejamento.destino}</p>
-                        <div className="flex items-center justify-end gap-2">
-                          <span className="px-1.5 py-0.5 bg-red-50 dark:bg-red-900/30 text-[9px] font-black text-red-600 rounded-md border border-red-100 dark:border-red-900">-{s.qtdDestino}</span>
-                          <p className="text-xs font-bold text-zinc-800 dark:text-zinc-200 line-clamp-1">{s.destinoNome}</p>
+                            {/* Destino */}
+                            <div className="flex-1 space-y-1 text-right">
+                              <p className="text-[8px] font-black text-red-500 uppercase tracking-widest">{t.remanejamento.destino}</p>
+                              <div className="flex items-center justify-end gap-2">
+                                <span className="px-1.5 py-0.5 bg-red-50 dark:bg-red-900/30 text-[9px] font-black text-red-600 rounded-md border border-red-100 dark:border-red-900">-{s.qtdDestino}</span>
+                                <p className="text-[11px] font-bold text-zinc-700 dark:text-zinc-300 line-clamp-1">{s.destinoNome}</p>
+                              </div>
+                            </div>
+                            
+                            {/* Linha pontilhada de conexão */}
+                            <div className="absolute top-1/2 left-1/4 right-1/4 h-px border-b border-dashed border-gray-100 dark:border-zinc-800 -translate-y-1/2 -z-0"></div>
+                          </div>
                         </div>
-                      </div>
-                      
-                      <div className="absolute top-1/2 left-1/4 right-1/4 h-px bg-dashed border-b border-dashed border-gray-100 dark:border-zinc-800 -translate-y-1/2"></div>
+                      ))}
                     </div>
                   </div>
                 ))}
