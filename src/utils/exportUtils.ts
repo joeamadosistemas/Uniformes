@@ -914,8 +914,8 @@ export const exportarRemanejamentoPDF = (
   ];
 
   const rowsSugestoes = sugestoes.map(s => ({
-    origem: s.origemNome,
-    destino: s.destinoNome,
+    origem: `${s.origemNome} (+${s.qtdOrigem})`,
+    destino: `${s.destinoNome} (-${s.qtdDestino})`,
     tipo: s.tipo,
     tamanho: s.tamanho,
     qtd: s.quantidade
