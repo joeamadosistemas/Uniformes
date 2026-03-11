@@ -861,3 +861,81 @@ export const exportarDashboardPDF = (
 
   doc.save(`relatorio_solicitacoes_${format(new Date(), 'yyyyMMdd_HHmm')}.pdf`);
 };
+
+// Exportar Plano de Remanejamento para PDF
+export const exportarRemanejamentoPDF = (
+  sugestoes: any[],
+  totais: { totalSobra: number, totalFalta: number, totalRotas: number },
+  t: any
+) => {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.width;
+
+  // Cabeçalho Oficial
+  const startY = drawGovHeader(doc, t.remanejamento.planoRemanejamento.toUpperCase());
+
+  // Data do Relatório
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(100);
+  doc.text(`${t.lancamentos.data}: ${format(new Date(), 'dd/MM/yyyy HH:mm')}`, pageWidth / 2, startY + 5, { align: 'center' });
+
+  // Resumo de Métricas
+  doc.setDrawColor(230);
+  doc.setFillColor(248, 250, 252);
+  doc.roundedRect(14, startY + 12, pageWidth - 28, 20, 3, 3, 'FD');
+
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(0, 90, 156);
+  
+  const metricY = startY + 24;
+  doc.text(t.remanejamento.totalSobras.toUpperCase(), 20, metricY);
+  doc.setFont('helvetica', 'normal');
+  doc.text(totais.totalSobra.toString(), 20 + doc.getTextWidth(t.remanejamento.totalSobras.toUpperCase()) + 3, metricY);
+
+  doc.setFont('helvetica', 'bold');
+  doc.text(t.remanejamento.totalFaltas.toUpperCase(), 80, metricY);
+  doc.setFont('helvetica', 'normal');
+  doc.text(totais.totalFalta.toString(), 80 + doc.getTextWidth(t.remanejamento.totalFaltas.toUpperCase()) + 3, metricY);
+
+  doc.setFont('helvetica', 'bold');
+  doc.text(t.remanejamento.remanejamentosPossiveis.toUpperCase(), 140, metricY);
+  doc.setFont('helvetica', 'normal');
+  doc.text(totais.totalRotas.toString(), 140 + doc.getTextWidth(t.remanejamento.remanejamentosPossiveis.toUpperCase()) + 3, metricY);
+
+  // Tabela de Sugestões
+  const columnsSugestoes = [
+    { header: t.remanejamento.origem, dataKey: 'origem' },
+    { header: t.remanejamento.destino, dataKey: 'destino' },
+    { header: t.remanejamento.tipo, dataKey: 'tipo' },
+    { header: t.remanejamento.tamanho, dataKey: 'tamanho' },
+    { header: t.remanejamento.qtdSugerida, dataKey: 'qtd' }
+  ];
+
+  const rowsSugestoes = sugestoes.map(s => ({
+    origem: s.origemNome,
+    destino: s.destinoNome,
+    tipo: s.tipo,
+    tamanho: s.tamanho,
+    qtd: s.quantidade
+  }));
+
+  autoTable(doc, {
+    startY: startY + 38,
+    columns: columnsSugestoes,
+    body: rowsSugestoes,
+    theme: 'grid',
+    headStyles: { fillColor: [0, 90, 156], textColor: 255, fontSize: 9, halign: 'center' },
+    styles: { fontSize: 8, cellPadding: 3, halign: 'center' },
+    columnStyles: {
+      origem: { halign: 'left', cellWidth: 'auto' },
+      destino: { halign: 'left', cellWidth: 'auto' },
+      qtd: { fontStyle: 'bold' }
+    }
+  });
+
+  // Salvar PDF
+  const filename = `Plano_Remanejamento_${format(new Date(), 'dd-MM-yyyy')}.pdf`;
+  doc.save(filename);
+};

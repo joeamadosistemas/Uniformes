@@ -35,6 +35,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, isA
     { id: 'lancamentos', label: t.sidebar.lancamentos, icon: LayoutDashboard },
     ...(isAdmin ? [
       { id: 'status-inventario', label: t.sidebar.statusInventario, icon: BarChart3 },
+      { id: 'remanejamento', label: t.sidebar.remanejamento, icon: ArrowLeftRight },
       { id: 'recebimentos', label: t.sidebar.recebimentos, icon: ClipboardList },
       { id: 'controle-recebimento', label: t.sidebar.controleRecebimento, icon: ClipboardList },
       { id: 'admin-dashboard', label: 'Dashboard', icon: FileText },

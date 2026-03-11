@@ -42,6 +42,7 @@ export const pt = {
         auditLogs: 'Histórico de Auditoria',
         versao: 'Versão',
         statusInventario: 'Status Inventário',
+        remanejamento: 'Remanejamento',
     },
 
     // Login
@@ -118,6 +119,7 @@ export const pt = {
         backupRestauracao: 'Backup e Restauração',
         sobre: 'Sobre o Sistema',
         auditLogs: 'Histórico de Auditoria do Sistema',
+        remanejamento: 'Remanejamento de Uniformes',
     },
     footer: {
         info: 'Informações da Secretaria Municipal de Educação | PMI',
@@ -382,6 +384,35 @@ export const pt = {
         filtrarTabela: 'Filtrar por tabela...',
         buscarUsuario: 'Buscar por e-mail de usuário...',
         verAlteracoes: 'Ver Alterações',
+    },
+
+    // Remanejamento
+    remanejamento: {
+        titulo: 'Remanejamento de Uniformes',
+        subtitulo: 'Cruzamento inteligente de sobras e faltas na rede municipal',
+        totalSobras: 'Itens Sobrando',
+        totalFaltas: 'Itens Faltando',
+        remanejamentosPossiveis: 'Remanejamentos Possíveis',
+        painelResumo: 'Painel de Resumo',
+        tabelaControle: 'Tabela de Controle (Sobras e Faltas)',
+        sugestoes: 'Sugestões de Remanejamento',
+        origem: 'Origem (Sobra)',
+        destino: 'Destino (Falta)',
+        qtdSugerida: 'Qtd. Sugerida',
+        gerarRemanejamento: 'Gerar Remanejamento',
+        simularRedistribuicao: 'Simular Redistribuição Total',
+        baixarPlano: 'Exportar Plano (PDF)',
+        planoRemanejamento: 'Plano de Remanejamento de Uniformes',
+        escola: 'Escola',
+        categoria: 'Categoria',
+        tipo: 'Tipo',
+        tamanho: 'Tamanho',
+        qtdSobrando: 'Qtd. Sobra',
+        qtdFaltando: 'Qtd. Falta',
+        filtros: 'Filtros de Busca',
+        limparFiltros: 'Limpar Filtros',
+        nenhumaSugestao: 'Nenhuma sugestão de remanejamento encontrada com os filtros atuais.',
+        sucessoRemanejamento: 'Remanejamento sugerido com sucesso!',
     }
 };
 
@@ -417,6 +448,7 @@ export const en: Translations = {
         auditLogs: 'Audit History',
         versao: 'Version',
         statusInventario: 'Inventory Status',
+        remanejamento: 'Redistribution',
     },
     login: {
         titulo: 'System Access',
@@ -489,6 +521,7 @@ export const en: Translations = {
         backupRestauracao: 'Backup & Restore',
         sobre: 'About the System',
         auditLogs: 'System Audit History',
+        remanejamento: 'Uniform Redistribution',
     },
     footer: {
         info: 'Information from the Municipal Education Secretariat | PMI',
@@ -748,6 +781,35 @@ export const en: Translations = {
         filtrarTabela: 'Filter by table...',
         buscarUsuario: 'Search by user email...',
         verAlteracoes: 'View Changes',
+    },
+
+    // Remanejamento
+    remanejamento: {
+        titulo: 'Uniform Redistribution',
+        subtitulo: 'Smart cross-referencing of surplus and shortages in the municipal network',
+        totalSobras: 'Surplus Items',
+        totalFaltas: 'Missing Items',
+        remanejamentosPossiveis: 'Possible Redistributions',
+        painelResumo: 'Summary Panel',
+        tabelaControle: 'Control Table (Surplus and Shortages)',
+        sugestoes: 'Redistribution Suggestions',
+        origem: 'Origin (Surplus)',
+        destino: 'Destination (Shortage)',
+        qtdSugerida: 'Suggested Qty',
+        gerarRemanejamento: 'Generate Redistribution',
+        simularRedistribuicao: 'Simulate Total Redistribution',
+        baixarPlano: 'Export Plan (PDF)',
+        planoRemanejamento: 'Uniform Redistribution Plan',
+        escola: 'School',
+        categoria: 'Category',
+        tipo: 'Type',
+        tamanho: 'Size',
+        qtdSobrando: 'Surplus Qty',
+        qtdFaltando: 'Missing Qty',
+        filtros: 'Search Filters',
+        limparFiltros: 'Clear Filters',
+        nenhumaSugestao: 'No redistribution suggestions found with current filters.',
+        sucessoRemanejamento: 'Redistribution suggested successfully!',
     }
 };
 
@@ -783,6 +845,7 @@ export const es: Translations = {
         auditLogs: 'Historial de Auditoría',
         versao: 'Versión',
         statusInventario: 'Estado del Inventario',
+        remanejamento: 'Remanejamiento',
     },
     login: {
         titulo: 'Acceso al Sistema',
@@ -855,6 +918,7 @@ export const es: Translations = {
         backupRestauracao: 'Copia de Seguridad',
         sobre: 'Acerca del Sistema',
         auditLogs: 'Historial de Auditoría del Sistema',
+        remanejamento: 'Remanejamiento de Uniformes',
     },
     footer: {
         info: 'Información de la Secretaría Municipal de Educación | PMI',
@@ -1114,6 +1178,35 @@ export const es: Translations = {
         filtrarTabela: 'Filtrar por tabla...',
         buscarUsuario: 'Buscar por correo de usuario...',
         verAlteracoes: 'Ver Cambios',
+    },
+
+    // Remanejamento
+    remanejamento: {
+        titulo: 'Remanejamiento de Uniformes',
+        subtitulo: 'Cruce inteligente de excedentes y faltantes en la red municipal',
+        totalSobras: 'Artículos Sobrantes',
+        totalFaltas: 'Artículos Faltantes',
+        remanejamentosPossiveis: 'Remanejamientos Posibles',
+        painelResumo: 'Panel de Resumen',
+        tabelaControle: 'Tabla de Control (Sobras y Faltas)',
+        sugestoes: 'Sugerencias de Remanejamiento',
+        origem: 'Origen (Sobra)',
+        destino: 'Destino (Falta)',
+        qtdSugerida: 'Cant. Sugerida',
+        gerarRemanejamento: 'Generar Remanejamiento',
+        simularRedistribuicao: 'Simular Redistribución Total',
+        baixarPlano: 'Exportar Plan (PDF)',
+        planoRemanejamento: 'Plan de Remanejamiento de Uniformes',
+        escola: 'Escuela',
+        categoria: 'Categoría',
+        tipo: 'Tipo',
+        tamanho: 'Talla',
+        qtdSobrando: 'Cant. Sobra',
+        qtdFaltando: 'Cant. Falta',
+        filtros: 'Filtros de Búsqueda',
+        limparFiltros: 'Limpiar Filtros',
+        nenhumaSugestao: 'No se encontraron sugerencias de remanejamiento con los filtros actuales.',
+        sucessoRemanejamento: '¡Remanejamiento sugerido con éxito!',
     }
 };
 

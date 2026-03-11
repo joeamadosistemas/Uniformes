@@ -1,5 +1,4 @@
-import React from 'react';
-import { Package, ClipboardList, FileText, BarChart3 } from 'lucide-react';
+import { Package, ClipboardList, FileText, BarChart3, ArrowLeftRight } from 'lucide-react';
 
 interface Props {
     activeView: string;
@@ -11,6 +10,7 @@ export const BottomNav: React.FC<Props> = ({ activeView, setActiveView, isAdmin 
     const navItems = isAdmin
         ? [
             { id: 'status-inventario', label: 'Status', icon: BarChart3 },
+            { id: 'remanejamento', label: 'Remaneja.', icon: ArrowLeftRight },
             { id: 'controle-recebimento', label: 'Controle', icon: FileText },
             { id: 'recebimentos', label: 'Recebimentos', icon: Package },
             { id: 'admin-dashboard', label: 'Dashboard', icon: FileText },

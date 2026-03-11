@@ -23,6 +23,7 @@ import { AuditLogs } from './views/AuditLogs';
 import { UpdateModal } from './components/UpdateModal';
 import { StatusInventario } from './views/StatusInventario';
 import { ReloadPrompt } from './components/ReloadPrompt';
+import { Remanejamento } from './views/Remanejamento';
 import { APP_VERSION } from './version';
 
 
@@ -212,6 +213,7 @@ function App() {
     const adminViews = [
       'admin-dashboard',
       'status-inventario',
+      'remanejamento',
       'controle-recebimento',
       'recebimentos',
       'transferencias',
@@ -242,6 +244,7 @@ function App() {
       case 'transferencias': return <Transferencias />;
       case 'admin-dashboard': return <DashboardAdmin />;
       case 'status-inventario': return <StatusInventario />;
+      case 'remanejamento': return <Remanejamento />;
       case 'controle-recebimento': return <ControleRecebimento />;
       case 'config-escola': return <UnidadeEscolar />;
       case 'config-usuarios': return <Usuarios />;
