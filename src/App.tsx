@@ -284,6 +284,7 @@ function App() {
             isDarkMode={isDarkMode}
             toggleDarkMode={() => setIsDarkMode(!isDarkMode)}
             onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+            activeView={activeView}
           />
 
           <div className="flex-1 flex flex-col overflow-hidden relative">

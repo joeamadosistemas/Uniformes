@@ -15,10 +15,10 @@ interface GovHeaderProps {
     isDarkMode: boolean;
     toggleDarkMode: () => void;
     onMenuToggle: () => void;
+    activeView: string;
 }
-
 export const GovHeader: React.FC<GovHeaderProps> = ({
-    userEmail, userName, schoolName, isAdmin, onLogout, isDarkMode, toggleDarkMode, onMenuToggle
+    userEmail, userName, schoolName, isAdmin, onLogout, isDarkMode, toggleDarkMode, onMenuToggle, activeView
 }) => {
     const { t, lang, setLang } = useT();
     const [langOpen, setLangOpen] = useState(false);
@@ -111,6 +111,14 @@ export const GovHeader: React.FC<GovHeaderProps> = ({
                             <span className="font-medium text-[#005A9C] dark:text-[#66b3ff]">Uniforme Escolar</span>
                             <span className="text-gray-300 dark:text-zinc-700">|</span>
                             <span className="font-black text-zinc-900 dark:text-white uppercase tracking-tight text-xs">Tela Administrativa</span>
+                            {activeView === 'status-inventario' && (
+                                <>
+                                    <span className="text-gray-300 dark:text-zinc-700">|</span>
+                                    <span className="font-black text-[#005A9C] dark:text-[#66b3ff] uppercase tracking-tight text-xs">
+                                        STATUS DO INVENTÁRIO DOS UNIFORMES - SOBRANDO OU FALTANDO
+                                    </span>
+                                </>
+                            )}
                         </div>
                     </div>
 
