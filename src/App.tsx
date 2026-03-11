@@ -22,6 +22,7 @@ import { BottomNav } from './components/BottomNav';
 import { AuditLogs } from './views/AuditLogs';
 import { UpdateModal } from './components/UpdateModal';
 import { StatusInventario } from './views/StatusInventario';
+import { ReloadPrompt } from './components/ReloadPrompt';
 
 
 function App() {
@@ -306,6 +307,7 @@ function App() {
           <BottomNav activeView={activeView} setActiveView={setActiveView} isAdmin={isAdmin} />
           <InstallPrompt />
           <UpdateModal isAdmin={isAdmin} currentVersion="2.0.4" />
+          <ReloadPrompt />
         </div>
       </div>
     </LanguageProvider>
