@@ -18,6 +18,7 @@ import {
   BarChart3
 } from 'lucide-react';
 import { useT } from '../lib/LanguageContext';
+import { APP_VERSION } from '../version';
 
 interface SidebarProps {
   activeView: string;
@@ -165,7 +166,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, isA
       </nav>
 
       <div className="p-6 border-t border-gray-100 dark:border-zinc-900 text-[10px] font-medium text-gray-400 dark:text-zinc-600 tracking-widest uppercase">
-        {t.sidebar.versao} 1.0.0
+        {t.sidebar.versao} {APP_VERSION}
       </div>
     </aside>
   );
