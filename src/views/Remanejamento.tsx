@@ -39,6 +39,8 @@ interface SugestaoRemanejamento {
   destino: string;
   destinoNome: string;
   quantidade: number;
+  qtdOrigem: number;
+  qtdDestino: number;
 }
 
 export const Remanejamento: React.FC = () => {
@@ -191,7 +193,9 @@ export const Remanejamento: React.FC = () => {
             origemNome: sbr.escolaNome,
             destino: flt.escola,
             destinoNome: flt.escolaNome,
-            quantidade: qtdTransferir
+            quantidade: qtdTransferir,
+            qtdOrigem: sbr.sobra,
+            qtdDestino: flt.falta
           });
 
           sobras[i].sobra -= qtdTransferir;
@@ -484,7 +488,10 @@ export const Remanejamento: React.FC = () => {
                     <div className="flex items-center gap-4 relative">
                       <div className="flex-1 space-y-1">
                         <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">{t.remanejamento.origem}</p>
-                        <p className="text-xs font-bold text-zinc-800 dark:text-zinc-200 line-clamp-1">{s.origemNome}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs font-bold text-zinc-800 dark:text-zinc-200 line-clamp-1">{s.origemNome}</p>
+                          <span className="px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-900/30 text-[9px] font-black text-emerald-600 rounded-md border border-emerald-100 dark:border-emerald-900">+{s.qtdOrigem}</span>
+                        </div>
                       </div>
 
                       <div className="flex items-center justify-center p-2 bg-gray-50 dark:bg-zinc-800 rounded-full text-gray-400 z-10 group-hover:scale-110 transition-transform">
@@ -493,19 +500,14 @@ export const Remanejamento: React.FC = () => {
 
                       <div className="flex-1 space-y-1 text-right">
                         <p className="text-[8px] font-black text-red-500 uppercase tracking-widest">{t.remanejamento.destino}</p>
-                        <p className="text-xs font-bold text-zinc-800 dark:text-zinc-200 line-clamp-1">{s.destinoNome}</p>
+                        <div className="flex items-center justify-end gap-2">
+                          <span className="px-1.5 py-0.5 bg-red-50 dark:bg-red-900/30 text-[9px] font-black text-red-600 rounded-md border border-red-100 dark:border-red-900">-{s.qtdDestino}</span>
+                          <p className="text-xs font-bold text-zinc-800 dark:text-zinc-200 line-clamp-1">{s.destinoNome}</p>
+                        </div>
                       </div>
                       
                       <div className="absolute top-1/2 left-1/4 right-1/4 h-px bg-dashed border-b border-dashed border-gray-100 dark:border-zinc-800 -translate-y-1/2"></div>
                     </div>
-
-                    <button 
-                      onClick={() => alert('Integrar com módulo de transferências para gerar documento oficial.')}
-                      className="w-full mt-4 py-2.5 bg-gray-50 hover:bg-emerald-50 dark:bg-zinc-950 dark:hover:bg-emerald-900/20 text-[#005A9C] hover:text-emerald-600 dark:text-blue-400 dark:hover:text-emerald-400 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-transparent hover:border-emerald-100 dark:hover:border-emerald-900 transition-all flex items-center justify-center gap-2"
-                    >
-                      <Plus size={14} />
-                      {t.remanejamento.gerarRemanejamento}
-                    </button>
                   </div>
                 ))}
               </div>
