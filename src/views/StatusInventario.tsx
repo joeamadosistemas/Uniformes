@@ -24,6 +24,7 @@ import * as XLSX from 'xlsx';
 import { format } from 'date-fns';
 import { SchoolDetailModal } from '../components/SchoolDetailModal';
 import { RegistroUniforme } from '../types';
+import { fetchAllRecords } from '../utils/fetchUtils';
 
 interface EscolaStatus extends EscolaCadastro {
     jaLancou: boolean;
@@ -71,35 +72,49 @@ export const StatusInventario: React.FC = () => {
             const endDate = `${selectedYear}-12-31T23:59:59Z`;
 
             // Nota: O 'sistema de controle de uniformes' usa a tabela 'registros_uniformes' para o inventário
-            const { data: lancamentos, error: errorLancamentos } = await supabase
-                .from('registros_uniformes')
-                .select('escola, data_registro')
-                .gte('data_registro', startDate)
-                .lte('data_registro', endDate)
-                .order('data_registro', { ascending: false });
-
-            if (errorLancamentos) {
+            let lancamentos = [];
+            try {
+                const queryLancamentos = supabase
+                    .from('registros_uniformes')
+                    .select('escola, data_registro')
+                    .gte('data_registro', startDate)
+                    .lte('data_registro', endDate)
+                    .order('data_registro', { ascending: false });
+                
+                lancamentos = await fetchAllRecords(queryLancamentos);
+            } catch (errorLancamentos) {
                 console.warn('Erro ao buscar lançamentos de inventário:', errorLancamentos);
             }
 
-            const escolasComLancamento = new Map<string, string>(); // email -> data_registro
+            const escolasComLancamento = new Map<string, string>(); // lowercase key -> data_registro
 
             if (lancamentos) {
                 lancamentos.forEach(l => {
-                    const escolaKey = (l.escola || '').toLowerCase().trim();
-                    if (!escolasComLancamento.has(escolaKey)) {
-                        escolasComLancamento.set(escolaKey, l.data_registro);
+                    const escolaVal = (l.escola || '').toLowerCase().trim();
+                    if (!escolasComLancamento.has(escolaVal)) {
+                        escolasComLancamento.set(escolaVal, l.data_registro);
                     }
                 });
             }
 
             const mappedEscolas: EscolaStatus[] = todasEscolas.map(esc => {
-                const escolaKey = (esc.email || '').toLowerCase().trim();
-                const jaLancou = escolasComLancamento.has(escolaKey);
+                const emailKey = (esc.email || '').toLowerCase().trim();
+                const nomeKey = (esc.nome || '').toLowerCase().trim();
+                
+                const dataEmail = escolasComLancamento.get(emailKey);
+                const dataNome = escolasComLancamento.get(nomeKey);
+                
+                const jaLancou = !!dataEmail || !!dataNome;
+                let dataUltimo = dataEmail || dataNome;
+                
+                if (dataEmail && dataNome) {
+                     dataUltimo = new Date(dataEmail) > new Date(dataNome) ? dataEmail : dataNome;
+                }
+
                 return {
                     ...esc,
                     jaLancou: jaLancou,
-                    dataUltimoLancamento: escolasComLancamento.get(escolaKey),
+                    dataUltimoLancamento: dataUltimo,
                     status: jaLancou ? 'concluido' : 'pendente'
                 };
             });

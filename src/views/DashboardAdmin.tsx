@@ -23,6 +23,7 @@ import {
     PieChart, Pie, Cell, LabelList, AreaChart, Area
 } from 'recharts';
 import { format, parseISO } from 'date-fns';
+import { fetchAllRecords } from '../utils/fetchUtils';
 
 interface DashboardStats {
     totalEscolas: number;
@@ -89,11 +90,11 @@ export const DashboardAdmin: React.FC = () => {
             // Fetch relevant data in parallel
             const [
                 { data: escolasData },
-                { data: recebimentosData },
+                recebimentosData,
                 { data: estoqueData }
             ] = await Promise.all([
                 supabase.from('escolas').select('*').eq('ativo', true).order('nome'),
-                supabase.from('recebimentos').select('*'),
+                fetchAllRecords(supabase.from('recebimentos').select('*')),
                 supabase.from('uniformes_catalogo').select('quantidade')
             ]);
 
@@ -207,8 +208,7 @@ export const DashboardAdmin: React.FC = () => {
     const handleExportPDF = async () => {
         setExportando(true);
         try {
-            const { data: recebimentosData } = await supabase.from('recebimentos').select('*');
-            const recebimentos = recebimentosData || [];
+            const recebimentos = await fetchAllRecords(supabase.from('recebimentos').select('*'));
 
             const escolas = todasEscolasExport;
 

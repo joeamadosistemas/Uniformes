@@ -5,6 +5,7 @@ import { useT } from '../lib/LanguageContext';
 import { EscolaCadastro } from '../types';
 import { SEGMENTOS_ENSINO } from '../constants';
 import { exportarControleRecebimentoPDF, exportarRecebimentosPDF } from '../utils/exportUtils';
+import { fetchAllRecords } from '../utils/fetchUtils';
 
 interface EscolaStatus extends EscolaCadastro {
     jaLancou: boolean;
@@ -50,15 +51,17 @@ export const ControleRecebimento: React.FC = () => {
             const startDate = `${selectedYear}-01-01T00:00:00Z`;
             const endDate = `${selectedYear}-12-31T23:59:59Z`;
 
-            const { data: lancamentos, error: errorLancamentos } = await supabase
-                .from('recebimentos')
-                .select('escola, data_recebimento, modelo_nome, quantidade')
-                .gte('data_recebimento', startDate)
-                .lte('data_recebimento', endDate)
-                .order('data_recebimento', { ascending: false })
-                .limit(10000);
+            let lancamentos = [];
+            try {
+                const queryLancamentos = supabase
+                    .from('recebimentos')
+                    .select('escola, data_recebimento, modelo_nome, quantidade')
+                    .gte('data_recebimento', startDate)
+                    .lte('data_recebimento', endDate)
+                    .order('data_recebimento', { ascending: false });
 
-            if (errorLancamentos) {
+                lancamentos = await fetchAllRecords(queryLancamentos);
+            } catch (errorLancamentos) {
                 console.warn('Tabela recebimentos ainda não disponível para controle total.');
             }
 
@@ -146,13 +149,13 @@ export const ControleRecebimento: React.FC = () => {
             setSelectedEscola(escola);
             setShowModal(true);
 
-            const { data, error } = await supabase
+            const query = supabase
                 .from('recebimentos')
                 .select('*')
                 .eq('escola', escola.email)
                 .order('data_recebimento', { ascending: false });
 
-            if (error) throw error;
+            const data = await fetchAllRecords(query);
             setDetalhesRecebimento(data || []);
         } catch (error) {
             console.error('Erro ao buscar detalhes da escola:', error);
