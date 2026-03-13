@@ -34,7 +34,7 @@ export const CATEGORIAS_UNIFORMES: Record<string, string[]> = {
     'CAMISETA COM MANGA',
     'CAMISETA SEM MANGA',
     'BERMUDA MASCULINA TACTEL',
-    'BERMUDA LEGGINS FEMIN.',
+    'BERMUDA LEGGINS FEMIN. (TAPA BUMBUM)',
     'CONJUNTO DE JAQUETA (FORRADO) E CALÇA EM MICROFIBRA',
     'MEIA COLEGIAL',
     'TÊNIS FECHAMENTO COM CADARÇO',
@@ -44,7 +44,7 @@ export const CATEGORIAS_UNIFORMES: Record<string, string[]> = {
     'CAMISETA COM MANGA',
     'CAMISETA SEM MANGA',
     'BERMUDA MASCULINA TACTEL',
-    'BERMUDA LEGGINS FEMININA',
+    'BERMUDA LEGGINS FEMIN. (TAPA BUMBUM)',
     'JAQUETA MICROFIBRA',
     'CALÇA JEAND MASC.',
     'CALÇA JEAND FEMIN.',
@@ -65,7 +65,7 @@ export const CATEGORIAS_UNIFORMES: Record<string, string[]> = {
 };
 
 export const TAMANHOS_DISPONIVEIS = [
-  '1', '2', '3', '4', '6', '8', '10', '12', '14', '16', 
+  '1', '2', '3', '4', '6', '8', '10', '12', '14', '16',
   '18', '20', '22', '24', '26', '28', '30', '32', '34', '36', '38', '40', '42', '44', '46', '48', '52',
   'P', 'M', 'G', 'GG', 'EG', 'OUTROS'
 ];
